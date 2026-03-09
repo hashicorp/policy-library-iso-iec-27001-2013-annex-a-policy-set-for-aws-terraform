@@ -1,0 +1,62 @@
+# This policy requires resources of type `aws_appsync_graphql_api` have attribute `log_config` with `field_log_level` set to `ERROR` or `ALL`.
+
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Params
+
+param field_log_level_options default ["ERROR", "ALL"]
+
+# Constants
+
+const = {
+	"policy_name":                      "appsync-field-level-logging-enabled",
+	"message":                          "Attribute 'log_config' with 'field_log_level' must be set to 'ERROR' or 'ALL' for 'aws_appsync_graphql_api' resources. Refer to https://docs.aws.amazon.com/config/latest/developerguide/appsync-logging-enabled.html for more details.",
+	"resource_aws_appsync_graphql_api": "aws_appsync_graphql_api",
+	"log_config":                       "log_config",
+	"field_log_level":                  "field_log_level",
+}
+
+# Variables
+
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_appsync_graphql_api).resources
+violations = collection.reject(resources, func(res) {
+	log_config = maps.get(res.values, const.log_config, null)
+	if log_config is null or log_config is empty {
+		return false
+	}
+	field_log_level_value = maps.get(log_config[0], const.field_log_level, null)
+	if field_log_level_value is null {
+		return false
+	}
+	return field_log_level_value in field_log_level_options
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        const.message,
+		}
+	},
+}
+
+# Outputs
+
+print(report.generate_policy_report(summary))
+
+# Rules
+
+main = rule {
+	violations is empty
+}
