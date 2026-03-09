@@ -14,9 +14,9 @@ import "strings"
 # Constants
 const = {
 	"policy_name":         "elb-ensure-ssl-listener-acm-cert-classic-load-balancer",
-	"message":             "Classic Load Balancers with SSL/HTTPS listeners should use a certificate provided by AWS Certificate Manager. Refer to https://docs.aws.amazon.com/config/latest/developerguide/elb-acm-certificate-required.html for more details.",
+	"message":             "Classic Load Balancers with SSL/HTTPS listeners should use a certificate provided by AWS Certificate Manager. Refer to https://docs.aws.amazon.com/securityhub/latest/userguide/elb-controls.html#elb-2 for more details.",
 	"resource_aws_elb":    "aws_elb",
-	"protocols":           ["workspaces-root-volume-encryption-enabled", "ssl"],
+	"protocols":           ["https", "ssl"],
 	"acm_cert_arn_prefix": "arn:aws:acm:",
 }
 

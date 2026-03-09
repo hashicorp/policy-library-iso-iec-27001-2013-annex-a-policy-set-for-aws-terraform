@@ -23,14 +23,14 @@ const = {
 	"port_80":                       80,
 	"redirect":                      "redirect",
 	"port_443":                      "443",
-	"workspaces-root-volume-encryption-enabled": "HTTPS",
-	"module_prefix":                             "module.",
-	"message":                                   "Application load balancers should be configured to redirect all HTTP requests to HTTPS. Refer to https://docs.aws.amazon.com/config/latest/developerguide/alb-http-to-https-redirection-check.html for more details.",
+	"https":                         "HTTPS",
+	"module_prefix":                 "module.",
+	"message":                       "Application load balancers should be configured to redirect all HTTP requests to HTTPS. Refer to https://docs.aws.amazon.com/securityhub/latest/userguide/elb-controls.html#elb-1 for more details.",
 }
 
 # Functions
 
-is_workspaces - root - volume - encryption - enabled_redirection_action_present = func(actions) {
+is_https_redirection_action_present = func(actions) {
 	return collection.find(actions, func(action) {
 		if action.type is not const.redirect {
 			return false
@@ -43,7 +43,7 @@ is_workspaces - root - volume - encryption - enabled_redirection_action_present 
 
 		redirection_block = redirection_block_list[0]
 		return redirection_block.port is const.port_443 and
-			redirection_block.protocol is const.workspaces - root - volume - encryption - enabled
+			redirection_block.protocol is const.https
 	}) is defined
 }
 
@@ -87,26 +87,24 @@ http_listeners = collection.reject(aws_lb_listeners, func(res) {
 })
 
 // Check for inline redirection configuration in the given http listeners
-http_listeners_with_inline_workspaces - root - volume - encryption - enabled_redirection = collection.reject(http_listeners, func(res) {
-	return is_workspaces - root - volume - encryption - enabled_redirection_action_present(maps.get(res, "values.default_action", [])) is false
+http_listeners_with_inline_https_redirection = collection.reject(http_listeners, func(res) {
+	return is_https_redirection_action_present(maps.get(res, "values.default_action", [])) is false
 })
 
 // Filter out their addresses into a list for future use
-http_listener_addresses_with_workspaces - root - volume - encryption - enabled_redirection = map http_listeners_with_inline_workspaces - root - volume - encryption - enabled_redirection as res {
-	res.address
-}
+http_listener_addresses_with_https_redirection = map http_listeners_with_inline_https_redirection as res { res.address }
 
 // Get the list of http listeners that don't have such inline redirection
-// configuration for workspaces-root-volume-encryption-enabled.
-http_listeners_without_inline_workspaces - root - volume - encryption - enabled_redirection = collection.reject(http_listeners, func(res) {
-	return res.address in http_listener_addresses_with_workspaces - root - volume - encryption - enabled_redirection
+// configuration for https.
+http_listeners_without_inline_https_redirection = collection.reject(http_listeners, func(res) {
+	return res.address in http_listener_addresses_with_https_redirection
 })
 
 // Get the configuration for aws_lb_listener_rule resources
 aws_lb_listener_rules_config_list = config_resources.type(const.resource_aws_lb_listener_rule).resources
 if aws_lb_listener_rules_config_list is not empty {
 	// Get the backing aws_lb_listener_rules referencing these listeners in the given config
-	for http_listeners_without_inline_workspaces - root - volume - encryption - enabled_redirection as _, listener {
+	for http_listeners_without_inline_https_redirection as _, listener {
 		// Fetch the listener rule associated with the current aws_lb_listener
 		listener_rules_referencing_http_listener = []
 		for aws_lb_listener_rules_config_list as listener_rule_config {
@@ -124,25 +122,25 @@ if aws_lb_listener_rules_config_list is not empty {
 		}
 
 		// Now that we have all the aws_lb_listener_rule resources associated with the given
-		// listener, check if they have workspaces-root-volume-encryption-enabled redirection configured.
-		listener_rules_with_workspaces - root - volume - encryption - enabled_redirection = collection.reject(listener_rules_referencing_http_listener, func(res) {
-			return is_workspaces - root - volume - encryption - enabled_redirection_action_present(maps.get(res, "values.action", [])) is false
+		// listener, check if they have https redirection configured.
+		listener_rules_with_https_redirection = collection.reject(listener_rules_referencing_http_listener, func(res) {
+			return is_https_redirection_action_present(maps.get(res, "values.action", [])) is false
 		})
 
 		// If there isn't even one listener_rule we ignore the listener.
-		if listener_rules_with_workspaces - root - volume - encryption - enabled_redirection is empty {
+		if listener_rules_with_https_redirection is empty {
 			continue
 		}
 
 		// Add the listener to the existing list of http listeners that contained
-		// inline redirection config for workspaces-root-volume-encryption-enabled.
-		append(http_listener_addresses_with_workspaces - root - volume - encryption - enabled_redirection, listener.address)
+		// inline redirection config for https.
+		append(http_listener_addresses_with_https_redirection, listener.address)
 	}
 }
 
 // For every valid listener filtered till now, find out the referenced load balancer
 referenced_valid_load_balancers = []
-for http_listener_addresses_with_workspaces - root - volume - encryption - enabled_redirection as _, listener_addr {
+for http_listener_addresses_with_https_redirection as _, listener_addr {
 	// Get the aws_lb_listener's config
 	listener_config = config_resources.type(const.resource_aws_lb_listener).address(listener_addr).resources
 	if listener_config is empty {
