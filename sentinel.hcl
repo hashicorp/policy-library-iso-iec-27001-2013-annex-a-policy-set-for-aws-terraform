@@ -605,3 +605,8 @@ policy "eventbridge-global-endpoints-should-have-event-replication-enabled" {
   source = "./policies/eventbridge/eventbridge-global-endpoints-should-have-event-replication-enabled.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "emr-kerberos-should-be-enabled" {
+  source = "./policies/emr/emr-kerberos-should-be-enabled.sentinel"
+  enforcement_level = "advisory"
+}

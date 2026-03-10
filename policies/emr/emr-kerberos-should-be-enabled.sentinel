@@ -1,0 +1,85 @@
+
+# This policy requires that Amazon EMR clusters have Kerberos authentication enabled.
+# Kerberos provides strong authentication for client/server applications and helps
+# secure cluster resources by requiring authentication before granting access.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":                        "emr-kerberos-enabled",
+	"resource_aws_emr_cluster":           "aws_emr_cluster",
+	"resource_aws_emr_security_config":   "aws_emr_security_configuration",
+	"kerberos_attributes":                "kerberos_attributes",
+	"security_configuration":             "security_configuration",
+}
+
+# Functions
+generate_violation_message = func(violation) {
+	return "Amazon EMR cluster must have Kerberos authentication enabled. Either the 'kerberos_attributes' block must be configured or a 'security_configuration' with Kerberos must be attached. Refer to https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-kerberos.html for more details."
+}
+
+# Check if a security configuration has Kerberos enabled
+has_kerberos_in_config = func(config_name, security_configs) {
+	for security_configs as _, sc {
+		if maps.get(sc.values, "name", "") == config_name {
+			config_json = maps.get(sc.values, "configuration", "")
+			# Check if the configuration JSON contains Kerberos settings
+			if config_json contains "KerberosConfiguration" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+is_kerberos_enabled = func(res, security_configs) {
+	# Check if kerberos_attributes block exists and is not empty
+	# kerberos_attributes is a list in Terraform plan
+	kerberos_attrs = maps.get(res.values, const.kerberos_attributes, [])
+	
+	# If kerberos_attributes is configured, Kerberos is enabled
+	if length(kerberos_attrs) > 0 {
+		return true
+	}
+	
+	# Check if security_configuration is set and has Kerberos enabled
+	security_config = maps.get(res.values, const.security_configuration, null)
+	if security_config is not null and security_config != "" {
+		return has_kerberos_in_config(security_config, security_configs)
+	}
+	
+	return false
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_emr_cluster).resources
+security_configs = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_emr_security_config).resources
+
+violations = collection.reject(resources, func(res) {
+	return is_kerberos_enabled(res, security_configs)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

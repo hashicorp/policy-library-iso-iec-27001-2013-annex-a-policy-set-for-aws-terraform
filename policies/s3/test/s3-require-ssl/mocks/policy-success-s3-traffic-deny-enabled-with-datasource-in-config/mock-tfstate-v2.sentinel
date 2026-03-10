@@ -1,7 +1,0 @@
-# Copyright IBM Corp. 2024, 2025
-
-terraform_version = undefined
-
-outputs = {}
-
-resources = {}
