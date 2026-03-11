@@ -607,6 +607,6 @@ policy "eventbridge-global-endpoints-should-have-event-replication-enabled" {
 }
 
 policy "api-gateway-cache-enabled-and-encrypted" {
-  source = "./policies/apigateway/api-gateway-cache-enabled-and-encrypted.sentinel"
+  source = "./policies/api-gateway/api-gateway-cache-enabled-and-encrypted.sentinel"
   enforcement_level = "advisory"
 }
