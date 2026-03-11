@@ -1,0 +1,24 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_api_gateway_stage.example": {
+      "address": "aws_api_gateway_stage.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_api_gateway_stage",
+      "values": {
+        "stage_name": "production",
+        "rest_api_id": "abc123",
+        "deployment_id": "def456",
+        "cache_cluster_enabled": true,
+        "cache_data_encrypted": true,
+      },
+    },
+  },
+}
