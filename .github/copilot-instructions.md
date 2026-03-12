@@ -6,6 +6,18 @@ This repository contains pre-written HashiCorp Sentinel policies for AWS Terrafo
 
 ---
 
+## PR Review Scope (Mandatory)
+
+When reviewing a pull request, Copilot must only review and comment on files and lines changed in that PR.
+
+- Only report findings and suggestions for code introduced or modified in the PR diff.
+- Do not raise issues for untouched files, untouched lines, or pre-existing repository-wide debt.
+- If context from an unchanged file is needed to validate changed code, reference it briefly but place findings only on the changed PR content.
+- Do not suggest opportunistic refactors outside the PR scope.
+- If a broader issue is noticed outside changed files, mention it only as a non-blocking note and explicitly state it is out of scope for this PR.
+
+---
+
 ## Sentinel Language Basics
 
 Understanding these file types is essential for reviewing PRs in this repository:
@@ -27,10 +39,13 @@ policies/
     [service]-[description].sentinel        ← policy file
     test/
       [policy-name]/                        ← directory name must match .sentinel basename exactly
-        [success|failure]-[scenario].hcl   ← test case files
+        [success|failure|pass|fail]-[scenario].hcl   ← test case files
         mocks/
-          policy-[success|failure]-[scenario]/  ← mock directory; name must match test file basename
+          [policy-success|policy-failure|pass|fail]-[scenario]/  ← mock directory; name must match test file basename
             mock-tfplan-v2.sentinel         ← OR mock-tfconfig-v2.sentinel / mock-tfstate-v2.sentinel
+          OR the structure that the mocks would follow
+          [pass|fail]/ 
+            [pass|fail]-[scenario].sentinel
 
 docs/
   policies/
@@ -52,14 +67,18 @@ modules/                                    ← shared modules; must not be modi
 - Invalid: `ecr_image_scanning.sentinel`, `rds-ensure=automatic-backups.sentinel`
 
 ### 2. Test case files
-- Must start with `success-` or `failure-` followed by a scenario description
-- Located at `policies/[service]/test/[policy-name]/[success|failure]-[scenario].hcl`
+- Must start with `success-`, `failure-`, `pass-`, or `fail-` followed by a scenario description
+- Located at `policies/[service]/test/[policy-name]/[success|failure|pass|fail]-[scenario].hcl`
 - The parent directory name must exactly match the `.sentinel` policy basename
 
 ### 3. Mock directories
-- Must start with `policy-success-` or `policy-failure-` followed by the scenario name
-- The directory name must exactly match the test file basename (e.g., test file `success-ecr-with-scanning.hcl` → mock directory `policy-success-ecr-with-scanning/`)
-- This is derived from the `source = "./mocks/[mock-dir]/..."` path inside the `.hcl` test file — verify it matches an existing directory
+- Two supported mock directory layouts are valid:
+  - Standard layout: `mocks/policy-success-[scenario]/`, `mocks/policy-failure-[scenario]/`
+  - Other layout: `mocks/pass/` for all pass mocks and `mocks/fail/` for all fail mocks
+- For other layout, each test file should map to the correct folder by expected outcome:
+  - pass test files use `source = "./mocks/pass/[test-case].sentinel"`
+  - fail test files use `source = "./mocks/fail/[test-case].sentinel"`
+- Always verify the `source = "./mocks/..."` path in the `.hcl` test file points to an existing mock file.
 
 ### 4. Documentation files
 - Format: `[policy-basename].md` — the exact same name as the `.sentinel` file, minus the extension
@@ -175,6 +194,16 @@ test {
   }
 }
 ```
+
+**Accepted mock source path patterns:**
+- Preferred standard pattern:
+  - `./mocks/policy-success-[scenario]/mock-tfplan-v2.sentinel`
+  - `./mocks/policy-failure-[scenario]/mock-tfplan-v2.sentinel`
+- Repository legacy pattern (also valid when present in existing policy tests):
+  - `./mocks/[test-case-name]/mock-tfplanv2.sentinel`
+  - `./mocks/pass/[test-case].sentinel` and `./mocks/fail/[test-case].sentinel`
+
+Treat these path variants as valid if the referenced mock file exists and the test expectation (`main = true/false`) is correct.
 
 **Blocking checks:**
 - At least one `success-*.hcl` file must exist in the test directory
