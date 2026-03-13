@@ -16,7 +16,6 @@ const = {
 	"resource_aws_emr_security_config":   "aws_emr_security_configuration",
 	"kerberos_attributes":                "kerberos_attributes",
 	"security_configuration":             "security_configuration",
-	"message":							  "'aws_emr_cluster' has Kerberos authentication enabled. Refer to https://docs.aws.amazon.com/config/latest/developerguide/emr-kerberos-enabled.html for more details.",
 }
 
 # Functions
