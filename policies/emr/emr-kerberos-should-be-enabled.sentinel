@@ -1,9 +1,8 @@
-
 # This policy requires that Amazon EMR clusters have Kerberos authentication enabled.
-# Kerberos provides strong authentication for client/server applications and helps
-# secure cluster resources by requiring authentication before granting access.
 
-# Imports
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
+
 import "tfplan/v2" as tfplan
 import "tfresources" as tf
 import "report" as report
@@ -12,11 +11,12 @@ import "collection/maps" as maps
 
 # Constants
 const = {
-	"policy_name":                        "emr-kerberos-enabled",
+	"policy_name":                        "emr-kerberos-should-be-enabled",
 	"resource_aws_emr_cluster":           "aws_emr_cluster",
 	"resource_aws_emr_security_config":   "aws_emr_security_configuration",
 	"kerberos_attributes":                "kerberos_attributes",
 	"security_configuration":             "security_configuration",
+	"message":							  "'aws_emr_cluster' has Kerberos authentication enabled. Refer to https://docs.aws.amazon.com/config/latest/developerguide/emr-kerberos-enabled.html for more details.",
 }
 
 # Functions
