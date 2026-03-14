@@ -1,0 +1,35 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_security_group.example": {
+      "address": "aws_security_group.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_security_group",
+      "values": {
+        "description": "Security group with port range including SSH open to world",
+        "ingress": [
+          {
+            "cidr_blocks": ["0.0.0.0/0"],
+            "description": "Port range 20-25 from anywhere",
+            "from_port": 20,
+            "ipv6_cidr_blocks": [],
+            "prefix_list_ids": [],
+            "protocol": "tcp",
+            "security_groups": [],
+            "self": false,
+            "to_port": 25,
+          },
+        ],
+        "name": "allow-port-range-public",
+        "vpc_id": "vpc-12345678",
+      },
+    },
+  },
+}

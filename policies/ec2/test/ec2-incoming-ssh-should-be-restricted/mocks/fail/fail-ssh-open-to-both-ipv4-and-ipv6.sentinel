@@ -1,0 +1,35 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_security_group.example": {
+      "address": "aws_security_group.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_security_group",
+      "values": {
+        "description": "Security group with SSH open to both IPv4 and IPv6 world",
+        "ingress": [
+          {
+            "cidr_blocks": ["0.0.0.0/0"],
+            "description": "SSH from anywhere IPv4 and IPv6",
+            "from_port": 22,
+            "ipv6_cidr_blocks": ["::/0"],
+            "prefix_list_ids": [],
+            "protocol": "tcp",
+            "security_groups": [],
+            "self": false,
+            "to_port": 22,
+          },
+        ],
+        "name": "allow-ssh-all-public",
+        "vpc_id": "vpc-12345678",
+      },
+    },
+  },
+}

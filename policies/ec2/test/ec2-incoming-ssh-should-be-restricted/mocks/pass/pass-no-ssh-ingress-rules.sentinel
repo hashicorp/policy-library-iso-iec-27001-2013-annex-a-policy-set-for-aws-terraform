@@ -1,0 +1,35 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_security_group.example": {
+      "address": "aws_security_group.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_security_group",
+      "values": {
+        "description": "Security group with no SSH ingress rules",
+        "ingress": [
+          {
+            "cidr_blocks": ["0.0.0.0/0"],
+            "description": "HTTP from anywhere",
+            "from_port": 80,
+            "to_port": 80,
+            "protocol": "tcp",
+            "ipv6_cidr_blocks": [],
+            "prefix_list_ids": [],
+            "security_groups": [],
+            "self": false,
+          },
+        ],
+        "name": "example-sg",
+        "egress": [],
+      },
+    },
+  },
+}

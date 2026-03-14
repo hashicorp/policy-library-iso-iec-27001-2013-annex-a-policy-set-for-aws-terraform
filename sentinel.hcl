@@ -625,3 +625,8 @@ policy "iam-managed-policy-should-be-attached-to-role" {
   source = "./policies/iam/iam-managed-policy-should-be-attached-to-role.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "ec2-incoming-ssh-should-be-restricted" {
+  source = "./policies/ec2/ec2-incoming-ssh-should-be-restricted.sentinel"
+  enforcement_level = "advisory"
+}
