@@ -23,7 +23,7 @@ const = {
 
 # Functions
 generate_violation_message = func(resource_type) {
-	return "Security group allows unrestricted SSH access (0.0.0.0/0 or ::/0) on port 22. The rule is COMPLIANT if the IP addresses of the incoming SSH traffic in the security groups are restricted (CIDR other than 0.0.0.0/0 or ::/0). Resource type: " + resource_type ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/restricted-ssh.html for more details."
+	return "Security group allows unrestricted SSH access (0.0.0.0/0 or ::/0) on port 22. The rule is COMPLIANT if the IP addresses of the incoming SSH traffic in the security groups are restricted (CIDR other than 0.0.0.0/0 or ::/0). Resource type: " + resource_type + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/restricted-ssh.html for more details."
 }
 
 # Check if a CIDR block is unrestricted

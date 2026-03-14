@@ -1,7 +1,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-ssh-open-to-ipv6-world.sentinel"
+    source = "./mocks/pass/pass-igw-attachment-authorized-vpc.sentinel"
   }
 }
 
@@ -17,8 +17,12 @@ mock "report" {
   }
 }
 
+param "authorized_vpc_ids" {
+  value = ["vpc-authorized888"]
+}
+
 test {
   rules = {
-    main = false
+    main = true
   }
 }

@@ -1,0 +1,21 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_internet_gateway_attachment.attach": {
+      "address": "aws_internet_gateway_attachment.attach",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "attach",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_internet_gateway_attachment",
+      "values": {
+        "internet_gateway_id": "igw-fedcba9876543210f",
+        "vpc_id": "vpc-unauthorized555",
+      },
+    },
+  },
+}

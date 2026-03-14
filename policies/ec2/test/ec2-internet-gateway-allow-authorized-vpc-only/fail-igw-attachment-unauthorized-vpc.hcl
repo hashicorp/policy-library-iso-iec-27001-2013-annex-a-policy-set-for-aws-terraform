@@ -1,7 +1,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-ssh-open-to-ipv6-world.sentinel"
+    source = "./mocks/fail/fail-igw-attachment-unauthorized-vpc.sentinel"
   }
 }
 
