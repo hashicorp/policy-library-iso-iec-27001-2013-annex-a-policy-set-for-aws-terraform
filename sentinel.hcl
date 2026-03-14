@@ -640,3 +640,8 @@ policy "ec2-internet-gateway-allow-authorized-vpc-only" {
   source = "./policies/ec2/ec2-internet-gateway-allow-authorized-vpc-only.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "mq-should-have-audit-logging-enabled" {
+  source = "./policies/mq/mq-should-have-audit-logging-enabled.sentinel"
+  enforcement_level = "advisory"
+}

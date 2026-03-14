@@ -1,0 +1,74 @@
+# This policy verifies that Amazon MQ brokers have Amazon CloudWatch audit logging enabled.
+
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":    "aws-mq-audit-logging-enabled",
+	"resource_type":  "aws_mq_broker",
+	"logs_attribute": "logs",
+}
+
+# Functions
+generate_violation_message = func(violation) {
+	logs = maps.get(violation.values, const.logs_attribute, [])
+	
+	if length(logs) is 0 {
+		return "Amazon MQ broker must have CloudWatch audit logging enabled. The 'logs' block is missing or empty. Refer to https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/configure-logging-monitoring-activemq.html for more details."
+	}
+	
+	return "Amazon MQ broker must have CloudWatch audit logging enabled. The 'logs.audit' attribute must be set to true. Refer to https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/configure-logging-monitoring-activemq.html for more details."
+}
+
+is_audit_logging_enabled = func(res) {
+	logs = maps.get(res.values, const.logs_attribute, [])
+	
+	# If logs is not defined or empty, audit logging is not enabled
+	if length(logs) is 0 {
+		return false
+	}
+	
+	# logs is a list of blocks, check each one for audit attribute
+	for logs as log_block {
+		audit_enabled = maps.get(log_block, "audit", false)
+		if audit_enabled is true {
+			return true
+		}
+	}
+	
+	return false
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).resources
+
+violations = collection.reject(resources, func(res) {
+	return is_audit_logging_enabled(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}
