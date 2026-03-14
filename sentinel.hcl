@@ -655,3 +655,8 @@ policy "elb-nlb-cross-zone-load-balancing-enabled" {
   source = "./policies/elb/elb-nlb-cross-zone-load-balancing-enabled.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "ec2-no-public-route-to-igw" {
+  source = "./policies/ec2/ec2-no-public-route-to-igw.sentinel"
+  enforcement_level = "advisory"
+}
