@@ -1,6 +1,8 @@
-
 # This policy ensures that IAM policies are actually in use by being attached to
 # IAM users, groups (with users), or roles (with trusted entities).
+
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
 
 # Imports
 import "tfplan/v2" as tfplan
