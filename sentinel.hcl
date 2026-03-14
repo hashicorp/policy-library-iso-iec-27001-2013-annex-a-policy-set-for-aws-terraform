@@ -650,3 +650,8 @@ policy "cloudtrail-multi-region-enabled" {
   source = "./policies/cloudtrail/cloudtrail-multi-region-enabled.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "elb-nlb-cross-zone-load-balancing-enabled" {
+  source = "./policies/elb/elb-nlb-cross-zone-load-balancing-enabled.sentinel"
+  enforcement_level = "advisory"
+}

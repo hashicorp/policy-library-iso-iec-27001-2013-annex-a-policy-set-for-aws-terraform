@@ -1,0 +1,22 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_lb.example": {
+      "address": "aws_lb.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_lb",
+      "values": {
+        "load_balancer_type": "network",
+        "cross_zone_load_balancing_enabled": true,
+        "name": "example-nlb",
+      },
+    },
+  },
+}

@@ -1,0 +1,22 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_lb.network_lb": {
+      "address": "aws_lb.network_lb",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "network_lb",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_lb",
+      "values": {
+        "load_balancer_type": "network",
+        "enable_cross_zone_load_balancing": true,
+        "name": "network-load-balancer",
+      },
+    },
+  },
+}
