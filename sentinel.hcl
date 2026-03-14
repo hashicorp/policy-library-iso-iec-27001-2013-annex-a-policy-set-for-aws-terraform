@@ -675,3 +675,13 @@ policy "redshift-audit-logging-should-be-enabled" {
   source = "./policies/redshift/redshift-audit-logging-should-be-enabled.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "redshift-cluster-encryption-audit-logging-enabled" {
+  source = "./policies/redshift/redshift-cluster-encryption-audit-logging-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "s3-account-level-public-access-configured" {
+  source = "./policies/s3/s3-account-level-public-access-configured.sentinel"
+  enforcement_level = "advisory"
+}

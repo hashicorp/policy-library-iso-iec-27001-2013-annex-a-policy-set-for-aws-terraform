@@ -1,0 +1,28 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_redshift_cluster.example": {
+      "address": "aws_redshift_cluster.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_redshift_cluster",
+      "values": {
+        "cluster_identifier": "my-redshift-cluster",
+        "encrypted": false,
+        "logging": [
+          {
+            "enable": false,
+            "bucket_name": "",
+            "s3_key_prefix": "",
+          },
+        ],
+      },
+    },
+  },
+}

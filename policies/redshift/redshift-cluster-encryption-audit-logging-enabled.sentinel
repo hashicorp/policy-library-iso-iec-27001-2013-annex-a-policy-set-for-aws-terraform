@@ -1,0 +1,135 @@
+# This policy verifies if Amazon Redshift clusters have encryption and audit logging enabled in accordance with AWS requirements.
+
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "strings"
+
+# Parameters
+param require_encryption default true
+param require_audit_logging default true
+param kms_key_id default ""
+
+# Constants
+const = {
+	"policy_name":   "redshift-cluster-encryption-audit-logging-enabled",
+	"resource_type": "aws_redshift_cluster",
+	"encrypted":     "encrypted",
+	"kms_key_id":    "kms_key_id",
+	"logging":       "logging",
+	"enable":        "enable",
+	"bucket_name":   "bucket_name",
+}
+
+# Functions
+generate_violation_message = func(violation, encryption_compliant, logging_compliant, kms_compliant) {
+	messages = []
+	
+	if not encryption_compliant {
+		encrypted_value = violation.values.encrypted else false
+		if encrypted_value is false or encrypted_value is undefined {
+			messages = messages + ["Encryption must be enabled (encrypted = true)"]
+		}
+	}
+	
+	if not kms_compliant {
+		messages = messages + ["Cluster must use the specified KMS key for encryption"]
+	}
+	
+	if not logging_compliant {
+		messages = messages + ["Audit logging must be enabled with a valid logging configuration"]
+	}
+	
+	base_message = "Amazon Redshift cluster '" + violation.address + "' does not meet Audit Manager requirements: "
+	return base_message + strings.join(messages, ", ") + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-cluster-configuration-check.html for more details."
+}
+
+is_encryption_compliant = func(res) {
+	if not require_encryption {
+		return true
+	}
+	
+	encrypted = res.values.encrypted else false
+	return encrypted is true
+}
+
+is_kms_key_compliant = func(res) {
+	# If no specific KMS key is required, any encryption is acceptable
+	if kms_key_id is "" {
+		return true
+	}
+	
+	# If a specific KMS key is required, check if it matches
+	cluster_kms_key = res.values.kms_key_id else ""
+	
+	# If cluster is not using the specified KMS key, it's non-compliant
+	if cluster_kms_key is "" or cluster_kms_key != kms_key_id {
+		return false
+	}
+	
+	return true
+}
+
+is_logging_compliant = func(res) {
+	if not require_audit_logging {
+		return true
+	}
+	
+	logging_blocks = res.values.logging else []
+	
+	if length(logging_blocks) == 0 {
+		return false
+	}
+	
+	# Check if at least one logging block has enable = true or enable_logging = true and a bucket_name
+	for logging_blocks as logging_block {
+		# Check both 'enable' and 'enable_logging' fields
+		enable_value = logging_block.enable else false
+		enable_logging_value = logging_block.enable_logging else false
+		bucket_name_value = logging_block.bucket_name else ""
+		
+		# Logging is enabled if either enable or enable_logging is true, and bucket_name is not empty
+		if (enable_value is true or enable_logging_value is true) and bucket_name_value is not "" {
+			return true
+		}
+	}
+	
+	return false
+}
+
+is_compliant = func(res) {
+	encryption_ok = is_encryption_compliant(res)
+	kms_ok = is_kms_key_compliant(res)
+	logging_ok = is_logging_compliant(res)
+	return encryption_ok and kms_ok and logging_ok
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).resources
+
+violations = filter resources as _, res {
+	not is_compliant(res)
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v, is_encryption_compliant(v), is_logging_compliant(v), is_kms_key_compliant(v)),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}
