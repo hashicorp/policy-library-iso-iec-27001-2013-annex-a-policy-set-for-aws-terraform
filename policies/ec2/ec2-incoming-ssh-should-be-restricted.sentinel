@@ -13,7 +13,7 @@ import "collection/maps" as maps
 
 # Constants
 const = {
-	"policy_name":                  "audit-manager-ssh-restricted-check",
+	"policy_name":                  "ec2-incoming-ssh-should-be-restricted",
 	"resource_security_group":      "aws_security_group",
 	"resource_security_group_rule": "aws_security_group_rule",
 	"ssh_port":                     22,

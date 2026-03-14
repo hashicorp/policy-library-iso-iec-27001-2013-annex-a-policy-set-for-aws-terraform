@@ -1,0 +1,23 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_db_instance.main": {
+      "address":        "aws_db_instance.main",
+      "depends_on":     [],
+      "deposed_key":    "",
+      "index":          null,
+      "mode":           "managed",
+      "module_address": "",
+      "name":           "main",
+      "provider_name":  "aws",
+      "tainted":        false,
+      "type":           "aws_db_instance",
+      "values": {
+        "identifier":     "mydb",
+        "arn":            "arn:aws:rds:us-east-1:123456789012:db:mydb",
+        "engine":         "aurora-mysql",
+        "instance_class": "db.t3.micro",
+      },
+    },
+  },
+}

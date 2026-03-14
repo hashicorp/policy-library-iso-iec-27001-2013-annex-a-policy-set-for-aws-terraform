@@ -12,7 +12,7 @@ import "collection/maps" as maps
 
 # Constants
 const = {
-	"policy_name":    "aws-mq-audit-logging-enabled",
+	"policy_name":    "mq-should-have-audit-logging-enabled",
 	"resource_type":  "aws_mq_broker",
 	"logs_attribute": "logs",
 }

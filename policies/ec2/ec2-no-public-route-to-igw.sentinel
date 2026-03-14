@@ -14,7 +14,7 @@ import "strings"
 
 # Constants
 const = {
-	"policy_name":       "audit-manager-no-public-igw-routes",
+	"policy_name":       "ec2-no-public-route-to-igw",
 	"resource_type":     "aws_route",
 	"route_table_type":  "aws_route_table",
 	"cidr_block":        "cidr_block",

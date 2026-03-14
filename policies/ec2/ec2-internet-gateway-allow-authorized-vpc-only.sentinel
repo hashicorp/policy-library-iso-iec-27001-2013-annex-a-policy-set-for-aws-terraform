@@ -16,7 +16,7 @@ param authorized_vpc_ids default []
 
 # Constants
 const = {
-	"policy_name":                             "igw-authorized-vpc-only",
+	"policy_name":                             "ec2-internet-gateway-allow-authorized-vpc-only",
 	"resource_aws_internet_gateway":           "aws_internet_gateway",
 	"resource_aws_internet_gateway_attachment": "aws_internet_gateway_attachment",
 	"vpc_id":                                  "vpc_id",

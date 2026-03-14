@@ -660,3 +660,8 @@ policy "ec2-no-public-route-to-igw" {
   source = "./policies/ec2/ec2-no-public-route-to-igw.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "rds-aurora-in-backup-plan" {
+  source = "./policies/rds/rds-aurora-in-backup-plan.sentinel"
+  enforcement_level = "advisory"
+}

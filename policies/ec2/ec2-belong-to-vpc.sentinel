@@ -12,7 +12,7 @@ import "collection/maps" as maps
 
 # Constants
 const = {
-	"policy_name":   "ec2-instance-in-vpc",
+	"policy_name":   "ec2-belong-to-vpc",
 	"resource_type": "aws_instance",
 }
 

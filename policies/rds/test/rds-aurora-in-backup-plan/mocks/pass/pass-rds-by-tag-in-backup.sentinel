@@ -1,0 +1,66 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_db_instance.tagged": {
+      "address":        "aws_db_instance.tagged",
+      "depends_on":     [],
+      "deposed_key":    "",
+      "index":          null,
+      "mode":           "managed",
+      "module_address": "",
+      "name":           "tagged",
+      "provider_name":  "aws",
+      "tainted":        false,
+      "type":           "aws_db_instance",
+      "values": {
+        "identifier":     "tagged-db",
+        "arn":            "arn:aws:rds:us-east-1:123456789012:db:tagged-db",
+        "engine":         "aurora-postgresql",
+        "instance_class": "db.t3.micro",
+        "tags": {
+          "Environment": "production",
+          "Backup":      "true",
+        },
+      },
+    },
+    "aws_backup_plan.tag_based": {
+      "address":        "aws_backup_plan.tag_based",
+      "depends_on":     [],
+      "deposed_key":    "",
+      "index":          null,
+      "mode":           "managed",
+      "module_address": "",
+      "name":           "tag_based",
+      "provider_name":  "aws",
+      "tainted":        false,
+      "type":           "aws_backup_plan",
+      "values": {
+        "name": "tag-based-backup-plan",
+        "arn":  "arn:aws:backup:us-east-1:123456789012:backup-plan:tag-based-backup-plan",
+      },
+    },
+    "aws_backup_selection.tag_based": {
+      "address":        "aws_backup_selection.tag_based",
+      "depends_on":     [],
+      "deposed_key":    "",
+      "index":          null,
+      "mode":           "managed",
+      "module_address": "",
+      "name":           "tag_based",
+      "provider_name":  "aws",
+      "tainted":        false,
+      "type":           "aws_backup_selection",
+      "values": {
+        "name":    "tag-based-selection",
+        "plan_id": "arn:aws:backup:us-east-1:123456789012:backup-plan:tag-based-backup-plan",
+        "selection_tag": [
+          {
+            "type":  "STRINGEQUALS",
+            "key":   "Backup",
+            "value": "true",
+          },
+        ],
+      },
+    },
+  },
+}

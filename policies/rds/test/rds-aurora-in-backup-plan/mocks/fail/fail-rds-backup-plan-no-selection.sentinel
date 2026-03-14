@@ -1,0 +1,39 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_db_instance.orphan": {
+      "address":        "aws_db_instance.orphan",
+      "depends_on":     [],
+      "deposed_key":    "",
+      "index":          null,
+      "mode":           "managed",
+      "module_address": "",
+      "name":           "orphan",
+      "provider_name":  "aws",
+      "tainted":        false,
+      "type":           "aws_db_instance",
+      "values": {
+        "identifier":     "orphan-db",
+        "arn":            "arn:aws:rds:us-east-1:123456789012:db:orphan-db",
+        "engine":         "aurora",
+        "instance_class": "db.t3.micro",
+      },
+    },
+    "aws_backup_plan.unused": {
+      "address":        "aws_backup_plan.unused",
+      "depends_on":     [],
+      "deposed_key":    "",
+      "index":          null,
+      "mode":           "managed",
+      "module_address": "",
+      "name":           "unused",
+      "provider_name":  "aws",
+      "tainted":        false,
+      "type":           "aws_backup_plan",
+      "values": {
+        "name": "unused-backup-plan",
+        "arn":  "arn:aws:backup:us-east-1:123456789012:backup-plan:unused-backup-plan",
+      },
+    },
+  },
+}

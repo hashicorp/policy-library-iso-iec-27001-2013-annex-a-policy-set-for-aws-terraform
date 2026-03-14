@@ -17,7 +17,7 @@ param blacklisted_policy_arns default []
 
 # Constants
 const = {
-	"policy_name":                              "iam-policy-blacklisted-check",
+	"policy_name":                              "iam-policy-no-blacklisted-arn-allowed",
 	"resource_aws_iam_user_policy_attachment":  "aws_iam_user_policy_attachment",
 	"resource_aws_iam_group_policy_attachment": "aws_iam_group_policy_attachment",
 	"resource_aws_iam_role_policy_attachment":  "aws_iam_role_policy_attachment",

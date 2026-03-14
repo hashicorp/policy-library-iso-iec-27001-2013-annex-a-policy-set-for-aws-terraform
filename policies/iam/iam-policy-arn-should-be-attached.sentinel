@@ -15,7 +15,7 @@ import "json"
 
 # Constants
 const = {
-	"policy_name":                    "iam-policy-in-use",
+	"policy_name":                    "iam-policy-arn-should-be-attached",
 	"resource_aws_iam_policy":        "aws_iam_policy",
 	"resource_aws_iam_user_policy_attachment": "aws_iam_user_policy_attachment",
 	"resource_aws_iam_group_policy_attachment": "aws_iam_group_policy_attachment",
