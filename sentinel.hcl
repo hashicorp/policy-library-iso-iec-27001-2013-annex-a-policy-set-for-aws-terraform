@@ -665,3 +665,13 @@ policy "rds-aurora-in-backup-plan" {
   source = "./policies/rds/rds-aurora-in-backup-plan.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "rds-recovery-point-created-within-time-period" {
+  source = "./policies/rds/rds-recovery-point-created-within-time-period.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "redshift-audit-logging-should-be-enabled" {
+  source = "./policies/redshift/redshift-audit-logging-should-be-enabled.sentinel"
+  enforcement_level = "advisory"
+}
