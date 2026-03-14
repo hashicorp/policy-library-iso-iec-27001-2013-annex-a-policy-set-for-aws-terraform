@@ -1,0 +1,38 @@
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_iam_user_policy_attachment.example1": {
+      "address": "aws_iam_user_policy_attachment.example1",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example1",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_iam_user_policy_attachment",
+      "values": {
+        "user": "example-user",
+        "policy_arn": "arn:aws:iam::aws:policy/ReadOnlyAccess",
+      },
+    },
+    "aws_iam_user_policy_attachment.example2": {
+      "address": "aws_iam_user_policy_attachment.example2",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example2",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_iam_user_policy_attachment",
+      "values": {
+        "user": "example-user",
+        "policy_arn": "arn:aws:iam::aws:policy/AdministratorAccess",
+      },
+    },
+  },
+}

@@ -1,0 +1,21 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_iam_group_policy_attachment.example": {
+      "address": "aws_iam_group_policy_attachment.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_iam_group_policy_attachment",
+      "values": {
+        "group": "example-group",
+        "policy_arn": "arn:aws:iam::aws:policy/ReadOnlyAccess",
+      },
+    },
+  },
+}

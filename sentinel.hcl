@@ -610,3 +610,8 @@ policy "emr-kerberos-should-be-enabled" {
   source = "./policies/emr/emr-kerberos-should-be-enabled.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "iam-policy-no-blacklisted-arn-allowed" {
+  source = "./policies/iam/iam-policy-no-blacklisted-arn-allowed.sentinel"
+  enforcement_level = "advisory"
+}
