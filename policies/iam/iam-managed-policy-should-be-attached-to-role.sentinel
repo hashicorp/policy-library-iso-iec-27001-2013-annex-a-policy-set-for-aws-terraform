@@ -1,0 +1,124 @@
+# This policy verifies that all managed policies specified in the parameter list
+# are attached to AWS IAM roles.
+
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+
+# Parameters
+# required_managed_policies is a list of managed policy ARNs that must be attached to IAM roles
+param required_managed_policies default []
+
+# Constants
+const = {
+	"policy_name":                                 "iam-role-required-managed-policies",
+	"resource_aws_iam_role_policy_attachment":     "aws_iam_role_policy_attachment",
+	"resource_aws_iam_role":                       "aws_iam_role",
+}
+
+# Functions
+# Get all policy attachments grouped by role
+get_policy_attachments_by_role = func(roles) {
+	role_policies = {}
+	
+	# First, check for managed_policy_arns attribute directly on IAM roles
+	for roles as _, role {
+		role_name = maps.get(role.values, "name", "")
+		managed_policy_arns = maps.get(role.values, "managed_policy_arns", [])
+		
+		if role_name is not "" and length(managed_policy_arns) > 0 {
+			role_policies[role_name] = managed_policy_arns
+		}
+	}
+	
+	# Then, check for aws_iam_role_policy_attachment resources
+	attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_role_policy_attachment).resources
+	
+	for attachments as _, attachment {
+		role_name = maps.get(attachment.values, "role", "")
+		policy_arn = maps.get(attachment.values, "policy_arn", "")
+		
+		if role_name is not "" and policy_arn is not "" {
+			if role_name not in keys(role_policies) {
+				role_policies[role_name] = []
+			}
+			role_policies[role_name] = role_policies[role_name] + [policy_arn]
+		}
+	}
+	
+	return role_policies
+}
+
+# Check if a role has all required managed policies attached
+has_all_required_policies = func(role_name, attached_policies) {
+	for required_managed_policies as required_policy {
+		policy_found = false
+		for attached_policies as attached_policy {
+			if attached_policy is required_policy {
+				policy_found = true
+			}
+		}
+		if policy_found is false {
+			return false
+		}
+	}
+	return true
+}
+
+# Generate violation message
+generate_violation_message = func(role_name, attached_policies) {
+	missing_policies = []
+	for required_managed_policies as required_policy {
+		policy_found = false
+		for attached_policies as attached_policy {
+			if attached_policy is required_policy {
+				policy_found = true
+			}
+		}
+		if policy_found is false {
+			missing_policies = missing_policies + [required_policy]
+		}
+	}
+	
+	return "IAM role '" + role_name + "' is missing required managed policies: " + strings.join(missing_policies, ", ") + ". All required managed policies must be attached to IAM roles. Refer to https://docs.aws.amazon.com/config/latest/developerguide/iam-role-managed-policy-check.html for more details."
+}
+
+# Variables
+roles = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_role).resources
+role_policy_map = get_policy_attachments_by_role(roles)
+
+# Use collection.reject to identify violations
+violations = collection.reject(roles, func(res) {
+	if length(required_managed_policies) is 0 {
+		return true
+	}
+	role_name = maps.get(res.values, "name", "")
+	attached_policies = maps.get(role_policy_map, role_name, [])
+	return has_all_required_policies(role_name, attached_policies)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(maps.get(v.values, "name", ""), maps.get(role_policy_map, maps.get(v.values, "name", ""), [])),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

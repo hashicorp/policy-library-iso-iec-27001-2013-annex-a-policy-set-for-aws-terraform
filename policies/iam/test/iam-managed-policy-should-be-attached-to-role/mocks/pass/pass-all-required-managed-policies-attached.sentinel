@@ -1,0 +1,26 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_iam_role.example": {
+      "address": "aws_iam_role.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_iam_role",
+      "values": {
+        "name": "example-role",
+        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ec2.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}",
+        "managed_policy_arns": [
+          "arn:aws:iam::aws:policy/ReadOnlyAccess",
+          "arn:aws:iam::aws:policy/SecurityAudit",
+          "arn:aws:iam::aws:policy/ViewOnlyAccess",
+        ],
+      },
+    },
+  },
+}

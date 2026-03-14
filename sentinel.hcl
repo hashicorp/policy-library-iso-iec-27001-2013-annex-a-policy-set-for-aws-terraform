@@ -620,3 +620,8 @@ policy "iam-policy-arn-should-be-attached" {
   source = "./policies/iam/iam-policy-arn-should-be-attached.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "iam-managed-policy-should-be-attached-to-role" {
+  source = "./policies/iam/iam-managed-policy-should-be-attached-to-role.sentinel"
+  enforcement_level = "advisory"
+}
