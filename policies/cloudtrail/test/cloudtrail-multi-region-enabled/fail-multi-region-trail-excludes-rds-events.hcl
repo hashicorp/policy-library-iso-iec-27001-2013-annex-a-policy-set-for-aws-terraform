@@ -1,0 +1,24 @@
+
+mock "tfplan/v2" {
+  module {
+    source = "./mocks/fail/fail-multi-region-trail-excludes-rds-events.sentinel"
+  }
+}
+
+mock "tfresources" {
+  module {
+    source = "../../../../modules/tfresources/tfresources.sentinel"
+  }
+}
+
+mock "report" {
+  module {
+    source = "../../../../modules/mocks/report/report.sentinel"
+  }
+}
+
+test {
+  rules = {
+    main = false
+  }
+}

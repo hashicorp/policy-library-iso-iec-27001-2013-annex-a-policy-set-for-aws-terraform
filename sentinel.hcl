@@ -645,3 +645,8 @@ policy "mq-should-have-audit-logging-enabled" {
   source = "./policies/mq/mq-should-have-audit-logging-enabled.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "cloudtrail-multi-region-enabled" {
+  source = "./policies/cloudtrail/cloudtrail-multi-region-enabled.sentinel"
+  enforcement_level = "advisory"
+}
