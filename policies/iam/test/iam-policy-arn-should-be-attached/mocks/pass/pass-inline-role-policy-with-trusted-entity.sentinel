@@ -1,0 +1,38 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_iam_role.example": {
+      "address": "aws_iam_role.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_iam_role",
+      "values": {
+        "name": "example-role",
+        "assume_role_policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"ec2.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}",
+      },
+    },
+    "aws_iam_role_policy.example": {
+      "address": "aws_iam_role_policy.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_iam_role_policy",
+      "values": {
+        "name": "example-role-policy",
+        "role": "example-role",
+        "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:ListBucket\",\"Resource\":\"*\"}]}",
+      },
+    },
+  },
+}

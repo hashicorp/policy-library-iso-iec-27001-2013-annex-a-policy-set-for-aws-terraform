@@ -615,3 +615,8 @@ policy "iam-policy-no-blacklisted-arn-allowed" {
   source = "./policies/iam/iam-policy-no-blacklisted-arn-allowed.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "iam-policy-arn-should-be-attached" {
+  source = "./policies/iam/iam-policy-arn-should-be-attached.sentinel"
+  enforcement_level = "advisory"
+}
