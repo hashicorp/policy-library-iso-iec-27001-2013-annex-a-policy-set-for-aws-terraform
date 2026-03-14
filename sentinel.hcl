@@ -630,3 +630,8 @@ policy "ec2-incoming-ssh-should-be-restricted" {
   source = "./policies/ec2/ec2-incoming-ssh-should-be-restricted.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "ec2-belong-to-vpc" {
+  source = "./policies/ec2/ec2-belong-to-vpc.sentinel"
+  enforcement_level = "advisory"
+}

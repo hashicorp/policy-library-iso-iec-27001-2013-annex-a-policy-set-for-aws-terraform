@@ -1,0 +1,80 @@
+# This policy verifies that EC2 instances belong to a virtual private cloud (VPC) by checking if the vpc_id or subnet_id is defined for aws_instance resources.
+
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":   "ec2-instance-in-vpc",
+	"resource_type": "aws_instance",
+}
+
+# Functions
+generate_violation_message = func(violation) {
+	return "EC2 instance must belong to a VPC. Instance does not have a vpc_id, subnet_id, or network_interface_id defined. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instances-in-vpc.html for more details."
+}
+
+is_instance_in_vpc = func(res) {
+	# Check if vpc_id is defined and not empty
+	vpc_id = maps.get(res.values, "vpc_id", "")
+	vpc_id_defined = vpc_id is not null and vpc_id is not ""
+	
+	# Check if subnet_id is defined and not empty
+	subnet_id = maps.get(res.values, "subnet_id", "")
+	subnet_id_defined = subnet_id is not null and subnet_id is not ""
+	
+	# Check if network_interface_id is defined and not empty
+	network_interface_id = maps.get(res.values, "network_interface_id", "")
+	network_interface_id_defined = network_interface_id is not null and network_interface_id is not ""
+	
+	# Check if vpc_security_group_ids is defined and not empty (indicates VPC membership)
+	vpc_security_group_ids = maps.get(res.values, "vpc_security_group_ids", null)
+	vpc_sg_defined = vpc_security_group_ids is not null and vpc_security_group_ids is not []
+	
+	# Check if network_interface array is defined with network_interface_id
+	network_interface = maps.get(res.values, "network_interface", null)
+	network_interface_defined = false
+	if network_interface is not null and network_interface is not [] {
+		# Check if the first network interface has a network_interface_id
+		if length(network_interface) > 0 {
+			first_ni = network_interface[0]
+			ni_id = maps.get(first_ni, "network_interface_id", "")
+			network_interface_defined = ni_id is not null and ni_id is not ""
+		}
+	}
+	
+	# Instance is in VPC if any of these attributes are defined
+	return vpc_id_defined or subnet_id_defined or network_interface_id_defined or vpc_sg_defined or network_interface_defined
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).resources
+violations = collection.reject(resources, func(res) {
+	return is_instance_in_vpc(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}
