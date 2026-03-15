@@ -1,0 +1,20 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_s3_bucket.example": {
+      "address": "aws_s3_bucket.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_s3_bucket",
+      "values": {
+        "bucket": "example-bucket",
+      },
+    },
+  },
+}

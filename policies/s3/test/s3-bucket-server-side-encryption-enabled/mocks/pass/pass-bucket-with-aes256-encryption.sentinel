@@ -1,0 +1,33 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_s3_bucket.example": {
+      "address": "aws_s3_bucket.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_s3_bucket",
+      "values": {
+        "bucket": "example-bucket",
+        "server_side_encryption_configuration": [
+          {
+            "rule": [
+              {
+                "apply_server_side_encryption_by_default": [
+                  {
+                    "sse_algorithm": "AES256",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+}

@@ -705,3 +705,8 @@ policy "s3-bucket-replication-enabled" {
   source = "./policies/s3/s3-bucket-replication-enabled.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "s3-bucket-server-side-encryption-enabled" {
+  source = "./policies/s3/s3-bucket-server-side-encryption-enabled.sentinel"
+  enforcement_level = "advisory"
+}

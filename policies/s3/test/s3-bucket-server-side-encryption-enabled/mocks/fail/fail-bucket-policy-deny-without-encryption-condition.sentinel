@@ -1,0 +1,36 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_s3_bucket.example": {
+      "address": "aws_s3_bucket.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_s3_bucket",
+      "values": {
+        "bucket": "example-bucket",
+      },
+    },
+    "aws_s3_bucket_policy.example": {
+      "address": "aws_s3_bucket_policy.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_s3_bucket_policy",
+      "values": {
+        "bucket": "example-bucket",
+        "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"DenyOtherActions\",\"Effect\":\"Deny\",\"Principal\":\"*\",\"Action\":\"s3:DeleteObject\",\"Resource\":\"arn:aws:s3:::example-bucket/*\"}]}",
+      },
+    },
+  },
+}
