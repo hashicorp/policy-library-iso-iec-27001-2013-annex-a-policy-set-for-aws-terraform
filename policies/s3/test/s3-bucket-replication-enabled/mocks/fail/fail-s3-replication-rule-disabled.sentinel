@@ -1,0 +1,38 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_s3_bucket.example": {
+      "address": "aws_s3_bucket.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_s3_bucket",
+      "values": {
+        "bucket": "my-bucket-with-disabled-replication",
+        "replication_configuration": [
+          {
+            "role": "arn:aws:iam::123456789012:role/replication-role",
+            "rules": [
+              {
+                "id": "rule1",
+                "status": "Disabled",
+                "priority": 1,
+                "destination": [
+                  {
+                    "bucket": "arn:aws:s3:::destination-bucket",
+                    "storage_class": "STANDARD",
+                  },
+                ],
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+}

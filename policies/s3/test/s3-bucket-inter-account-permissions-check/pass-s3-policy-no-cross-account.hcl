@@ -1,0 +1,28 @@
+
+mock "tfplan/v2" {
+  module {
+    source = "./mocks/pass/pass-s3-policy-no-cross-account.sentinel"
+  }
+}
+
+mock "tfresources" {
+  module {
+    source = "../../../../modules/tfresources/tfresources.sentinel"
+  }
+}
+
+mock "report" {
+  module {
+    source = "../../../../modules/mocks/report/report.sentinel"
+  }
+}
+
+param "controlPolicy" {
+  value = "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"AllowCurrentAccount\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::999988887777:user/local-user\"},\"Action\":\"s3:GetObject\",\"Resource\":\"arn:aws:s3:::example-bucket/*\"}]}"
+}
+
+test {
+  rules = {
+    main = true
+  }
+}

@@ -1,0 +1,21 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_s3_bucket_policy.example": {
+      "address": "aws_s3_bucket_policy.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_s3_bucket_policy",
+      "values": {
+        "bucket": "example-bucket",
+        "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"AllowCrossAccountBroadActions\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::123456789012:root\"},\"Action\":[\"s3:GetObject\",\"s3:PutObject\",\"s3:DeleteObject\",\"s3:ListBucket\"],\"Resource\":\"arn:aws:s3:::example-bucket/*\"}]}",
+      },
+    },
+  },
+}

@@ -695,3 +695,13 @@ policy "s3-bucket-policy-principal-validation" {
   source = "./policies/s3/s3-bucket-policy-principal-validation.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "s3-bucket-inter-account-permissions-check" {
+  source = "./policies/s3/s3-bucket-inter-account-permissions-check.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "s3-bucket-replication-enabled" {
+  source = "./policies/s3/s3-bucket-replication-enabled.sentinel"
+  enforcement_level = "advisory"
+}

@@ -1,0 +1,264 @@
+# This policy verifies that S3 bucket policies do not allow other inter-account permissions than the control S3 bucket policy provided.
+
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+import "json"
+import "types"
+
+# Parameters
+# controlPolicy is the JSON string of the control S3 bucket policy
+param controlPolicy default ""
+
+# Constants
+const = {
+	"policy_name":      "s3-bucket-inter-account-permissions-check",
+	"resource_type":    "aws_s3_bucket_policy",
+	"policy_attribute": "policy",
+	"message_prefix":   "S3 bucket policy contains unauthorized inter-account permissions.",
+}
+
+# Helper function to extract account ID from ARN
+extract_account_id = func(arn) {
+	if strings.has_prefix(arn, "arn:aws:iam::") {
+		parts = strings.split(arn, ":")
+		if length(parts) >= 5 {
+			return parts[4]
+		}
+	}
+	return ""
+}
+
+# Helper function to check if principal is inter-account (has account ID in ARN)
+is_inter_account_arn = func(principal_str) {
+	if principal_str is "*" {
+		return true
+	}
+	if strings.has_prefix(principal_str, "arn:aws:iam::") {
+		return true
+	}
+	return false
+}
+
+# Main function to check if policy is more permissive than control
+has_unauthorized_inter_account_permissions = func(policy_string) {
+	# Handle empty or invalid policy
+	if policy_string is "" {
+		return false
+	}
+	
+	# Parse the policy JSON
+	policy_doc = json.unmarshal(policy_string)
+	
+	# Get statements from the policy
+	statements = maps.get(policy_doc, "Statement", [])
+	
+	# Parse control policy if provided
+	control_statements = []
+	if controlPolicy is not "" {
+		control_doc = json.unmarshal(controlPolicy)
+		control_statements = maps.get(control_doc, "Statement", [])
+	}
+	
+	# Check each statement in the actual policy
+	for statements as stmt {
+		# Only check Allow statements
+		effect = maps.get(stmt, "Effect", "")
+		if effect is not "Allow" {
+			continue
+		}
+		
+		# Get principal
+		principal = maps.get(stmt, "Principal", {})
+		
+		# Check for wildcard principal (string "*")
+		if types.type_of(principal) is "string" {
+			if principal is "*" {
+				# Wildcard principal - check if allowed in control
+				if controlPolicy is "" {
+					# No control policy, wildcard is unauthorized
+					return true
+				}
+				# Check if control policy also has wildcard
+				has_wildcard_in_control = false
+				for control_statements as cs {
+					cs_effect = maps.get(cs, "Effect", "")
+					if cs_effect is not "Allow" {
+						continue
+					}
+					cs_principal = maps.get(cs, "Principal", {})
+					if types.type_of(cs_principal) is "string" and cs_principal is "*" {
+						has_wildcard_in_control = true
+					}
+				}
+				if has_wildcard_in_control is false {
+					return true
+				}
+			}
+			continue
+		}
+		
+		# Check for AWS principals in map
+		if types.type_of(principal) is not "map" {
+			continue
+		}
+		
+		aws_principals = maps.get(principal, "AWS", null)
+		if aws_principals is null {
+			continue
+		}
+		
+		# Normalize to list
+		aws_principal_list = []
+		if types.type_of(aws_principals) is "string" {
+			aws_principal_list = [aws_principals]
+		} else if types.type_of(aws_principals) is "list" {
+			aws_principal_list = aws_principals
+		}
+		
+		# Check each AWS principal
+		for aws_principal_list as aws_p {
+			# Skip if not inter-account
+			if is_inter_account_arn(aws_p) is false {
+				continue
+			}
+			
+			# If wildcard in actual
+			if aws_p is "*" {
+				if controlPolicy is "" {
+					return true
+				}
+				# Check if control allows wildcard
+				has_wildcard_in_control = false
+				for control_statements as cs {
+					cs_effect = maps.get(cs, "Effect", "")
+					if cs_effect is not "Allow" {
+						continue
+					}
+					cs_principal = maps.get(cs, "Principal", {})
+					if types.type_of(cs_principal) is "map" {
+						cs_aws = maps.get(cs_principal, "AWS", null)
+						if cs_aws is not null {
+							if types.type_of(cs_aws) is "string" and cs_aws is "*" {
+								has_wildcard_in_control = true
+							} else if types.type_of(cs_aws) is "list" {
+								for cs_aws as cs_aws_p {
+									if cs_aws_p is "*" {
+										has_wildcard_in_control = true
+									}
+								}
+							}
+						}
+					}
+				}
+				if has_wildcard_in_control is false {
+					return true
+				}
+				continue
+			}
+			
+			# Extract account ID from actual principal
+			actual_account = extract_account_id(aws_p)
+			if actual_account is "" {
+				continue
+			}
+			
+			# If no control policy, any inter-account is unauthorized
+			if controlPolicy is "" {
+				return true
+			}
+			
+			# Check if this account is allowed in control policy
+			account_allowed = false
+			for control_statements as cs {
+				cs_effect = maps.get(cs, "Effect", "")
+				if cs_effect is not "Allow" {
+					continue
+				}
+				
+				cs_principal = maps.get(cs, "Principal", {})
+				if types.type_of(cs_principal) is not "map" {
+					continue
+				}
+				
+				cs_aws = maps.get(cs_principal, "AWS", null)
+				if cs_aws is null {
+					continue
+				}
+				
+				# Normalize control AWS principals
+				cs_aws_list = []
+				if types.type_of(cs_aws) is "string" {
+					cs_aws_list = [cs_aws]
+				} else if types.type_of(cs_aws) is "list" {
+					cs_aws_list = cs_aws
+				}
+				
+				# Check if account matches
+				for cs_aws_list as cs_aws_p {
+					if cs_aws_p is "*" {
+						account_allowed = true
+					} else {
+						control_account = extract_account_id(cs_aws_p)
+						if control_account is actual_account {
+							account_allowed = true
+						}
+					}
+				}
+			}
+			
+			if account_allowed is false {
+				return true
+			}
+		}
+	}
+	
+	return false
+}
+
+# Generate violation message
+generate_violation_message = func(violation) {
+	return const.message_prefix + " Resource: " + violation.address + ". Ensure bucket policies only allow authorized inter-account access as defined in the control policy. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy-not-more-permissive.html for more details."
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).resources
+
+violations = collection.reject(resources, func(res) {
+	# Get the policy attribute
+	policy_value = maps.get(res.values, const.policy_attribute, "")
+	
+	# If policy is empty or not defined, consider it compliant
+	if policy_value is "" {
+		return true
+	}
+	
+	# Check if the policy has unauthorized inter-account permissions
+	return has_unauthorized_inter_account_permissions(policy_value) is false
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

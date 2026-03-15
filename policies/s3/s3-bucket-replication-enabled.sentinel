@@ -1,0 +1,115 @@
+# This policy verifies that AWS S3 buckets have replication rules enabled
+# by checking the replication_configuration attribute within aws_s3_bucket resources.
+
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":            "s3-bucket-replication-enabled",
+	"resource_aws_s3_bucket": "aws_s3_bucket",
+	"message":                "S3 bucket must have replication rules enabled with all rules in 'Enabled' status.",
+}
+
+# Functions
+generate_violation_message = func(bucket_address, reason) {
+	return "S3 bucket '" + bucket_address + "' does not meet replication requirements: " + reason + ". Configure replication_configuration with enabled rules to meet AWS Audit Manager compliance requirements. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-replication-enabled.html for more details."
+}
+
+# Check if bucket has valid replication configuration with all rules enabled
+has_valid_replication = func(bucket_res) {
+	# Get replication_configuration from bucket values
+	replication_config = maps.get(bucket_res.values, "replication_configuration", null)
+	
+	# If no replication_configuration exists, fail
+	if replication_config is null {
+		return {
+			"valid":  false,
+			"reason": "no replication_configuration found",
+		}
+	}
+	
+	# replication_configuration is a list, check if it's not empty
+	if length(replication_config) == 0 {
+		return {
+			"valid":  false,
+			"reason": "replication_configuration is empty",
+		}
+	}
+	
+	# Get the first (and typically only) replication configuration
+	config = replication_config[0]
+	
+	# Check if rules exist
+	rules = maps.get(config, "rules", null)
+	if rules is null {
+		return {
+			"valid":  false,
+			"reason": "no rules found in replication_configuration",
+		}
+	}
+	
+	# Check if rules array is empty
+	if length(rules) == 0 {
+		return {
+			"valid":  false,
+			"reason": "rules array is empty",
+		}
+	}
+	
+	# Check that ALL rules have status "Enabled"
+	for rules as _, r {
+		status = maps.get(r, "status", "")
+		if status is not "Enabled" {
+			return {
+				"valid":  false,
+				"reason": "at least one rule has status '" + status + "' instead of 'Enabled'",
+			}
+		}
+	}
+	
+	# All checks passed
+	return {
+		"valid":  true,
+		"reason": "",
+	}
+}
+
+# Variables
+s3_buckets = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_s3_bucket).resources
+
+violations = collection.reject(s3_buckets, func(bucket_res) {
+	result = has_valid_replication(bucket_res)
+	return result.valid
+})
+
+# Build violations list with detailed messages
+violation_list = []
+for violations as _, v {
+	result = has_valid_replication(v)
+	violation_list = append(violation_list, {
+		"address":        v.address,
+		"module_address": v.module_address,
+		"message":        generate_violation_message(v.address, result.reason),
+	})
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations":  violation_list,
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}
