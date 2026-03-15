@@ -685,3 +685,13 @@ policy "s3-account-level-public-access-configured" {
   source = "./policies/s3/s3-account-level-public-access-configured.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "s3-bucket-blacklisted-actions-prohibited" {
+  source = "./policies/s3/s3-bucket-blacklisted-actions-prohibited.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "s3-bucket-policy-principal-validation" {
+  source = "./policies/s3/s3-bucket-policy-principal-validation.sentinel"
+  enforcement_level = "advisory"
+}

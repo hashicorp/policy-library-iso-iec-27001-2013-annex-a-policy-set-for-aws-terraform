@@ -1,0 +1,306 @@
+# This policy verifies that AWS S3 buckets have appropriate access restrictions
+# by checking bucket policies for restricted access to specific principals, IPs, or VPCs.
+
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "types"
+
+# Parameters
+# allowed_principals: List of AWS principals that are allowed to access S3 buckets
+param allowed_principals default []
+# allowed_ips: List of IP addresses/CIDR blocks that are allowed to access S3 buckets
+param allowed_ips default []
+# allowed_vpcs: List of VPC IDs that are allowed to access S3 buckets
+param allowed_vpcs default []
+
+# Constants
+const = {
+	"policy_name":            "s3-bucket-policy-principal-validation",
+	"resource_s3_bucket":     "aws_s3_bucket",
+	"resource_bucket_policy": "aws_s3_bucket_policy",
+	"policy_attr":            "policy",
+}
+
+# Functions
+
+# Extract all principals from policy string
+extract_principals = func(policy_str) {
+	principals = []
+	
+	# Check for wildcard principal patterns
+	if policy_str matches ".*\"Principal\"\\s*:\\s*\"\\*\".*" {
+		principals = principals + ["*"]
+	}
+	if policy_str matches ".*\"AWS\"\\s*:\\s*\"\\*\".*" {
+		principals = principals + ["*"]
+	}
+	
+	# Extract IAM ARNs - look for patterns like arn:aws:iam::123456789012:
+	# This is a simplified extraction since we can't parse JSON properly
+	if policy_str matches ".*arn:aws:iam::[0-9]{12}:.*" {
+		# Try to extract account IDs
+		# Pattern: arn:aws:iam::ACCOUNT_ID:
+		# We'll mark that an ARN exists
+		principals = principals + ["arn_found"]
+	}
+	
+	return principals
+}
+
+# Extract IPs from policy string
+extract_ips = func(policy_str) {
+	ips = []
+	
+	# Look for IP address patterns in conditions
+	# This is simplified - in production you'd parse JSON
+	if policy_str matches ".*aws:SourceIp.*" {
+		ips = ips + ["ip_found"]
+	}
+	if policy_str matches ".*IpAddress.*" {
+		ips = ips + ["ip_found"]
+	}
+	
+	return ips
+}
+
+# Extract VPCs from policy string
+extract_vpcs = func(policy_str) {
+	vpcs = []
+	
+	if policy_str matches ".*aws:SourceVpc.*" {
+		vpcs = vpcs + ["vpc_found"]
+	}
+	if policy_str matches ".*aws:SourceVpce.*" {
+		vpcs = vpcs + ["vpce_found"]
+	}
+	
+	return vpcs
+}
+
+# Check if a specific principal ARN is in the allowed list
+is_principal_allowed = func(policy_str, allowed_list) {
+	# If no allowed list provided, any specific principal is OK
+	if length(allowed_list) is 0 {
+		return true
+	}
+	
+	# Extract account ID from policy and check against allowed list
+	# This is a simplified check - we look for any ARN pattern
+	for allowed_list as _, allowed_principal {
+		if policy_str matches ".*" + allowed_principal + ".*" {
+			return true
+		}
+	}
+	
+	return false
+}
+
+# Check if IP restrictions match allowed IPs
+is_ip_allowed = func(policy_str, allowed_list) {
+	# If no allowed list provided, any IP restriction is OK
+	if length(allowed_list) is 0 {
+		return true
+	}
+	
+	# Check if any allowed IP is mentioned in the policy
+	for allowed_list as _, allowed_ip {
+		if policy_str matches ".*" + allowed_ip + ".*" {
+			return true
+		}
+	}
+	
+	return false
+}
+
+# Check if VPC restrictions match allowed VPCs
+is_vpc_allowed = func(policy_str, allowed_list) {
+	# If no allowed list provided, any VPC restriction is OK
+	if length(allowed_list) is 0 {
+		return true
+	}
+	
+	# Check if any allowed VPC is mentioned in the policy
+	for allowed_list as _, allowed_vpc {
+		if policy_str matches ".*" + allowed_vpc + ".*" {
+			return true
+		}
+	}
+	
+	return false
+}
+
+# Main validation function
+has_policy_restrictions = func(policy_str) {
+	# Deny statements are always acceptable (they restrict access)
+	if policy_str matches ".*\"Effect\"\\s*:\\s*\"Deny\".*" {
+		return true
+	}
+	
+	# Check for wildcard principals with Allow effect
+	has_wildcard_allow = false
+	if policy_str matches ".*\"Effect\"\\s*:\\s*\"Allow\".*" {
+		if policy_str matches ".*\"Principal\"\\s*:\\s*\"\\*\".*" {
+			has_wildcard_allow = true
+		}
+		if policy_str matches ".*\"AWS\"\\s*:\\s*\"\\*\".*" {
+			has_wildcard_allow = true
+		}
+	}
+	
+	# If there's a wildcard Allow, it MUST have conditions that restrict access
+	if has_wildcard_allow {
+		# Check if there are any conditions at all
+		if not (policy_str matches ".*\"Condition\".*") {
+			# Wildcard Allow without conditions is a violation
+			return false
+		}
+		
+		# If parameters are provided, validate against them
+		if length(allowed_ips) > 0 {
+			# Must have IP restrictions and they must match allowed IPs
+			if policy_str matches ".*aws:SourceIp.*" {
+				return is_ip_allowed(policy_str, allowed_ips)
+			}
+			if policy_str matches ".*IpAddress.*" {
+				return is_ip_allowed(policy_str, allowed_ips)
+			}
+			# Has wildcard but no IP condition when IPs are required
+			return false
+		}
+		
+		if length(allowed_vpcs) > 0 {
+			# Must have VPC restrictions and they must match allowed VPCs
+			if policy_str matches ".*aws:SourceVpc.*" {
+				return is_vpc_allowed(policy_str, allowed_vpcs)
+			}
+			if policy_str matches ".*aws:SourceVpce.*" {
+				return is_vpc_allowed(policy_str, allowed_vpcs)
+			}
+			# Has wildcard but no VPC condition when VPCs are required
+			return false
+		}
+		
+		if length(allowed_principals) > 0 {
+			# Must have principal restrictions in conditions
+			if policy_str matches ".*aws:PrincipalAccount.*" {
+				return is_principal_allowed(policy_str, allowed_principals)
+			}
+			if policy_str matches ".*aws:PrincipalOrgID.*" {
+				return true  # Org ID restrictions are acceptable
+			}
+			# Has wildcard but no principal condition when principals are required
+			return false
+		}
+		
+		# Wildcard with conditions but no parameters - accept any condition
+		return true
+	}
+	
+	# No wildcard - check for specific principals
+	# Service principals are always OK
+	if policy_str matches ".*\"Service\".*" {
+		return true
+	}
+	
+	# Federated principals are always OK
+	if policy_str matches ".*\"Federated\".*" {
+		return true
+	}
+	
+	# Specific IAM ARNs
+	if policy_str matches ".*arn:aws:iam.*" {
+		# If we have an allowed principals list, validate against it
+		if length(allowed_principals) > 0 {
+			return is_principal_allowed(policy_str, allowed_principals)
+		}
+		# No allowed list - any specific ARN is OK
+		return true
+	}
+	
+	# Check for AWS principal that's not wildcard
+	if policy_str matches ".*\"AWS\".*" {
+		# Make sure it's not wildcard
+		if policy_str matches ".*\"AWS\"\\s*:\\s*\"\\*\".*" {
+			return false
+		}
+		# Specific AWS principal
+		if length(allowed_principals) > 0 {
+			return is_principal_allowed(policy_str, allowed_principals)
+		}
+		return true
+	}
+	
+	# Has conditions - check if they're valid
+	if policy_str matches ".*\"Condition\".*" {
+		# If we have IP restrictions
+		if policy_str matches ".*aws:SourceIp.*" {
+			if length(allowed_ips) > 0 {
+				return is_ip_allowed(policy_str, allowed_ips)
+			}
+			return true
+		}
+		if policy_str matches ".*IpAddress.*" {
+			if length(allowed_ips) > 0 {
+				return is_ip_allowed(policy_str, allowed_ips)
+			}
+			return true
+		}
+		
+		# If we have VPC restrictions
+		if policy_str matches ".*aws:SourceVpc.*" {
+			if length(allowed_vpcs) > 0 {
+				return is_vpc_allowed(policy_str, allowed_vpcs)
+			}
+			return true
+		}
+		
+		# Other conditions are acceptable
+		return true
+	}
+	
+	# No recognizable restrictions
+	return false
+}
+
+generate_violation_message = func(violation) {
+	return "S3 bucket policy '" + violation.address + "' does not have sufficient access restrictions. Bucket policies must restrict access by AWS principals, federated users, service principals, IP addresses, or VPCs. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy-grantee-check.html for more details."
+}
+
+# Variables
+bucket_policy_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_bucket_policy).resources
+
+# If no bucket policies exist, the rule is COMPLIANT (per AWS Config rule spec)
+# Only check policies that exist
+violations = collection.reject(bucket_policy_resources, func(policy) {
+	policy_content = maps.get(policy.values, const.policy_attr, "")
+	if policy_content is "" {
+		return false
+	}
+	return has_policy_restrictions(policy_content)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

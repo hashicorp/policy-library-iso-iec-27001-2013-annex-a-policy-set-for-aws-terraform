@@ -1,0 +1,250 @@
+# This policy verifies that Amazon S3 bucket policies do not allow blocklisted
+# bucket-level and object-level actions on resources in the bucket for principals from other AWS accounts.
+
+# Copyright IBM Corp. 2024, 2025
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+import "json"
+import "types"
+
+# Parameters
+# current_account_id defines the AWS account ID that owns the resources being evaluated
+# This is used to distinguish between same-account and cross-account principals
+param current_account_id default "111111111111"
+
+# blocklisted_actions defines the list of S3 actions that should not be allowed for cross-account principals
+# Note: Read-only actions like s3:GetBucketLocation and s3:ListBucket are NOT blocklisted
+param blocklisted_actions default [
+	"s3:DeleteBucket",
+	"s3:DeleteBucketPolicy",
+	"s3:DeleteBucketWebsite",
+	"s3:DeleteObject",
+	"s3:DeleteObjectVersion",
+	"s3:PutBucketAcl",
+	"s3:PutBucketPolicy",
+	"s3:PutEncryptionConfiguration",
+	"s3:PutLifecycleConfiguration",
+	"s3:PutReplicationConfiguration",
+	"s3:ReplicateDelete",
+	"s3:RestoreObject",
+	"s3:PutObjectAcl",
+	"s3:GetBucketAcl",
+	"s3:GetBucketPolicy",
+	"s3:GetBucketTagging",
+]
+
+# Constants
+const = {
+	"policy_name":            "s3-bucket-blacklisted-actions-prohibited",
+	"resource_aws_s3_bucket": "aws_s3_bucket_policy",
+	"policy_attribute":       "policy",
+	"message_prefix":         "S3 bucket policy allows blocklisted actions for cross-account principals",
+}
+
+# Functions
+# parse_policy_document parses the JSON policy document
+parse_policy_document = func(policy_json) {
+	return json.unmarshal(policy_json)
+}
+
+# extract_account_id_from_arn extracts the account ID from an IAM ARN
+extract_account_id_from_arn = func(arn) {
+	# ARN format: arn:aws:iam::123456789012:root or arn:aws:iam::123456789012:user/username
+	if not strings.has_prefix(arn, "arn:aws:iam::") {
+		return ""
+	}
+	
+	# Remove the "arn:aws:iam::" prefix
+	remainder = strings.trim_prefix(arn, "arn:aws:iam::")
+	
+	# Split by ":" to get account ID (first part)
+	parts = strings.split(remainder, ":")
+	if types.type_of(parts) is not "list" or parts is empty {
+		return ""
+	}
+	
+	return parts[0]
+}
+
+# is_cross_account_principal checks if a principal is from another AWS account
+is_cross_account_principal = func(principal_value) {
+	# Wildcard principal is always considered cross-account
+	if principal_value is "*" {
+		return true
+	}
+	
+	# Check if it's an IAM ARN
+	if strings.has_prefix(principal_value, "arn:aws:iam::") {
+		account_id = extract_account_id_from_arn(principal_value)
+		# If we can't extract account ID or it's different from current account, it's cross-account
+		if account_id is "" {
+			return true
+		}
+		if account_id is not current_account_id {
+			return true
+		}
+		# Same account - not cross-account
+		return false
+	}
+	
+	return false
+}
+
+# action_matches_pattern checks if an action matches a blocklisted pattern (supports wildcards)
+action_matches_pattern = func(action, pattern) {
+	# Exact match
+	if action is pattern {
+		return true
+	}
+	
+	# Wildcard match (e.g., "s3:GetBucket*" matches "s3:GetBucketAcl")
+	# Check if pattern has a wildcard by trying to split
+	parts = strings.split(pattern, "*")
+	# If split results in more than one part, there's a wildcard
+	if types.type_of(parts) is "list" {
+		# Check if we can access index 1 (means there was a split)
+		prefix = parts[0]
+		# If the pattern ends with *, check if action starts with prefix
+		if strings.has_prefix(action, prefix) and prefix is not pattern {
+			return true
+		}
+	}
+	
+	return false
+}
+
+# check_actions checks if any actions are blocklisted
+check_actions = func(actions_list) {
+	for actions_list as a {
+		if a is "s3:*" {
+			return true
+		}
+		for blocklisted_actions as blocked {
+			if action_matches_pattern(a, blocked) {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+# check_principal checks if principal contains cross-account access
+check_principal = func(principal) {
+	if principal is null {
+		return false
+	}
+	
+	# Handle Principal as string (e.g., "*")
+	if types.type_of(principal) is "string" {
+		return is_cross_account_principal(principal)
+	}
+	
+	# Handle Principal as map
+	if types.type_of(principal) is "map" {
+		aws_principals = maps.get(principal, "AWS", [])
+		if types.type_of(aws_principals) is "string" {
+			return is_cross_account_principal(aws_principals)
+		}
+		if types.type_of(aws_principals) is "list" {
+			for aws_principals as p {
+				if is_cross_account_principal(p) {
+					return true
+				}
+			}
+		}
+	}
+	
+	return false
+}
+
+# check_statement checks if a statement allows blocklisted actions for cross-account principals
+check_statement = func(stmt) {
+	# Only check Allow statements
+	effect = maps.get(stmt, "Effect", "")
+	if effect is not "Allow" {
+		return false
+	}
+	
+	# Check if statement has cross-account principals
+	principal = maps.get(stmt, "Principal", null)
+	has_cross_account = check_principal(principal)
+	
+	if not has_cross_account {
+		return false
+	}
+	
+	# Check if statement allows any blocklisted actions
+	action = maps.get(stmt, "Action", [])
+	actions_list = []
+	
+	if types.type_of(action) is "string" {
+		actions_list = [action]
+	} else if types.type_of(action) is "list" {
+		actions_list = action
+	}
+	
+	return check_actions(actions_list)
+}
+
+# has_blocklisted_cross_account_access checks if the policy allows blocklisted actions for cross-account principals
+has_blocklisted_cross_account_access = func(res) {
+	policy_str = maps.get(res.values, const.policy_attribute, "")
+	if policy_str is "" {
+		return false
+	}
+	
+	policy_doc = parse_policy_document(policy_str)
+	if policy_doc is null {
+		return false
+	}
+	
+	statements = maps.get(policy_doc, "Statement", [])
+	if types.type_of(statements) is not "list" {
+		return false
+	}
+	
+	for statements as stmt {
+		if check_statement(stmt) {
+			return true
+		}
+	}
+	
+	return false
+}
+
+# generate_violation_message generates a detailed violation message
+generate_violation_message = func(violation) {
+	return const.message_prefix + ". Ensure that the bucket policy does not allow blocklisted actions (e.g., s3:DeleteBucket, s3:DeleteObject, s3:PutBucketPolicy) for cross-account principals. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-blacklisted-actions-prohibited.html for more details."
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_s3_bucket).resources
+violations = collection.reject(resources, func(res) {
+	return has_blocklisted_cross_account_access(res) is false
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}
