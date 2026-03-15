@@ -1,0 +1,30 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_sagemaker_endpoint_configuration.example": {
+      "address": "aws_sagemaker_endpoint_configuration.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_sagemaker_endpoint_configuration",
+      "values": {
+        "name": "example-endpoint-config",
+        "kms_key_id": "",
+        "production_variants": [
+          {
+            "variant_name": "variant-1",
+            "model_name": "example-model",
+            "initial_instance_count": 1,
+            "instance_type": "ml.t2.medium",
+          },
+        ],
+        "tags": {},
+      },
+    },
+  },
+}

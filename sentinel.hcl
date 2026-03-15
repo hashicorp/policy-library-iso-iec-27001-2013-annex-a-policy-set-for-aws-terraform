@@ -710,3 +710,18 @@ policy "s3-bucket-server-side-encryption-enabled" {
   source = "./policies/s3/s3-bucket-server-side-encryption-enabled.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "sagemaker-endpoint-configuration-kms-key-configured" {
+  source = "./policies/sagemaker/sagemaker-endpoint-configuration-kms-key-configured.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "sagemaker-notebook-instance-kms-key-configured" {
+  source = "./policies/sagemaker/sagemaker-notebook-instance-kms-key-configured.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "secretsmanager-secrets-encrypted-using-cmk" {
+  source = "./policies/secretsmanager/secretsmanager-secrets-encrypted-using-cmk.sentinel"
+  enforcement_level = "advisory"
+}
