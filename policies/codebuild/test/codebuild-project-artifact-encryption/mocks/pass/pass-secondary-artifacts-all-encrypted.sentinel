@@ -1,0 +1,39 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_codebuild_project.example": {
+      "address": "aws_codebuild_project.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_codebuild_project",
+      "values": {
+        "name": "example-project",
+        "artifacts": [
+          {
+            "type": "NO_ARTIFACTS",
+          },
+        ],
+        "secondary_artifacts": [
+          {
+            "type": "S3",
+            "location": "secondary-bucket-1",
+            "artifact_identifier": "secondary1",
+            "encryption_disabled": false,
+          },
+          {
+            "type": "S3",
+            "location": "secondary-bucket-2",
+            "artifact_identifier": "secondary2",
+            "encryption_disabled": false,
+          },
+        ],
+      },
+    },
+  },
+}

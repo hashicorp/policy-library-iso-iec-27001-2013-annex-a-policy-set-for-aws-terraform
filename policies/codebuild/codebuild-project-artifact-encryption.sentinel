@@ -1,0 +1,88 @@
+
+# This policy verifies that AWS CodeBuild projects have encryption enabled for all artifacts.
+# According to AWS best practices, artifacts should be encrypted to protect sensitive build outputs.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":                    "codebuild-project-artifact-encryption",
+	"resource_aws_codebuild_project": "aws_codebuild_project",
+	"artifacts":                      "artifacts",
+	"secondary_artifacts":            "secondary_artifacts",
+	"encryption_disabled":            "encryption_disabled",
+}
+
+# Functions
+# Check if a single artifact has encryption enabled
+is_artifact_encrypted = func(artifact) {
+	# If encryption_disabled is not defined, encryption is enabled by default (returns true)
+	# If encryption_disabled is explicitly set to false, encryption is enabled (returns true)
+	# If encryption_disabled is set to true, encryption is disabled (returns false)
+	encryption_disabled_value = maps.get(artifact, const.encryption_disabled, false)
+	return encryption_disabled_value is false
+}
+
+# Check if all artifacts in a CodeBuild project have encryption enabled
+are_all_artifacts_encrypted = func(res) {
+	# Get primary artifacts (should be a list)
+	primary_artifacts = maps.get(res.values, const.artifacts, [])
+	
+	# Check primary artifacts
+	if length(primary_artifacts) > 0 {
+		for primary_artifacts as artifact {
+			if is_artifact_encrypted(artifact) is false {
+				return false
+			}
+		}
+	}
+	
+	# Get secondary artifacts (should be a list)
+	secondary_artifacts = maps.get(res.values, const.secondary_artifacts, [])
+	
+	# Check secondary artifacts
+	if length(secondary_artifacts) > 0 {
+		for secondary_artifacts as artifact {
+			if is_artifact_encrypted(artifact) is false {
+				return false
+			}
+		}
+	}
+	
+	return true
+}
+
+generate_violation_message = func(violation) {
+	return "AWS CodeBuild project '" + violation.address + "' must have encryption enabled for all artifacts. Set 'encryption_disabled' to false or omit it to enable encryption."
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_codebuild_project).resources
+
+violations = collection.reject(resources, func(res) {
+	return are_all_artifacts_encrypted(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

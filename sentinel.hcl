@@ -639,4 +639,9 @@ policy "cloudwatch-log-group-kms-encryption" {
   enforcement_level = "mandatory"
 }
 
+policy "codebuild-project-artifact-encryption" {
+  source = "./policies/codebuild/codebuild-project-artifact-encryption.sentinel"
+  enforcement_level = "mandatory"
+}
+
 
