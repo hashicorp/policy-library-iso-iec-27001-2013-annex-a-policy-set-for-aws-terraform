@@ -644,4 +644,9 @@ policy "codebuild-project-artifact-encryption" {
   enforcement_level = "mandatory"
 }
 
+policy "codebuild-project-privileged-mode-disabled" {
+  source = "./policies/codebuild/codebuild-project-privileged-mode-disabled.sentinel"
+  enforcement_level = "mandatory"
+}
+
 
