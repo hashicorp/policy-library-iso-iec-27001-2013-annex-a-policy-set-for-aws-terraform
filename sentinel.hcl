@@ -633,6 +633,10 @@ policy "aurora-recovery-point-created" {
   source = "./policies/aurora/aurora-recovery-point-created.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "cloudwatch-log-group-kms-encryption" {
+  source = "./policies/cloudwatch/cloudwatch-log-group-kms-encryption.sentinel"
+  enforcement_level = "mandatory"
 }
-}
+
 
