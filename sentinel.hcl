@@ -694,6 +694,7 @@ policy "ebs-backup-recovery-point-created" {
 
 policy "ebs-volumes-backup-plan-protection"{
   source = "./policies/ec2/ebs-volumes-backup-plan-protection.sentinel"
+  enforcement_level = "mandatory"
 }
 
 policy "ec2-autoscaling-capacity-rebalancing-enabled" {  
@@ -721,3 +722,7 @@ policy "ec2-security-group-attached-to-eni-periodic"{
   enforcement_level = "mandatory"
 }
 
+policy "backup-recovery-point-manual-deletion-disabled"{
+  source = "./policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel"
+  enforcement_level = "mandatory"
+}
