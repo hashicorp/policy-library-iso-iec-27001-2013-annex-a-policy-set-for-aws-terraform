@@ -20,7 +20,7 @@ const = {
 
 # Functions
 generate_violation_message = func(violation) {
-	return "Amazon EMR cluster must have Kerberos authentication enabled. Either the 'kerberos_attributes' block must be configured or a 'security_configuration' with Kerberos must be attached. Refer to https://docs.aws.amazon.com/emr/latest/ManagementGuide/emr-kerberos.html for more details."
+	return "Amazon EMR cluster must have Kerberos authentication enabled. Either the 'kerberos_attributes' block must be configured or a 'security_configuration' with Kerberos must be attached. Refer to https://docs.aws.amazon.com/config/latest/developerguide/emr-kerberos-enabled.html for more details."
 }
 
 # Check if a security configuration has Kerberos enabled

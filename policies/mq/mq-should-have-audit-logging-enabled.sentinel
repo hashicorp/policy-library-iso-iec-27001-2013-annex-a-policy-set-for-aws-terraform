@@ -22,10 +22,10 @@ generate_violation_message = func(violation) {
 	logs = maps.get(violation.values, const.logs_attribute, [])
 	
 	if length(logs) is 0 {
-		return "Amazon MQ broker must have CloudWatch audit logging enabled. The 'logs' block is missing or empty. Refer to https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/configure-logging-monitoring-activemq.html for more details."
+		return "Amazon MQ broker must have CloudWatch audit logging enabled. The 'logs' block is missing or empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/mq-cloudwatch-audit-logging-enabled.html for more details."
 	}
 	
-	return "Amazon MQ broker must have CloudWatch audit logging enabled. The 'logs.audit' attribute must be set to true. Refer to https://docs.aws.amazon.com/amazon-mq/latest/developer-guide/configure-logging-monitoring-activemq.html for more details."
+	return "Amazon MQ broker must have CloudWatch audit logging enabled. The 'logs.audit' attribute must be set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/mq-cloudwatch-audit-logging-enabled.html for more details."
 }
 
 is_audit_logging_enabled = func(res) {

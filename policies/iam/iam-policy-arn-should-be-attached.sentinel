@@ -148,7 +148,7 @@ is_policy_in_use = func(policy, user_attachments, group_attachments, role_attach
 }
 
 generate_violation_message = func(violation) {
-	return "IAM policy '" + violation.address + "' is not attached to any IAM user, group with users, or role with trusted entities. Policies should be in use to comply with AWS Audit Manager requirements. Refer to https://docs.aws.amazon.com/audit-manager/latest/userguide/control-data-sources.html for more details."
+	return "IAM policy '" + violation.address + "' is not attached to any IAM user, group with users, or role with trusted entities. Policies should be in use to comply with AWS Audit Manager requirements. Refer to https://docs.aws.amazon.com/config/latest/developerguide/iam-policy-in-use.html for more details."
 }
 
 # Variables
