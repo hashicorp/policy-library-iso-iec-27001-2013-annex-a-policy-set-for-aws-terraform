@@ -609,6 +609,7 @@ policy "eventbridge-global-endpoints-should-have-event-replication-enabled" {
 policy "cloudtrail-security-best-practices" {
   source = "./policies/cloudtrail/cloudtrail-security-best-practices.sentinel"
   enforcement_level = "mandatory"
+}
 
 policy "cloudtrail-enabled-all-regions" {
   source = "./policies/cloudtrail/cloudtrail-enabled-all-regions.sentinel"
@@ -618,6 +619,7 @@ policy "cloudtrail-enabled-all-regions" {
 policy "cloudtrail-s3-dataevents-enabled" {
   source = "./policies/cloudtrail/cloudtrail-s3-dataevents-enabled.sentinel"
   enforcement_level = "advisory"
+}
 
 policy "api-gateway-cache-enabled-and-encrypted" {
   source = "./policies/api-gateway/api-gateway-cache-enabled-and-encrypted.sentinel"
@@ -648,5 +650,16 @@ policy "codebuild-project-privileged-mode-disabled" {
   source = "./policies/codebuild/codebuild-project-privileged-mode-disabled.sentinel"
   enforcement_level = "mandatory"
 }
+
+policy "dynamo-db-table-encryption-enabled" {  
+  source = "./policies/dynamo-db/dynamo-db-table-encryption-enabled.sentinel"
+  enforcement_level = "mandatory"
+}
+
+policy "dynamo-db-table-encrypted-kms" {
+  source = "./policies/dynamo-db/dynamo-db-table-encrypted-kms.sentinel"
+  enforcement_level = "mandatory"
+} 
+
 
 

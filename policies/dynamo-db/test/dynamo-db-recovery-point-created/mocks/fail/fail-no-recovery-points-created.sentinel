@@ -1,0 +1,48 @@
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_dynamodb_table.example": {
+      "address": "aws_dynamodb_table.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_dynamodb_table",
+      "values": {
+        "name": "example-table",
+        "billing_mode": "PAY_PER_REQUEST",
+        "hash_key": "id",
+        "attribute": [
+          {
+            "name": "id",
+            "type": "S",
+          },
+        ],
+        "tags": {
+          "Environment": "production",
+        },
+      },
+    },
+    "aws_backup_vault.example": {
+      "address": "aws_backup_vault.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_vault",
+      "values": {
+        "name": "example-backup-vault",
+        "recovery_points": 0,
+        "last_recovery_point_created": null,
+      },
+    },
+  },
+}

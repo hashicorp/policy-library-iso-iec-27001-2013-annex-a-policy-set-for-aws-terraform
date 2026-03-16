@@ -14,7 +14,7 @@ import "collection/maps" as maps
 
 # Constants
 const = {
-	"policy_name":                                  "api-gw-cache-enabled-and-encrypted",
+	"policy_name":                                  "api-gateway-cache-enabled-and-encrypted",
 	"resource_aws_api_gateway_stage":               "aws_api_gateway_stage",
 	"resource_aws_api_gateway_method_settings":     "aws_api_gateway_method_settings",
 	"cache_cluster_enabled":                        "cache_cluster_enabled",
