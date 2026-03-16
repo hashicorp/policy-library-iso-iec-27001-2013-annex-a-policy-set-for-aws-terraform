@@ -1,6 +1,6 @@
 # This policy verifies that EC2 instances belong to a virtual private cloud (VPC) by checking if the vpc_id or subnet_id is defined for aws_instance resources.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

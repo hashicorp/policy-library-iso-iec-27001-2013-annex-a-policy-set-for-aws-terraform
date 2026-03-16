@@ -1,6 +1,6 @@
 # This policy verifies that internet gateways are only attached to authorized VPCs. The rule is NON_COMPLIANT if internet gateways are attached to unauthorized VPCs.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

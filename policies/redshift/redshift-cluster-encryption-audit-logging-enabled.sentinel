@@ -1,6 +1,6 @@
 # This policy verifies if Amazon Redshift clusters have encryption and audit logging enabled in accordance with AWS requirements.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

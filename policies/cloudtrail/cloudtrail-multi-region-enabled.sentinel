@@ -1,6 +1,6 @@
 # This policy ensures that there is at least one multi-region AWS CloudTrail that includes management events and does not exclude KMS or RDS Data API events.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

@@ -1,6 +1,6 @@
 # This policy verifies that S3 bucket policies do not allow other inter-account permissions than the control S3 bucket policy provided.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

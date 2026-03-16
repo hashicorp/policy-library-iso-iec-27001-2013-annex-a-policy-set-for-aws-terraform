@@ -2,7 +2,7 @@
 # The rule is NON_COMPLIANT if the Aurora DB instance is not covered by a backup plan.
 # Note: This rule only applies to Amazon Aurora DB instances. DB clusters are not supported.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

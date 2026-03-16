@@ -1,7 +1,7 @@
 # This policy checks that specified IAM policy ARNs are not attached to IAM users, groups, or roles.
 # The rule is NON_COMPLIANT if a blacklisted policy ARN is attached to any IAM resource.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

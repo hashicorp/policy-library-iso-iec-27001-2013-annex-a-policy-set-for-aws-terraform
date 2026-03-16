@@ -1,7 +1,7 @@
 # This policy requires that AWS SageMaker notebook instances have AWS KMS key configured for encryption.
 # It checks that the `kms_key_id` attribute is defined and not empty for `aws_sagemaker_notebook_instance` resources.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

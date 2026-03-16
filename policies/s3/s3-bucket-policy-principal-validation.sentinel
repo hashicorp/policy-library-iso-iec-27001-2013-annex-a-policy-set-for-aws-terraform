@@ -1,7 +1,7 @@
 # This policy verifies that AWS S3 buckets have appropriate access restrictions
 # by checking bucket policies for restricted access to specific principals, IPs, or VPCs.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

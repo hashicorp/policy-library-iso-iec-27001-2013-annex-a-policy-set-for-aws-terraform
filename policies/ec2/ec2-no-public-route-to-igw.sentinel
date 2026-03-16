@@ -1,7 +1,7 @@
 # This policy checks if there are public routes in the route table to an Internet Gateway (IGW)
 # with unrestricted access (0.0.0.0/0 or ::/0).
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

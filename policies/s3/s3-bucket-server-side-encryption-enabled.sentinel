@@ -1,7 +1,7 @@
 # This policy requires that AWS S3 buckets have default encryption enabled
 # or have a bucket policy that explicitly denies put-object requests without server side encryption
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

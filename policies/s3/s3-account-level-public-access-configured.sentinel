@@ -1,7 +1,7 @@
 # This policy verifies if the attributes of the 'aws_s3_account_public_access_block'
 # resource are in accordance to AWS standards for S3 Account-Level Public Access Block Settings.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

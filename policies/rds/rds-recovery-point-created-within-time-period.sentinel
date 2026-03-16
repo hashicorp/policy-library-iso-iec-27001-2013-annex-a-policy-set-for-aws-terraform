@@ -1,7 +1,7 @@
 # This policy verifies that recovery points (backups) are created for Amazon RDS instances
 # within a specified time period by checking AWS Backup recovery point creation dates.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports
