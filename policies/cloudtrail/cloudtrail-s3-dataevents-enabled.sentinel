@@ -1,0 +1,187 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+
+# This policy verifies that at least one AWS CloudTrail trail is logging
+# Amazon S3 data events for all S3 buckets.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":                "cloudtrail-s3-dataevents-enabled",
+	"resource_aws_cloudtrail":    "aws_cloudtrail",
+	"event_selector":             "event_selector",
+	"advanced_event_selector":    "advanced_event_selector",
+	"data_resource":              "data_resource",
+	"field_selector":             "field_selector",
+	"type":                       "type",
+	"values":                     "values",
+	"field":                      "field",
+	"equals":                     "equals",
+	"s3_resource_type":           "AWS::S3::Object",
+}
+
+# Functions
+# Check if a value pattern represents all S3 buckets
+is_all_s3_pattern = func(value) {
+	# Empty string or various ARN patterns that represent all S3 buckets
+	return value is "" or
+		value is "arn:aws:s3:::*/*" or
+		value is "arn:aws:s3:::" or
+		value is "arn:aws:s3"
+}
+
+# Check if advanced event selectors are configured for all S3 data events
+check_advanced_event_selectors = func(res) {
+	advanced_selectors = maps.get(res.values, const.advanced_event_selector, [])
+	
+	if length(advanced_selectors) == 0 {
+		return false
+	}
+	
+	# Check each advanced event selector
+	for advanced_selectors as selector {
+		field_selectors = maps.get(selector, const.field_selector, [])
+		
+		has_data_category = false
+		has_s3_resource = false
+		has_event_name_filter = false
+		
+		# Check field selectors for Data category and S3 resource type
+		for field_selectors as field_selector {
+			field_name = maps.get(field_selector, const.field, "")
+			equals_values = maps.get(field_selector, const.equals, [])
+			
+			# Check for eventCategory = Data
+			if field_name is "eventCategory" {
+				for equals_values as val {
+					if val is "Data" {
+						has_data_category = true
+					}
+				}
+			}
+			
+			# Check for resources.type = AWS::S3::Object
+			if field_name is "resources.type" {
+				for equals_values as val {
+					if val is const.s3_resource_type {
+						has_s3_resource = true
+					}
+				}
+			}
+			
+			# Check if eventName filter is present (restricts to specific operations)
+			if field_name is "eventName" {
+				has_event_name_filter = true
+			}
+		}
+		
+		# Must have data category and S3 resource, but NOT have eventName filter
+		if has_data_category and has_s3_resource and not has_event_name_filter {
+			return true
+		}
+	}
+	
+	return false
+}
+
+# Check if legacy event selectors are configured for all S3 data events
+check_legacy_event_selectors = func(res) {
+	event_selectors = maps.get(res.values, const.event_selector, [])
+	
+	if length(event_selectors) == 0 {
+		return false
+	}
+	
+	# Check each event selector
+	for event_selectors as event_selector {
+		# Check read_write_type is "All" (not ReadOnly or WriteOnly)
+		read_write_type = maps.get(event_selector, "read_write_type", "All")
+		if read_write_type is not "All" {
+			continue
+		}
+		
+		data_resources = maps.get(event_selector, const.data_resource, [])
+		
+		# Check each data resource
+		for data_resources as data_resource {
+			resource_type = maps.get(data_resource, const.type, "")
+			resource_values = maps.get(data_resource, const.values, [])
+			
+			# Check if this data resource is for S3 objects
+			if resource_type is const.s3_resource_type {
+				# Empty values array implies all resources
+				if length(resource_values) == 0 {
+					return true
+				}
+				
+				# Check if any value pattern represents all S3 buckets
+				for resource_values as value {
+					if is_all_s3_pattern(value) {
+						return true
+					}
+				}
+			}
+		}
+	}
+	
+	return false
+}
+
+# Check if a trail has event selectors configured for all S3 buckets
+is_trail_logging_all_s3_data_events = func(res) {
+	# Check if logging is enabled
+	enable_logging = maps.get(res.values, "enable_logging", true)
+	if enable_logging is false {
+		return false
+	}
+	
+	# Check advanced event selectors first (newer format)
+	if check_advanced_event_selectors(res) {
+		return true
+	}
+	
+	# Fall back to legacy event selectors
+	return check_legacy_event_selectors(res)
+}
+
+generate_violation_message = func() {
+	return "At least one AWS CloudTrail trail must be logging Amazon S3 data events for all S3 buckets. Configure event selectors with data resource type 'AWS::S3::Object' and values set to 'arn:aws:s3:::*/*' to capture object-level API operations across all buckets. Refer to AWS security best practices for CloudTrail configuration."
+}
+
+# Variables
+cloudtrail_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_cloudtrail).resources
+
+# Check if at least one trail is logging all S3 data events
+compliant_trails = filter cloudtrail_resources as _, res {
+	is_trail_logging_all_s3_data_events(res) is true
+}
+
+# If no compliant trails found, this is a violation
+# We create a synthetic violation since this is an account-level requirement
+violations = []
+if length(compliant_trails) == 0 {
+	violations = [{
+		"address":        "account-level-requirement",
+		"module_address": "",
+		"message":        generate_violation_message(),
+	}]
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations":  violations,
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

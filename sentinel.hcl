@@ -1,4 +1,4 @@
-# Copyright IBM Corp. 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 import "module" "report" {
@@ -605,3 +605,34 @@ policy "eventbridge-global-endpoints-should-have-event-replication-enabled" {
   source = "./policies/eventbridge/eventbridge-global-endpoints-should-have-event-replication-enabled.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "cloudtrail-security-best-practices" {
+  source = "./policies/cloudtrail/cloudtrail-security-best-practices.sentinel"
+  enforcement_level = "mandatory"
+
+policy "cloudtrail-enabled-all-regions" {
+  source = "./policies/cloudtrail/cloudtrail-enabled-all-regions.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "cloudtrail-s3-dataevents-enabled" {
+  source = "./policies/cloudtrail/cloudtrail-s3-dataevents-enabled.sentinel"
+  enforcement_level = "advisory"
+
+policy "api-gateway-cache-enabled-and-encrypted" {
+  source = "./policies/api-gateway/api-gateway-cache-enabled-and-encrypted.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "athena-workgroup-encrypted-at-rest" {
+  source = "./policies/athena/athena-workgroup-encrypted-at-rest.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "aurora-recovery-point-created" {
+  source = "./policies/aurora/aurora-recovery-point-created.sentinel"
+  enforcement_level = "advisory"
+}
+}
+}
+

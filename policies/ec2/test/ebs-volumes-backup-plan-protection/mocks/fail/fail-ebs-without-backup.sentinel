@@ -1,0 +1,30 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_ebs_volume.example": {
+      "address": "aws_ebs_volume.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_ebs_volume",
+      "values": {
+        "availability_zone": "us-east-1a",
+        "encrypted": true,
+        "size": 100,
+        "type": "gp3",
+        "tags": {
+          "Name": "unprotected-volume",
+        },
+      },
+    },
+  },
+}

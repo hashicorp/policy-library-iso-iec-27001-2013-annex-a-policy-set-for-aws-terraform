@@ -1,0 +1,85 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+
+# This policy ensures that Amazon Athena workgroups are encrypted at rest.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":                    "athena-workgroup-encrypted-at-rest",
+	"resource_aws_athena_workgroup":  "aws_athena_workgroup",
+	"message":                        "Amazon Athena workgroup must have encryption enabled at rest.",
+}
+
+# Functions
+is_encryption_enabled = func(res) {
+	# Check for encryption_configuration at the top level (direct configuration)
+	encryption_configuration_direct = maps.get(res.values, "encryption_configuration", [])
+	
+	if length(encryption_configuration_direct) > 0 {
+		encryption_config = encryption_configuration_direct[0]
+		encryption_option = maps.get(encryption_config, "encryption_option", "")
+		if encryption_option is not "" {
+			return true
+		}
+	}
+	
+	# Check for encryption_configuration under configuration.result_configuration (nested configuration)
+	configuration = maps.get(res.values, "configuration", [])
+	
+	if length(configuration) > 0 {
+		config = configuration[0]
+		result_configuration = maps.get(config, "result_configuration", [])
+		
+		if length(result_configuration) > 0 {
+			result_config = result_configuration[0]
+			encryption_configuration = maps.get(result_config, "encryption_configuration", [])
+			
+			if length(encryption_configuration) > 0 {
+				encryption_config = encryption_configuration[0]
+				encryption_option = maps.get(encryption_config, "encryption_option", "")
+				
+				# Valid encryption options are SSE_S3, SSE_KMS, or CSE_KMS
+				if encryption_option is not "" {
+					return true
+				}
+			}
+		}
+	}
+	
+	# If neither location has encryption configured, return false
+	return false
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_athena_workgroup).resources
+
+violations = collection.reject(resources, func(res) {
+	return is_encryption_enabled(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        const.message,
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

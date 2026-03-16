@@ -1,0 +1,56 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_ebs_volume.mismatched": {
+      "address": "aws_ebs_volume.mismatched",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "mismatched",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_ebs_volume",
+      "values": {
+        "availability_zone": "us-east-1c",
+        "encrypted": true,
+        "size": 80,
+        "type": "gp3",
+        "tags": {
+          "Name": "mismatched-volume",
+          "Environment": "development",
+          "Backup": "false",
+        },
+      },
+    },
+    "aws_backup_selection.tag_based": {
+      "address": "aws_backup_selection.tag_based",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "tag_based",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_selection",
+      "values": {
+        "name": "production-backup",
+        "plan_id": "backup-plan-id-4",
+        "iam_role_arn": "arn:aws:iam::123456789012:role/backup-role",
+        "selection_tag": [
+          {
+            "type": "STRINGEQUALS",
+            "key": "Environment",
+            "value": "production",
+          },
+        ],
+      },
+    },
+  },
+}
