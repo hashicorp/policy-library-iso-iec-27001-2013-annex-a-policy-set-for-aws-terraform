@@ -1,0 +1,48 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_efs_file_system.example": {
+      "address": "aws_efs_file_system.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_efs_file_system",
+      "values": {
+        "creation_token": "my-efs",
+        "encrypted": true,
+        "kms_key_id": "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+        "tags": {
+          "Name": "example-efs",
+          "LastBackup": "2023-01-01T00:00:00Z",
+        },
+      },
+    },
+    "aws_backup_selection.example": {
+      "address": "aws_backup_selection.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_selection",
+      "values": {
+        "name": "efs-backup-selection",
+        "plan_id": "backup-plan-id",
+        "resources": [
+          "arn:aws:elasticfilesystem:us-east-1:123456789012:file-system/fs-12345678",
+        ],
+      },
+    },
+  },
+}

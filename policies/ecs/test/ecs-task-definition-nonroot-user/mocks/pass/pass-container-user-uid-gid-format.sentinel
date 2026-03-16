@@ -1,0 +1,28 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_ecs_task_definition.example": {
+      "address": "aws_ecs_task_definition.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_ecs_task_definition",
+      "values": {
+        "family": "example-task",
+        "container_definitions": "[{\"name\":\"app\",\"image\":\"nginx:latest\",\"user\":\"1000:1000\",\"memory\":512,\"cpu\":256}]",
+        "requires_compatibilities": ["FARGATE"],
+        "network_mode": "awsvpc",
+        "cpu": "256",
+        "memory": "512",
+      },
+    },
+  },
+}

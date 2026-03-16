@@ -1,0 +1,85 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_ebs_volume.example": {
+      "address": "aws_ebs_volume.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_ebs_volume",
+      "values": {
+        "availability_zone": "us-east-1a",
+        "encrypted": true,
+        "size": 100,
+        "type": "gp3",
+        "tags": {
+          "Name": "example-volume",
+        },
+      },
+    },
+    "aws_backup_selection.example": {
+      "address": "aws_backup_selection.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_selection",
+      "values": {
+        "name": "example-backup-selection",
+        "plan_id": "backup-plan-id",
+        "iam_role_arn": "arn:aws:iam::123456789012:role/service-role/AWSBackupDefaultServiceRole",
+        "resources": ["arn:aws:ec2:us-east-1:123456789012:volume/vol-12345678"],
+      },
+    },
+    "aws_backup_vault.example": {
+      "address": "aws_backup_vault.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_vault",
+      "values": {
+        "name": "example-backup-vault",
+        "recovery_points": [
+          {
+            "recovery_point_arn": "arn:aws:backup:us-east-1:123456789012:recovery-point:11111111-1111-1111-1111-111111111111",
+            "resource_arn": "arn:aws:ec2:us-east-1:123456789012:volume/vol-12345678",
+            "creation_date": "2023-05-01T10:00:00Z",
+            "completion_date": "2023-05-01T10:30:00Z",
+            "status": "COMPLETED",
+          },
+          {
+            "recovery_point_arn": "arn:aws:backup:us-east-1:123456789012:recovery-point:22222222-2222-2222-2222-222222222222",
+            "resource_arn": "arn:aws:ec2:us-east-1:123456789012:volume/vol-12345678",
+            "creation_date": "2023-08-15T10:00:00Z",
+            "completion_date": "2023-08-15T10:30:00Z",
+            "status": "COMPLETED",
+          },
+          {
+            "recovery_point_arn": "arn:aws:backup:us-east-1:123456789012:recovery-point:33333333-3333-3333-3333-333333333333",
+            "resource_arn": "arn:aws:ec2:us-east-1:123456789012:volume/vol-12345678",
+            "creation_date": "2024-01-15T10:00:00Z",
+            "completion_date": "2024-01-15T10:30:00Z",
+            "status": "COMPLETED",
+          },
+        ],
+      },
+    },
+  },
+}

@@ -1,3 +1,6 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
 
 # This policy checks if AWS CodeBuild projects have privileged mode disabled
 # in their environment configuration.

@@ -1,3 +1,6 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
 
 # This policy verifies that Amazon DynamoDB tables have encryption enabled
 # to protect data at rest in accordance with AWS Audit Manager requirements.

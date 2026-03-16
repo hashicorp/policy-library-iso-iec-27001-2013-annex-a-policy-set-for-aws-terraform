@@ -1,0 +1,71 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_instance.example": {
+      "address": "aws_instance.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_instance",
+      "values": {
+        "ami": "ami-0c55b159cbfafe1f0",
+        "instance_type": "t2.micro",
+        "tags": {
+          "Name": "example-instance",
+        },
+      },
+    },
+    "aws_backup_plan.example": {
+      "address": "aws_backup_plan.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_plan",
+      "values": {
+        "name": "example-backup-plan",
+        "rule": [
+          {
+            "rule_name": "daily-backup",
+            "schedule": "cron(0 2 * * ? *)",
+            "target_vault_name": "Default",
+            "lifecycle": [
+              {
+                "delete_after": 30,
+              },
+            ],
+          },
+        ],
+      },
+    },
+    "aws_backup_selection.example": {
+      "address": "aws_backup_selection.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_selection",
+      "values": {
+        "name": "example-backup-selection",
+        "plan_id": "backup-plan-id",
+        "resources": ["arn:aws:ec2:us-east-1:123456789012:instance/i-1234567890abcdef0"],
+      },
+    },
+  },
+}

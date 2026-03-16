@@ -1,3 +1,6 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
 
 # This policy verifies that AWS CodeBuild projects have encryption enabled for all artifacts.
 # According to AWS best practices, artifacts should be encrypted to protect sensitive build outputs.

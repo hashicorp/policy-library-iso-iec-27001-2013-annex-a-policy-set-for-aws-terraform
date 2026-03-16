@@ -1,0 +1,41 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_schemas_registry.custom": {
+      "address": "aws_schemas_registry.custom",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "custom",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_schemas_registry",
+      "values": {
+        "name": "custom-event-registry",
+        "description": "Custom EventBridge schema registry",
+      },
+    },
+    "aws_schemas_registry_policy.custom": {
+      "address": "aws_schemas_registry_policy.custom",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "custom",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_schemas_registry_policy",
+      "values": {
+        "registry_name": "custom-event-registry",
+        "policy": "",
+      },
+    },
+  },
+}

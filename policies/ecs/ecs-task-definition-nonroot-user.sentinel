@@ -1,0 +1,103 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+
+# This policy requires that ECS task definitions specify a non-root user for container execution.
+# Each container definition in the task definition must have a 'user' attribute that specifies
+# a non-root user (not '0' or 'root').
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+import "types"
+
+# Constants
+const = {
+	"policy_name":                     "ecs-task-definition-nonroot-user",
+	"resource_aws_ecs_task_definition": "aws_ecs_task_definition",
+	"container_definitions":           "container_definitions",
+	"user":                            "user",
+}
+
+# Functions
+check_container_definitions = func(res) {
+	container_defs = maps.get(res.values, const.container_definitions, "")
+	
+	if container_defs is "" {
+		return false
+	}
+	
+	# If container_definitions is a string (JSON), check for user attribute
+	if types.type_of(container_defs) is "string" {
+		# Check if user is set to root values (various formats)
+		# Matches: "user":"root", "user":"0", "user":0, "user":"0:0", "user":"0:1000", etc.
+		has_root_user = container_defs matches ".*\"user\"\\s*:\\s*\"root\".*" or
+		                container_defs matches ".*\"user\"\\s*:\\s*\"0\".*" or
+		                container_defs matches ".*\"user\"\\s*:\\s*0[^0-9].*" or
+		                container_defs matches ".*\"user\"\\s*:\\s*\"0:.*"
+		
+		if has_root_user {
+			return false
+		}
+		
+		# Check for containers missing user attribute
+		# Check if "name" appears without "user" before the next container or end
+		# Pattern: "name"...},{ where "user" doesn't appear before },{
+		has_name_without_user_before_next_container =
+			container_defs matches ".*\"name\"[^\\}]*\\}\\s*,\\s*\\{.*" and
+			not (container_defs matches ".*\"name\"[^\\}]*\"user\"[^\\}]*\\}\\s*,\\s*\\{.*")
+		
+		# Also check last container: "name"...}] where "user" doesn't appear
+		has_name_without_user_at_end =
+			container_defs matches ".*\"name\"[^\\}]*\\}\\s*\\].*" and
+			not (container_defs matches ".*\"name\"[^\\}]*\"user\"[^\\}]*\\}\\s*\\].*")
+		
+		if has_name_without_user_before_next_container or has_name_without_user_at_end {
+			return false
+		}
+		
+		# Also check if "user" attribute exists at all
+		if not (container_defs matches ".*\"user\".*") {
+			return false
+		}
+		
+		# If we reach here, all containers have user attribute and none are root
+		return true
+	}
+	
+	return false
+}
+
+generate_violation_message = func(violation) {
+	return "ECS task definition '" + violation.address + "' must specify a non-root user for all container definitions. Each container must have a 'user' attribute set to a non-root user (not '0' or 'root'). Refer to AWS Audit Manager best practices for container security."
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_ecs_task_definition).resources
+
+violations = collection.reject(resources, func(res) {
+	return check_container_definitions(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

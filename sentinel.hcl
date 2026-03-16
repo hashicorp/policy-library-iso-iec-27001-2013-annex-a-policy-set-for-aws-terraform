@@ -651,6 +651,11 @@ policy "codebuild-project-privileged-mode-disabled" {
   enforcement_level = "mandatory"
 }
 
+policy "dynamo-db-recovery-point-created" { 
+  source = "./policies/dynamodb/dynamodb-recovery-point-created.sentinel"
+  enforcement_level = "mandatory"
+}
+
 policy "dynamo-db-table-encryption-enabled" {  
   source = "./policies/dynamo-db/dynamo-db-table-encryption-enabled.sentinel"
   enforcement_level = "mandatory"
@@ -661,5 +666,58 @@ policy "dynamo-db-table-encrypted-kms" {
   enforcement_level = "mandatory"
 } 
 
+policy "ecs-task-definition-nonroot-user" {
+  source = "./policies/ecs/ecs-task-definition-nonroot-user.sentinel"
+  enforcement_level = "mandatory"
+}
 
+policy "efs-recovery-point-compliance" {  
+  source = "./policies/efs/efs-recovery-point-compliance.sentinel"
+  enforcement_level = "mandatory"
+}
+
+policy "eks-cluster-logging-enabled" {  
+  source = "./policies/eks/eks-cluster-logging-enabled.sentinel"
+  enforcement_level = "mandatory"
+}
+
+policy "eventbridge-schema-registry-policy-attached" {  
+  source = "./policies/eventbridge/eventbridge-schema-registry-policy-attached.sentinel"
+  enforcement_level = "mandatory"
+}
+
+
+policy "ebs-backup-recovery-point-created" {  
+  source = "./policies/ec2/ebs-backup-recovery-point-created.sentinel"
+  enforcement_level = "mandatory"
+} 
+
+policy "ebs-volumes-backup-plan-protection"{
+  source = "./policies/ec2/ebs-volumes-backup-plan-protection.sentinel"
+}
+
+policy "ec2-autoscaling-capacity-rebalancing-enabled" {  
+  source = "./policies/ec2/ec2-autoscaling-capacity-rebalancing-enabled.sentinel"
+  enforcement_level = "mandatory"
+}
+
+policy "ec2-backup-recovery-point-time-period"{
+  source = "./policies/ec2/ec2-backup-recovery-point-time-period.sentinel"
+  enforcement_level = "mandatory"
+}
+
+policy "ec2-instance-profit-required"{
+  source = "./policies/ec2/ec2-instance-profit-required.sentinel"
+  enforcement_level = "mandatory"
+}
+
+policy "ec2-non-default-security-groups-attached-to-eni"{
+  source = "./policies/ec2/ec2-non-default-security-groups-attached-to-eni.sentinel"
+    enforcement_level = "mandatory"
+}
+
+policy "ec2-security-group-attached-to-eni-periodic"{
+  source = "./policies/ec2/ec2-security-group-attached-to-eni-periodic.sentinel"
+  enforcement_level = "mandatory"
+}
 

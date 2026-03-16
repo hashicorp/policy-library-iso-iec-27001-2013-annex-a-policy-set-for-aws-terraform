@@ -1,0 +1,56 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+
+# This policy requires that EC2 instances have an IAM instance profile attached.
+# This ensures proper identity and access management for EC2 instances.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":          "ec2-instance-profile-required",
+	"resource_type":        "aws_instance",
+	"iam_instance_profile": "iam_instance_profile",
+}
+
+# Functions
+generate_violation_message = func(violation) {
+	profile = maps.get(violation.values, const.iam_instance_profile, null)
+	if profile is null {
+		return "EC2 instance '" + violation.address + "' must have an IAM instance profile attached. The 'iam_instance_profile' attribute is required for proper identity and access management."
+	}
+	return "EC2 instance '" + violation.address + "' has an empty 'iam_instance_profile' attribute. A valid IAM instance profile must be specified for proper identity and access management."
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).resources
+
+violations = collection.reject(resources, func(res) {
+	profile = maps.get(res.values, const.iam_instance_profile, null)
+	return profile is not null and profile is not ""
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}
