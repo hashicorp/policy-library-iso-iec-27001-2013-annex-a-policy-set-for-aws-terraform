@@ -1,25 +1,24 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_schemas_registry.example": {
-      "address": "aws_schemas_registry.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_schemas_registry",
-      "values": {
-        "name": "my-custom-registry",
-        "description": "Custom schema registry without policy",
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_schemas_registry.example": {
+			"address":        "aws_schemas_registry.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_schemas_registry",
+			"values": {
+				"name":        "my-custom-registry",
+				"description": "Custom schema registry without policy",
+			},
+		},
+	},
 }

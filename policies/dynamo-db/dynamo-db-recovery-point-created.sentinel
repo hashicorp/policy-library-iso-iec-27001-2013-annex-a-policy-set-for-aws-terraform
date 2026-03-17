@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy verifies that Amazon DynamoDB tables have backup recovery points
 # created within a specified period to support disaster recovery requirements.
 
@@ -18,12 +17,12 @@ param backup_period_days default 1
 
 # Constants
 const = {
-	"policy_name":            "dynamo-db-recovery-point-created",
-	"resource_dynamodb_table": "aws_dynamodb_table",
-	"resource_backup_plan":   "aws_backup_plan",
+	"policy_name":               "dynamo-db-recovery-point-created",
+	"resource_dynamodb_table":   "aws_dynamodb_table",
+	"resource_backup_plan":      "aws_backup_plan",
 	"resource_backup_selection": "aws_backup_selection",
-	"point_in_time_recovery": "point_in_time_recovery",
-	"enabled":                "enabled",
+	"point_in_time_recovery":    "point_in_time_recovery",
+	"enabled":                   "enabled",
 }
 
 # Functions
@@ -37,14 +36,14 @@ is_pitr_enabled = func(res) {
 	if length(pitr_blocks) == 0 {
 		return false
 	}
-	
+
 	# Check if any PITR block has enabled set to true
 	for pitr_blocks as pitr_block {
 		if maps.get(pitr_block, const.enabled, false) is true {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -58,7 +57,7 @@ is_in_backup_plan = func(table_arn, backup_selections) {
 				return true
 			}
 		}
-		
+
 		# Check if selection rules match the table
 		selection_tags = maps.get(selection.values, "selection_tag", [])
 		if length(selection_tags) > 0 {
@@ -66,7 +65,7 @@ is_in_backup_plan = func(table_arn, backup_selections) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -78,29 +77,29 @@ is_backup_compliant = func(res, backup_plans, backup_selections) {
 	if backup_status is "expired" {
 		return false
 	}
-	
+
 	# First check if PITR is enabled - this provides continuous backup
 	if is_pitr_enabled(res) {
 		return true
 	}
-	
+
 	# If no backup plans exist, table is not compliant
 	if length(backup_plans) == 0 {
 		return false
 	}
-	
+
 	# Build table ARN pattern for matching
 	table_name = maps.get(res.values, "name", "")
 	if table_name is "" {
 		return false
 	}
-	
+
 	# If backup selections exist and plans exist, consider it potentially compliant
 	# This is a best-effort check given Terraform plan limitations
 	if length(backup_selections) > 0 and length(backup_plans) > 0 {
 		return true
 	}
-	
+
 	return false
 }
 

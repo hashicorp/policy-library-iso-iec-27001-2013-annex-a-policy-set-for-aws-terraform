@@ -2,27 +2,27 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_rds_cluster.main": {
-      "address": "aws_rds_cluster.main",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "main",
-      "provider_name": "registry.terraform.io/hashicorp/aws",
-      "tainted": false,
-      "type": "aws_rds_cluster",
-      "values": {
-        "cluster_identifier": "aurora-cluster-high-retention",
-        "engine": "aurora-postgresql",
-        "engine_version": "14.6",
-        "backup_retention_period": 30,
-        "preferred_backup_window": "02:00-03:00",
-        "skip_final_snapshot": false,
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_rds_cluster.main": {
+			"address":        "aws_rds_cluster.main",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "main",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_rds_cluster",
+			"values": {
+				"cluster_identifier":      "aurora-cluster-high-retention",
+				"engine":                  "aurora-postgresql",
+				"engine_version":          "14.6",
+				"backup_retention_period": 30,
+				"preferred_backup_window": "02:00-03:00",
+				"skip_final_snapshot":     false,
+			},
+		},
+	},
 }

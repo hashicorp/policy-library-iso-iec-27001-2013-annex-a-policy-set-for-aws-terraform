@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy checks if AWS CodeBuild projects have privileged mode disabled
 # in their environment configuration.
 
@@ -34,16 +33,16 @@ generate_violation_message = func(violation) {
 
 is_privileged_mode_disabled = func(res) {
 	environment_blocks = maps.get(res.values, const.environment, [])
-	
+
 	# If environment is not defined or empty, consider it compliant (no privileged mode)
 	if length(environment_blocks) is 0 {
 		return true
 	}
-	
+
 	# Check first environment block (CodeBuild projects have single environment block)
 	environment = environment_blocks[0]
 	privileged_mode = maps.get(environment, const.privileged_mode, false)
-	
+
 	return privileged_mode is false
 }
 

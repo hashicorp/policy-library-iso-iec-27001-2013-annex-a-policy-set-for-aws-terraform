@@ -2,25 +2,25 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_cloudwatch_log_group.example": {
-      "address": "aws_cloudwatch_log_group.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_cloudwatch_log_group",
-      "values": {
-        "name": "/aws/lambda/example",
-        "kms_key_id": "12345678-1234-1234-1234-123456789012",
-        "retention_in_days": 7,
-        "tags": {},
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_cloudwatch_log_group.example": {
+			"address":        "aws_cloudwatch_log_group.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_cloudwatch_log_group",
+			"values": {
+				"name":              "/aws/lambda/example",
+				"kms_key_id":        "12345678-1234-1234-1234-123456789012",
+				"retention_in_days": 7,
+				"tags":              {},
+			},
+		},
+	},
 }

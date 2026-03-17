@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy requires that Capacity Rebalancing is enabled for Amazon EC2 Auto Scaling groups
 # that use multiple instance types.
 
@@ -28,10 +27,10 @@ has_multiple_instance_types = func(res) {
 	if length(instance_types) > 1 {
 		return true
 	}
-	
+
 	# Check if mixed_instances_policy is defined with multiple overrides
 	mixed_instances_policy = maps.get(res.values, const.mixed_instances_policy, [])
-	
+
 	if length(mixed_instances_policy) > 0 {
 		# Navigate through the nested structure to find overrides
 		for mixed_instances_policy as mip {
@@ -45,7 +44,7 @@ has_multiple_instance_types = func(res) {
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -68,7 +67,7 @@ violations = collection.reject(resources, func(res) {
 	if not has_multiple_instance_types(res) {
 		return true
 	}
-	
+
 	# If it uses multiple instance types, check if capacity_rebalance is enabled
 	return is_capacity_rebalance_enabled(res)
 })

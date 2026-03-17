@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy ensures that AWS CloudTrail is enabled in all regions by checking
 # that the is_multi_region_trail attribute is set to true for aws_cloudtrail resources.
 
@@ -24,7 +23,7 @@ const = {
 generate_violation_message = func(violation) {
 	is_multi_region = maps.get(violation.values, const.is_multi_region_trail, false)
 	enable_logging = maps.get(violation.values, const.enable_logging, true)
-	
+
 	if is_multi_region is false and enable_logging is false {
 		return "CloudTrail '" + violation.address + "' must have 'is_multi_region_trail' set to true and 'enable_logging' set to true. Refer to AWS Audit Manager best practices for more details."
 	} else if is_multi_region is false {

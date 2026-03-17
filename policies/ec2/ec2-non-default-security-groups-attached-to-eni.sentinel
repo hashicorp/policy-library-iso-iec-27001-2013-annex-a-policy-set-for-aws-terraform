@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy ensures that non-default security groups are attached to elastic network interfaces.
 # Elastic network interfaces should not use default security groups as they typically have overly permissive rules.
 
@@ -31,22 +30,22 @@ is_default_security_group = func(sg) {
 
 has_non_default_security_groups = func(res) {
 	sg_list = maps.get(res.values, const.security_groups, [])
-	
+
 	# If no security groups are specified, it's a violation
 	if length(sg_list) is 0 {
 		return false
 	}
-	
+
 	# Check if any security group is default
 	default_sgs = filter sg_list as _, sg {
 		is_default_security_group(sg)
 	}
-	
+
 	# If any default security groups are found, it's a violation
 	if length(default_sgs) > 0 {
 		return false
 	}
-	
+
 	# All security groups are non-default
 	return true
 }
@@ -56,15 +55,15 @@ generate_violation_message = func(violation) {
 	if length(sg_list) is 0 {
 		return "Network interface '" + violation.address + "' has no security groups attached. " + const.message
 	}
-	
+
 	default_sgs = filter sg_list as _, sg {
 		is_default_security_group(sg)
 	}
-	
+
 	if length(default_sgs) > 0 {
 		return "Network interface '" + violation.address + "' is attached to default security group(s). " + const.message
 	}
-	
+
 	return "Network interface '" + violation.address + "' must use non-default security groups. " + const.message
 }
 

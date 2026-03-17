@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy verifies that Amazon CloudWatch Log Groups are encrypted with AWS KMS.
 # Optionally, it can check for a specific KMS key ID if provided.
 
@@ -27,7 +26,7 @@ const = {
 # Functions
 generate_violation_message = func(violation) {
 	kms_key = maps.get(violation.values, const.kms_key_id_attr, "")
-	
+
 	if kms_key_id is "" {
 		if kms_key is "" {
 			return "CloudWatch Log Group must be encrypted with an AWS KMS key. Attribute 'kms_key_id' is not set."
@@ -38,23 +37,23 @@ generate_violation_message = func(violation) {
 		}
 		return "CloudWatch Log Group must be encrypted with AWS KMS key '" + kms_key_id + "'. Current value is '" + kms_key + "'."
 	}
-	
+
 	return "CloudWatch Log Group encryption check failed."
 }
 
 is_encrypted_with_kms = func(res) {
 	kms_key = maps.get(res.values, const.kms_key_id_attr, "")
-	
+
 	# Check if kms_key_id is set (not empty)
 	if kms_key is "" {
 		return false
 	}
-	
+
 	# If specific KMS key is required, verify it matches
 	if kms_key_id is not "" {
 		return kms_key is kms_key_id
 	}
-	
+
 	# Otherwise, any KMS key is acceptable
 	return true
 }

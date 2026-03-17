@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy ensures that non-default security groups are attached to elastic network interfaces.
 # It validates that ENIs have security groups configured and that none of them are default security groups.
 
@@ -29,32 +28,32 @@ is_default_security_group = func(sg_id) {
 	# Convert to string and lowercase for comparison
 	sg_str = string(sg_id)
 	sg_lower = strings.to_lower(sg_str)
-	
+
 	# Check if the security group is exactly "default" or contains "default" in common patterns
 	# Match patterns like: "default", "aws_security_group.default", "aws_default_security_group", etc.
 	if sg_lower is "default" {
 		return true
 	}
-	
+
 	# Check if it starts with "default" (e.g., "default-sg")
 	if strings.has_prefix(sg_lower, "default") {
 		return true
 	}
-	
+
 	# Check if it ends with "default" (e.g., "sg-default")
 	if strings.has_suffix(sg_lower, "default") {
 		return true
 	}
-	
+
 	# Check for common Terraform resource references
 	if strings.has_prefix(sg_lower, "aws_security_group.default") {
 		return true
 	}
-	
+
 	if strings.has_prefix(sg_lower, "aws_default_security_group") {
 		return true
 	}
-	
+
 	# Check if ".default" appears (e.g., "module.vpc.aws_security_group.default")
 	# We can check this by looking for the pattern after splitting
 	# Since we can't use contains, check if replacing works
@@ -65,37 +64,37 @@ is_default_security_group = func(sg_id) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
 # Check if the ENI has non-default security groups
 has_non_default_security_groups = func(res) {
 	security_groups = maps.get(res.values, const.security_groups, [])
-	
+
 	# Must have at least one security group
 	if length(security_groups) is 0 {
 		return false
 	}
-	
+
 	# Check that none of the security groups are default
 	for security_groups as sg {
 		if is_default_security_group(sg) {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
 # Generate violation message based on the specific issue
 generate_violation_message = func(res) {
 	security_groups = maps.get(res.values, const.security_groups, [])
-	
+
 	if length(security_groups) is 0 {
 		return const.message_no_sg
 	}
-	
+
 	return const.message_default_sg
 }
 

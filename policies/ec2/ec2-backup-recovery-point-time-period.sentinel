@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy verifies that a recovery point is created for EC2 instances within
 # the specified time period by checking AWS Backup plans and their associated rules.
 
@@ -38,14 +37,14 @@ get_backup_frequency_hours = func(schedule) {
 	# rate(X hours) or rate(X hour)
 	# rate(X days) or rate(X day)
 	# cron expressions
-	
+
 	if strings.has_prefix(schedule, "rate(") {
 		parts = strings.split(schedule, " ")
 		if length(parts) >= 2 {
 			# Extract the numeric value from rate(X ...)
 			numeric_part = strings.trim_prefix(parts[0], "rate(")
 			value = int(numeric_part)
-			
+
 			# Check if it's hours or days
 			if strings.has_prefix(parts[1], "hour") {
 				return value
@@ -54,7 +53,7 @@ get_backup_frequency_hours = func(schedule) {
 			}
 		}
 	}
-	
+
 	# For cron expressions, parse the day-of-month field
 	# cron format: minute hour day-of-month month day-of-week year
 	# cron(0 2 * * ? *) = daily (every day)
@@ -64,7 +63,7 @@ get_backup_frequency_hours = func(schedule) {
 		cron_expr = strings.trim_prefix(schedule, "cron(")
 		cron_expr = strings.trim_suffix(cron_expr, ")")
 		parts = strings.split(cron_expr, " ")
-		
+
 		if length(parts) >= 3 {
 			day_of_month = parts[2]
 			# If day-of-month is *, it runs daily (24 hours)
@@ -73,22 +72,22 @@ get_backup_frequency_hours = func(schedule) {
 			}
 			# If day-of-month is a specific number (like 1), it runs monthly (~720 hours)
 			if day_of_month matches "[0-9]+" {
-				return 720  # ~30 days
+				return 720 # ~30 days
 			}
 		}
 	}
-	
+
 	# Default to a high value if we can't parse (assume infrequent)
 	return 720
 }
 
 is_backup_plan_compliant = func(plan_res) {
 	rules_list = maps.get(plan_res.values, const.rule_key, [])
-	
+
 	if length(rules_list) is 0 {
 		return false
 	}
-	
+
 	# Check if any rule has a schedule that meets the requirement
 	for rules_list as r {
 		schedule = maps.get(r, const.schedule_key, "")
@@ -99,14 +98,14 @@ is_backup_plan_compliant = func(plan_res) {
 			}
 		}
 	}
-	
+
 	return false
 }
 
 # Check if a backup selection targets EC2 instances
 targets_ec2_instances = func(selection_res) {
 	resources_list = maps.get(selection_res.values, const.resources_key, [])
-	
+
 	# Check if any resource in the selection is an EC2 instance ARN or wildcard
 	for resources_list as resource_arn {
 		# Check for EC2 instance ARNs (arn:aws:ec2:*:*:instance/*)
@@ -121,20 +120,20 @@ targets_ec2_instances = func(selection_res) {
 			return true
 		}
 	}
-	
+
 	# Check selection_tags if present (EC2 instances selected by tags)
 	selection_tags = maps.get(selection_res.values, const.selection_tag_key, [])
 	if length(selection_tags) > 0 {
 		return true
 	}
-	
+
 	return false
 }
 
 get_plan_name_from_address = func(address) {
 	parts = strings.split(address, ".")
 	if length(parts) > 0 {
-		return parts[length(parts)-1]
+		return parts[length(parts) - 1]
 	}
 	return address
 }
@@ -174,22 +173,22 @@ if length(ec2_instances) > 0 {
 is_violation = func(plan_res) {
 	plan_name = get_plan_name_from_address(plan_res.address)
 	plan_address = plan_res.address
-	
+
 	# Check if this plan is referenced by any EC2 selections
 	has_ec2_selection = false
 	for backup_selections as _, sel {
 		sel_plan_id = maps.get(sel.values, const.plan_id_key, "")
 		# Match against both address and name patterns
 		if sel_plan_id is plan_address or
-		   strings.has_suffix(sel_plan_id, plan_name) or
-		   strings.has_suffix(sel_plan_id, "." + plan_name) or
-		   sel_plan_id is plan_name {
+			strings.has_suffix(sel_plan_id, plan_name) or
+			strings.has_suffix(sel_plan_id, "." + plan_name) or
+			sel_plan_id is plan_name {
 			if targets_ec2_instances(sel) {
 				has_ec2_selection = true
 			}
 		}
 	}
-	
+
 	# Violation if plan targets EC2 and is not compliant
 	return has_ec2_selection and maps.get(plan_compliance, plan_address, false) is false
 }
@@ -202,13 +201,13 @@ has_compliant_ec2_backup = func(instance_res) {
 	if last_backup is not "" and strings.has_prefix(last_backup, "2023-") {
 		return false
 	}
-	
+
 	# Check if any backup selection covers this instance
 	for backup_selections as _, sel {
 		if targets_ec2_instances(sel) {
 			# Get the plan_id for this selection
 			plan_id = maps.get(sel.values, const.plan_id_key, "")
-			
+
 			# If plan_id is present, try to match it to a backup plan
 			if plan_id is not "" {
 				# Check if the associated plan is compliant
@@ -216,10 +215,10 @@ has_compliant_ec2_backup = func(instance_res) {
 					plan_name = get_plan_name_from_address(plan.address)
 					# Match by address, name, or if plan_id is a generic reference
 					if plan_id is plan.address or
-					   strings.has_suffix(plan_id, plan_name) or
-					   strings.has_suffix(plan_id, "." + plan_name) or
-					   plan_id is plan_name or
-					   plan_id matches ".*plan.*" {
+						strings.has_suffix(plan_id, plan_name) or
+						strings.has_suffix(plan_id, "." + plan_name) or
+						plan_id is plan_name or
+						plan_id matches ".*plan.*" {
 						if is_backup_plan_compliant(plan) {
 							return true
 						}
@@ -235,7 +234,7 @@ has_compliant_ec2_backup = func(instance_res) {
 			}
 		}
 	}
-	
+
 	# No compliant backup coverage found
 	return false
 }

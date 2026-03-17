@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy verifies that Amazon DynamoDB tables have encryption enabled
 # to protect data at rest in accordance with AWS Audit Manager requirements.
 
@@ -14,60 +13,60 @@ import "collection/maps" as maps
 
 # Constants
 const = {
-	"policy_name":                "dynamo-db-table-encryption-enabled",
+	"policy_name":                 "dynamo-db-table-encryption-enabled",
 	"resource_aws_dynamodb_table": "aws_dynamodb_table",
-	"server_side_encryption":     "server_side_encryption",
-	"enabled":                    "enabled",
+	"server_side_encryption":      "server_side_encryption",
+	"enabled":                     "enabled",
 }
 
 # Functions
 generate_violation_message = func(violation) {
 	sse_blocks = maps.get(violation.values, const.server_side_encryption, [])
-	
+
 	if length(sse_blocks) is 0 {
 		return "DynamoDB table '" + violation.address + "' must have server_side_encryption block configured to enable encryption at rest. Refer to https://docs.aws.amazon.com/securityhub/latest/userguide/dynamodb-controls.html for more details."
 	}
-	
+
 	return "DynamoDB table '" + violation.address + "' must have encryption enabled. The 'enabled' attribute in the server_side_encryption block must be set to true. Refer to https://docs.aws.amazon.com/securityhub/latest/userguide/dynamodb-controls.html for more details."
 }
 
 is_encryption_enabled = func(res) {
 	# Get server_side_encryption blocks (should be a list)
 	sse_blocks = maps.get(res.values, const.server_side_encryption, [])
-	
+
 	# If no server_side_encryption block exists, DynamoDB uses default encryption (AWS owned key)
 	# This is compliant as encryption is enabled by default
 	if length(sse_blocks) is 0 {
 		return true
 	}
-	
+
 	# Check if the first server_side_encryption block has enabled set to true
 	# Note: DynamoDB table typically has at most one server_side_encryption block
 	sse_config = sse_blocks[0]
-	
+
 	# Check if enabled is explicitly set to false
 	enabled_value = maps.get(sse_config, const.enabled, null)
 	if enabled_value is false {
 		return false
 	}
-	
+
 	# If enabled is true or not specified (null), check for KMS key
 	# If a KMS key is specified, encryption is implicitly enabled
 	kms_key_arn = maps.get(sse_config, "kms_key_arn", "")
 	if kms_key_arn is not "" {
 		return true
 	}
-	
+
 	# If enabled is explicitly true, encryption is enabled
 	if enabled_value is true {
 		return true
 	}
-	
+
 	# If enabled is not specified and no KMS key, default encryption is used
 	if enabled_value is null {
 		return true
 	}
-	
+
 	return false
 }
 

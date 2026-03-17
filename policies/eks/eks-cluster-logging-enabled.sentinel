@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy requires that Amazon EKS clusters have logging enabled for all log types
 # to provide comprehensive visibility into cluster operations and security events.
 
@@ -44,12 +43,12 @@ generate_violation_message = func(res, missing_log_types) {
 # Get missing log types for a resource
 get_missing_log_types = func(res) {
 	enabled_types = maps.get(res.values, "enabled_cluster_log_types", [])
-	
+
 	# If enabled_types is not a list or is empty, all types are missing
 	if length(enabled_types) is 0 {
 		return const.required_log_types
 	}
-	
+
 	# Find missing log types
 	missing = []
 	for const.required_log_types as log_type {
@@ -63,19 +62,19 @@ get_missing_log_types = func(res) {
 			missing = missing + [log_type]
 		}
 	}
-	
+
 	return missing
 }
 
 # Check if all required log types are enabled
 has_all_log_types_enabled = func(res) {
 	enabled_types = maps.get(res.values, "enabled_cluster_log_types", [])
-	
+
 	# If no enabled_cluster_log_types exists or is empty, return false
 	if length(enabled_types) is 0 {
 		return false
 	}
-	
+
 	# Check if all required log types are present
 	for const.required_log_types as log_type {
 		type_found = false
@@ -88,7 +87,7 @@ has_all_log_types_enabled = func(res) {
 			return false
 		}
 	}
-	
+
 	return true
 }
 

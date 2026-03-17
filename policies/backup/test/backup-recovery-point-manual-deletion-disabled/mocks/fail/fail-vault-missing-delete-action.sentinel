@@ -2,42 +2,42 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_backup_vault.example": {
-      "address": "aws_backup_vault.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "registry.terraform.io/hashicorp/aws",
-      "tainted": false,
-      "type": "aws_backup_vault",
-      "values": {
-        "name": "example-backup-vault",
-        "kms_key_arn": "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
-        "tags": {
-          "Environment": "production",
-        },
-      },
-    },
-    "aws_backup_vault_policy.example": {
-      "address": "aws_backup_vault_policy.example",
-      "depends_on": ["aws_backup_vault.example"],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "registry.terraform.io/hashicorp/aws",
-      "tainted": false,
-      "type": "aws_backup_vault_policy",
-      "values": {
-        "backup_vault_name": "example-backup-vault",
-        "policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"PreventManualDeletion\",\"Effect\":\"Deny\",\"Principal\":\"*\",\"Action\":[\"backup:UpdateRecoveryPointLifecycle\",\"backup:PutBackupVaultAccessPolicy\"],\"Resource\":\"*\"}]}",
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_backup_vault.example": {
+			"address":        "aws_backup_vault.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_backup_vault",
+			"values": {
+				"name":        "example-backup-vault",
+				"kms_key_arn": "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+				"tags": {
+					"Environment": "production",
+				},
+			},
+		},
+		"aws_backup_vault_policy.example": {
+			"address":        "aws_backup_vault_policy.example",
+			"depends_on":     ["aws_backup_vault.example"],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_backup_vault_policy",
+			"values": {
+				"backup_vault_name": "example-backup-vault",
+				"policy":            "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"PreventManualDeletion\",\"Effect\":\"Deny\",\"Principal\":\"*\",\"Action\":[\"backup:UpdateRecoveryPointLifecycle\",\"backup:PutBackupVaultAccessPolicy\"],\"Resource\":\"*\"}]}",
+			},
+		},
+	},
 }

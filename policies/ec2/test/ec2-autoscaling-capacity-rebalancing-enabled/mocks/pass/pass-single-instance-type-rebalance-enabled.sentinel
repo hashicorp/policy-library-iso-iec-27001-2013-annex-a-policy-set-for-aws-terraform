@@ -2,29 +2,29 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_autoscaling_group.example": {
-      "address": "aws_autoscaling_group.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_autoscaling_group",
-      "values": {
-        "name": "example-asg",
-        "max_size": 5,
-        "min_size": 1,
-        "desired_capacity": 3,
-        "capacity_rebalance": true,
-        "launch_configuration": "example-lc",
-        "availability_zones": ["us-east-1a", "us-east-1b"],
-        "mixed_instances_policy": [],
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_autoscaling_group.example": {
+			"address":        "aws_autoscaling_group.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_autoscaling_group",
+			"values": {
+				"name":                   "example-asg",
+				"max_size":               5,
+				"min_size":               1,
+				"desired_capacity":       3,
+				"capacity_rebalance":     true,
+				"launch_configuration":   "example-lc",
+				"availability_zones":     ["us-east-1a", "us-east-1b"],
+				"mixed_instances_policy": [],
+			},
+		},
+	},
 }

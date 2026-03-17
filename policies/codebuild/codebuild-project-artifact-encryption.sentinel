@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy verifies that AWS CodeBuild projects have encryption enabled for all artifacts.
 # According to AWS best practices, artifacts should be encrypted to protect sensitive build outputs.
 
@@ -35,7 +34,7 @@ is_artifact_encrypted = func(artifact) {
 are_all_artifacts_encrypted = func(res) {
 	# Get primary artifacts (should be a list)
 	primary_artifacts = maps.get(res.values, const.artifacts, [])
-	
+
 	# Check primary artifacts
 	if length(primary_artifacts) > 0 {
 		for primary_artifacts as artifact {
@@ -44,10 +43,10 @@ are_all_artifacts_encrypted = func(res) {
 			}
 		}
 	}
-	
+
 	# Get secondary artifacts (should be a list)
 	secondary_artifacts = maps.get(res.values, const.secondary_artifacts, [])
-	
+
 	# Check secondary artifacts
 	if length(secondary_artifacts) > 0 {
 		for secondary_artifacts as artifact {
@@ -56,7 +55,7 @@ are_all_artifacts_encrypted = func(res) {
 			}
 		}
 	}
-	
+
 	return true
 }
 

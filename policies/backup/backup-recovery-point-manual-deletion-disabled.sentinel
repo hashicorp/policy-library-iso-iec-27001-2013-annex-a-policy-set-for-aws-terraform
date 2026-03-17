@@ -1,6 +1,6 @@
 # This policy checks if AWS Backup vaults have resource-based policies that prevent manual deletion of recovery points.
-# The rule is NON_COMPLIANT if the Backup Vault does not have resource-based policies or has policies without 
-# a suitable 'Deny' statement with backup:DeleteRecoveryPoint, backup:UpdateRecoveryPointLifecycle, 
+# The rule is NON_COMPLIANT if the Backup Vault does not have resource-based policies or has policies without
+# a suitable 'Deny' statement with backup:DeleteRecoveryPoint, backup:UpdateRecoveryPointLifecycle,
 # and backup:PutBackupVaultAccessPolicy permissions.
 
 # Copyright IBM Corp. 2026
@@ -17,8 +17,8 @@ import "json"
 
 # Constants
 const = {
-	"policy_name":                "backup-recovery-point-manual-deletion-disabled",
-	"resource_backup_vault":      "aws_backup_vault",
+	"policy_name":                  "backup-recovery-point-manual-deletion-disabled",
+	"resource_backup_vault":        "aws_backup_vault",
 	"resource_backup_vault_policy": "aws_backup_vault_policy",
 	"required_actions": [
 		"backup:DeleteRecoveryPoint",
@@ -33,20 +33,20 @@ const = {
 has_required_deny_statements = func(policy_json) {
 	# Parse the policy JSON
 	policy_doc = json.unmarshal(policy_json)
-	
+
 	# Get statements
 	statements = maps.get(policy_doc, "Statement", [])
-	
+
 	# Look for Deny statements with all required actions
 	for statements as statement {
 		effect = maps.get(statement, "Effect", "")
 		if effect is not "Deny" {
 			continue
 		}
-		
+
 		# Get actions from the statement
 		actions_raw = maps.get(statement, "Action", [])
-		
+
 		# Convert single action to list if needed
 		# Check if it's a list by trying to iterate
 		actions = []
@@ -56,12 +56,12 @@ has_required_deny_statements = func(policy_json) {
 		} else {
 			actions = actions_raw
 		}
-		
+
 		# Check if all required actions are present
 		has_delete = false
 		has_update = false
 		has_put = false
-		
+
 		for actions as action {
 			action_lower = strings.to_lower(action)
 			if strings.has_suffix(action_lower, "deleterecoverypoint") or action_lower is "backup:deleterecoverypoint" {
@@ -74,13 +74,13 @@ has_required_deny_statements = func(policy_json) {
 				has_put = true
 			}
 		}
-		
+
 		# If all three actions are found in this Deny statement, policy is compliant
 		if has_delete and has_update and has_put {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -98,7 +98,7 @@ vault_has_compliant_policy = func(vault_name, vault_policies) {
 			return has_required_deny_statements(policy_json)
 		}
 	}
-	
+
 	# No policy found for this vault
 	return false
 }

@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy ensures that a recovery point was created for Amazon Aurora DB clusters
 # within the specified time period to enable backup and disaster recovery capabilities.
 
@@ -19,10 +18,10 @@ param max_days_since_backup default 1
 
 # Constants
 const = {
-	"policy_name":             "aurora-recovery-point-created",
+	"policy_name":              "aurora-recovery-point-created",
 	"resource_aws_rds_cluster": "aws_rds_cluster",
-	"backup_retention_period": "backup_retention_period",
-	"engine":                  "engine",
+	"backup_retention_period":  "backup_retention_period",
+	"engine":                   "engine",
 }
 
 # Functions
@@ -38,11 +37,11 @@ has_backup_enabled = func(res) {
 
 generate_violation_message = func(violation) {
 	backup_retention = maps.get(violation.values, const.backup_retention_period, 0)
-	
+
 	if backup_retention is 0 {
 		return "Aurora DB cluster '" + violation.address + "' does not have automated backups enabled. The 'backup_retention_period' must be at least " + string(max_days_since_backup) + " day(s) to ensure recovery points are created. Refer to AWS Audit Manager best practices for backup and disaster recovery."
 	}
-	
+
 	return "Aurora DB cluster '" + violation.address + "' must have automated backups configured with a backup_retention_period of at least " + string(max_days_since_backup) + " day(s) to ensure recent recovery points are available. Current backup_retention_period: " + string(backup_retention) + ". Refer to AWS Audit Manager best practices for backup and disaster recovery."
 }
 

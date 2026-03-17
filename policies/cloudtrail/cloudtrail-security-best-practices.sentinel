@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy ensures that at least one AWS CloudTrail trail is defined with security best practices
 # according to AWS Audit Manager requirements.
 
@@ -23,20 +22,20 @@ const = {
 is_trail_compliant = func(res) {
 	# Check include_global_service_events is true (defaults to true if not specified)
 	include_global = maps.get(res.values, "include_global_service_events", true)
-	
+
 	# Check is_multi_region_trail is true
 	is_multi_region = maps.get(res.values, "is_multi_region_trail", false)
-	
+
 	# Check enable_log_file_validation is true
 	log_validation = maps.get(res.values, "enable_log_file_validation", false)
-	
+
 	# Check kms_key_id is defined (encrypted with KMS)
 	kms_encrypted = maps.has(res.values, "kms_key_id") and res.values.kms_key_id is not null and res.values.kms_key_id is not ""
-	
+
 	# Check event_selector for reads and writes
 	event_selectors = maps.get(res.values, "event_selector", [])
 	has_valid_event_selector = check_event_selectors(event_selectors)
-	
+
 	# All conditions must be true
 	return include_global is true and
 		is_multi_region is true and
@@ -50,23 +49,23 @@ check_event_selectors = func(selectors) {
 	if length(selectors) == 0 {
 		return false
 	}
-	
+
 	# Check if at least one event selector meets requirements
 	for selectors as selector {
 		# Check read_write_type is "All" (or not specified, which defaults to All)
 		read_write_type = maps.get(selector, "read_write_type", "All")
-		
+
 		# Check include_management_events is true (defaults to true)
 		include_mgmt = maps.get(selector, "include_management_events", true)
-		
+
 		# Check that exclude_management_event_sources is not set or is empty
 		exclude_sources = maps.get(selector, "exclude_management_event_sources", [])
-		
+
 		if read_write_type == "All" and include_mgmt is true and length(exclude_sources) == 0 {
 			return true
 		}
 	}
-	
+
 	return false
 }
 

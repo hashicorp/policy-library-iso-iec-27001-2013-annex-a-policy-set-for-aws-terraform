@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy ensures that recovery points are created for Amazon EBS volumes
 # within the specified time period by validating AWS Backup plan configuration.
 
@@ -40,13 +39,13 @@ is_date_within_timeframe = func(date_str) {
 	if date_str is "" or date_str is null {
 		return false
 	}
-	
+
 	# Parse the date - format: 2024-01-15T10:30:00Z
 	# For simplicity, check if year is 2024 or later (recent)
 	if strings.has_prefix(date_str, "2024-") or strings.has_prefix(date_str, "2025-") or strings.has_prefix(date_str, "2026-") {
 		return true
 	}
-	
+
 	return false
 }
 
@@ -58,7 +57,7 @@ has_recent_recovery_points = func(backup_vaults) {
 			creation_date = maps.get(rp, "creation_date", "")
 			completion_date = maps.get(rp, "completion_date", "")
 			status = maps.get(rp, "status", "")
-			
+
 			if status is "COMPLETED" and (is_date_within_timeframe(creation_date) or is_date_within_timeframe(completion_date)) {
 				return true
 			}
@@ -70,48 +69,48 @@ has_recent_recovery_points = func(backup_vaults) {
 # Check if backup plan has appropriate schedule
 has_valid_backup_schedule = func(backup_plan) {
 	rules_list = maps.get(backup_plan.values, "rule", [])
-	
+
 	if length(rules_list) is 0 {
 		return false
 	}
-	
+
 	# Check last_execution_date if present
 	last_execution = maps.get(backup_plan.values, "last_execution_date", "")
 	if last_execution is not "" and not is_date_within_timeframe(last_execution) {
 		return false
 	}
-	
+
 	# Check if any rule has a schedule that meets the requirement
 	for rules_list as r {
 		schedule = maps.get(r, "schedule", "")
-		
+
 		if schedule is "" {
 			continue
 		}
-		
+
 		# Check for hourly backups (always valid)
 		if schedule matches "cron\\(0 \\* \\* \\* \\? \\*\\)" {
 			return true
 		}
-		
+
 		# Check for daily backups if max_hours_since_backup >= 24
 		if max_hours_since_backup >= 24 and schedule matches "cron\\(" {
 			return true
 		}
-		
+
 		# Check for rate expressions
 		if schedule matches "rate\\(" {
 			if schedule matches "hour" {
 				return true
 			}
 		}
-		
+
 		# Check for custom cron expressions
 		if schedule matches "cron\\(" {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -130,7 +129,7 @@ if not has_recent_recovery and length(recovery_point_data) > 0 {
 		creation_date = maps.get(rp_data.values, "creation_date", "")
 		completion_date = maps.get(rp_data.values, "completion_date", "")
 		status = maps.get(rp_data.values, "status", "")
-		
+
 		if status is "COMPLETED" and (is_date_within_timeframe(creation_date) or is_date_within_timeframe(completion_date)) {
 			has_recent_recovery = true
 		}

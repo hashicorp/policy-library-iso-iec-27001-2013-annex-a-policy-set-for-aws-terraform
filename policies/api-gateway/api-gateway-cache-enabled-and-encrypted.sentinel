@@ -1,7 +1,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # This policy verifies that all methods in Amazon API Gateway stages have cache enabled and encrypted.
 # It checks both aws_api_gateway_stage and aws_api_gateway_method_settings resources.
 
@@ -14,19 +13,19 @@ import "collection/maps" as maps
 
 # Constants
 const = {
-	"policy_name":                                  "api-gateway-cache-enabled-and-encrypted",
-	"resource_aws_api_gateway_stage":               "aws_api_gateway_stage",
-	"resource_aws_api_gateway_method_settings":     "aws_api_gateway_method_settings",
-	"cache_cluster_enabled":                        "cache_cluster_enabled",
-	"cache_data_encrypted":                         "cache_data_encrypted",
-	"caching_enabled":                              "caching_enabled",
+	"policy_name":                              "api-gateway-cache-enabled-and-encrypted",
+	"resource_aws_api_gateway_stage":           "aws_api_gateway_stage",
+	"resource_aws_api_gateway_method_settings": "aws_api_gateway_method_settings",
+	"cache_cluster_enabled":                    "cache_cluster_enabled",
+	"cache_data_encrypted":                     "cache_data_encrypted",
+	"caching_enabled":                          "caching_enabled",
 }
 
 # Functions
 generate_stage_violation_message = func(violation) {
 	cache_enabled = maps.get(violation.values, const.cache_cluster_enabled, false)
 	cache_encrypted = maps.get(violation.values, const.cache_data_encrypted, false)
-	
+
 	if not cache_enabled {
 		return "API Gateway stage must have cache cluster enabled. Attribute 'cache_cluster_enabled' must be set to true. Refer to AWS Audit Manager API_GW_CACHE_ENABLED_AND_ENCRYPTED for more details."
 	}
@@ -38,62 +37,62 @@ generate_stage_violation_message = func(violation) {
 
 generate_method_settings_violation_message = func(violation) {
 	settings = maps.get(violation.values, "settings", [])
-	
+
 	if length(settings) == 0 {
 		return "API Gateway method settings must have caching enabled and cache encrypted. Settings block is missing or empty. Refer to AWS Audit Manager API_GW_CACHE_ENABLED_AND_ENCRYPTED for more details."
 	}
-	
+
 	return "API Gateway method settings must have caching enabled and cache encrypted in the settings block. Refer to AWS Audit Manager API_GW_CACHE_ENABLED_AND_ENCRYPTED for more details."
 }
 
 is_stage_compliant = func(res) {
 	cache_enabled = maps.get(res.values, const.cache_cluster_enabled, false)
 	cache_encrypted = maps.get(res.values, const.cache_data_encrypted, false)
-	
+
 	# Check stage-level cache settings
 	if cache_enabled is not true or cache_encrypted is not true {
 		return false
 	}
-	
+
 	# Check nested settings or method_settings arrays
 	settings = maps.get(res.values, "settings", [])
 	method_settings = maps.get(res.values, "method_settings", [])
-	
+
 	# Combine both arrays
 	all_settings = settings + method_settings
-	
+
 	# If there are nested settings, check each one
 	if length(all_settings) > 0 {
 		for all_settings as setting {
 			caching_enabled = maps.get(setting, const.caching_enabled, false)
 			cache_encrypted = maps.get(setting, const.cache_data_encrypted, false)
-			
+
 			if caching_enabled is not true or cache_encrypted is not true {
 				return false
 			}
 		}
 	}
-	
+
 	return true
 }
 
 is_method_settings_compliant = func(res) {
 	settings = maps.get(res.values, "settings", [])
-	
+
 	if length(settings) == 0 {
 		return false
 	}
-	
+
 	# Check each settings block
 	for settings as setting {
 		caching_enabled = maps.get(setting, const.caching_enabled, false)
 		cache_encrypted = maps.get(setting, const.cache_data_encrypted, false)
-		
+
 		if caching_enabled is not true or cache_encrypted is not true {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
