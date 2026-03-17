@@ -284,22 +284,18 @@ Every new policy must have a corresponding `docs/policies/[policy-name].md` file
 This rule is covered by the [policy-name](https://github.com/hashicorp/policy-library-.../blob/main/policies/[service]/[policy-name].sentinel) policy.
 
 ## Policy Results (Pass)
-```bash
-trace:
+    trace:
       Pass - [policy-name].sentinel
       ...
-      This result means that all resources have passed the policy check for the policy [policy-name].
+      This result means that all resources have passed the policy check.
       ✓ Found 0 resource violations
-```
 
 ---
 
 ## Policy Results (Fail)
-```bash
-trace:
+    trace:
       Fail - [policy-name].sentinel
       ...
-```
 ```
 
 **Blocking checks:**
@@ -309,7 +305,7 @@ trace:
 **Advisory checks (flag but do not block):**
 - Provider/Category table must be present
 - `## Description` section must be present with substantive content
-- `## Policy Results (Pass)` and `## Policy Results (Fail)` sections must be present with fenced `bash` trace blocks
+- `## Policy Results (Pass)` and `## Policy Results (Fail)` sections must be present with trace output examples
 - The policy name shown in the trace (e.g., `Pass - ecr-image-scanning-enabled.sentinel`) must match the actual `.sentinel` filename
 - The policy link must point to the correct file path on the `main` branch
 - Flag spelling mistakes and grammatical errors in the Description section
