@@ -1,0 +1,89 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# This policy verifies that AWS DynamoDB tables are encrypted with AWS KMS.
+# It checks the `server_side_encryption` block to ensure KMS encryption is enabled.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":             "dynamo-db-table-encrypted-kms",
+	"resource_dynamodb_table": "aws_dynamodb_table",
+	"server_side_encryption":  "server_side_encryption",
+	"enabled":                 "enabled",
+	"kms_key_arn":             "kms_key_arn",
+}
+
+# Functions
+generate_violation_message = func(violation) {
+	sse_blocks = maps.get(violation.values, const.server_side_encryption, [])
+
+	if length(sse_blocks) is 0 {
+		return "DynamoDB table must have 'server_side_encryption' block configured with KMS encryption enabled. Refer to AWS Audit Manager compliance standards for more details."
+	}
+
+	return "DynamoDB table 'server_side_encryption' block must have 'enabled' set to true and 'kms_key_arn' specified for KMS encryption. Refer to AWS Audit Manager compliance standards for more details."
+}
+
+is_kms_encrypted = func(res) {
+	sse_blocks = maps.get(res.values, const.server_side_encryption, [])
+
+	if length(sse_blocks) is 0 {
+		return false
+	}
+
+	sse = sse_blocks[0]
+
+	# Get KMS key ARN - treat null as empty string
+	kms_key_value = maps.get(sse, const.kms_key_arn, "")
+	if kms_key_value is null {
+		kms_key_value = ""
+	}
+
+	# KMS key must be present and not empty
+	if kms_key_value is "" {
+		return false
+	}
+
+	# Get enabled value - defaults to true if not specified when KMS key is present
+	enabled_value = maps.get(sse, const.enabled, null)
+
+	# If enabled is explicitly false, fail
+	if enabled_value is false {
+		return false
+	}
+
+	# If KMS key is present and enabled is not false, encryption is enabled
+	return true
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_dynamodb_table).resources
+violations = collection.reject(resources, func(res) {
+	return is_kms_encrypted(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

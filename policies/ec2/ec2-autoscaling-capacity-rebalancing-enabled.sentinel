@@ -1,0 +1,92 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# This policy requires that Capacity Rebalancing is enabled for Amazon EC2 Auto Scaling groups
+# that use multiple instance types.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":                        "ec2-autoscaling-capacity-rebalancing-enabled",
+	"resource_aws_autoscaling_group":     "aws_autoscaling_group",
+	"capacity_rebalance":                 "capacity_rebalance",
+	"mixed_instances_policy":             "mixed_instances_policy",
+	"message_capacity_rebalance_not_set": "Capacity Rebalancing must be enabled (capacity_rebalance = true) for Auto Scaling groups that use multiple instance types.",
+}
+
+# Functions
+has_multiple_instance_types = func(res) {
+	# Check if instance_types array is defined with multiple types
+	instance_types = maps.get(res.values, "instance_types", [])
+	if length(instance_types) > 1 {
+		return true
+	}
+
+	# Check if mixed_instances_policy is defined with multiple overrides
+	mixed_instances_policy = maps.get(res.values, const.mixed_instances_policy, [])
+
+	if length(mixed_instances_policy) > 0 {
+		# Navigate through the nested structure to find overrides
+		for mixed_instances_policy as mip {
+			launch_template = maps.get(mip, "launch_template", [])
+			for launch_template as lt {
+				override = maps.get(lt, "override", [])
+				# If there are multiple overrides, it uses multiple instance types
+				if length(override) > 1 {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+is_capacity_rebalance_enabled = func(res) {
+	# Check if capacity_rebalance is set to true
+	capacity_rebalance = maps.get(res.values, const.capacity_rebalance, false)
+	return capacity_rebalance is true
+}
+
+generate_violation_message = func(violation) {
+	return const.message_capacity_rebalance_not_set
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_autoscaling_group).resources
+
+# Filter ASGs that have multiple instance types but don't have capacity rebalancing enabled
+violations = collection.reject(resources, func(res) {
+	# If the ASG doesn't use multiple instance types, it's compliant (not a violation)
+	if not has_multiple_instance_types(res) {
+		return true
+	}
+
+	# If it uses multiple instance types, check if capacity_rebalance is enabled
+	return is_capacity_rebalance_enabled(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

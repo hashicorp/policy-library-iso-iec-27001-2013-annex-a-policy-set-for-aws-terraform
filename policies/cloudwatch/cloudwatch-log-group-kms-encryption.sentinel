@@ -1,0 +1,84 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# This policy verifies that Amazon CloudWatch Log Groups are encrypted with AWS KMS.
+# Optionally, it can check for a specific KMS key ID if provided.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Parameters
+# kms_key_id is optional. If not provided, any KMS key is acceptable.
+# If provided, the log group must be encrypted with this specific KMS key.
+param kms_key_id default ""
+
+# Constants
+const = {
+	"policy_name":                       "cloudwatch-log-group-kms-encryption",
+	"resource_aws_cloudwatch_log_group": "aws_cloudwatch_log_group",
+	"kms_key_id_attr":                   "kms_key_id",
+}
+
+# Functions
+generate_violation_message = func(violation) {
+	kms_key = maps.get(violation.values, const.kms_key_id_attr, "")
+
+	if kms_key_id is "" {
+		if kms_key is "" {
+			return "CloudWatch Log Group must be encrypted with an AWS KMS key. Attribute 'kms_key_id' is not set."
+		}
+	} else {
+		if kms_key is "" {
+			return "CloudWatch Log Group must be encrypted with AWS KMS key '" + kms_key_id + "'. Attribute 'kms_key_id' is not set."
+		}
+		return "CloudWatch Log Group must be encrypted with AWS KMS key '" + kms_key_id + "'. Current value is '" + kms_key + "'."
+	}
+
+	return "CloudWatch Log Group encryption check failed."
+}
+
+is_encrypted_with_kms = func(res) {
+	kms_key = maps.get(res.values, const.kms_key_id_attr, "")
+
+	# Check if kms_key_id is set (not empty)
+	if kms_key is "" {
+		return false
+	}
+
+	# If specific KMS key is required, verify it matches
+	if kms_key_id is not "" {
+		return kms_key is kms_key_id
+	}
+
+	# Otherwise, any KMS key is acceptable
+	return true
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_cloudwatch_log_group).resources
+violations = collection.reject(resources, func(res) {
+	return is_encrypted_with_kms(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

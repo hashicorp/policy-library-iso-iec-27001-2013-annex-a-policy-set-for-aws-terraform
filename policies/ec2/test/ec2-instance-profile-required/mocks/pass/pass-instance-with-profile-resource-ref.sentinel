@@ -1,0 +1,44 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_iam_instance_profile.example": {
+			"address":        "aws_iam_instance_profile.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_iam_instance_profile",
+			"values": {
+				"name": "example-instance-profile",
+				"role": "example-role",
+			},
+		},
+		"aws_instance.example": {
+			"address":        "aws_instance.example",
+			"depends_on":     ["aws_iam_instance_profile.example"],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_instance",
+			"values": {
+				"ami":                  "ami-0c55b159cbfafe1f0",
+				"instance_type":        "t2.micro",
+				"iam_instance_profile": "example-instance-profile",
+				"tags": {
+					"Name": "example-instance",
+				},
+			},
+		},
+	},
+}

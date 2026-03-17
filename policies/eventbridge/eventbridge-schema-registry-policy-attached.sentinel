@@ -1,0 +1,98 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# This policy requires that AWS EventBridge schema registries have a resource policy attached.
+# It checks that 'aws_schemas_registry_policy' resources are defined for 'aws_schemas_registry' resources.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":                          "eventbridge-schema-registry-policy-attached",
+	"resource_aws_schemas_registry":        "aws_schemas_registry",
+	"resource_aws_schemas_registry_policy": "aws_schemas_registry_policy",
+	"message": "Custom Amazon EventBridge schema registries must have a resource policy attached.",
+}
+
+# Functions
+generate_violation_message = func(registry_name) {
+	# Handle null, empty string, or missing registry name
+	if length(registry_name) is 0 {
+		return const.message + " Registry name is undefined."
+	}
+	return const.message + " Registry '" + registry_name + "' does not have a resource policy attached."
+}
+
+# Get all registry names that have policies
+get_registries_with_policies = func(policies) {
+	registry_names = {}
+	for policies as _, res {
+		# Try both "registry_name" and "name" attributes
+		name = maps.get(res.values, "registry_name", "")
+		if name is "" {
+			name = maps.get(res.values, "name", "")
+		}
+		# Also check that the policy is not empty
+		policy = maps.get(res.values, "policy", "")
+		if length(name) > 0 and length(policy) > 0 {
+			registry_names[name] = true
+		}
+	}
+	return registry_names
+}
+
+# Variables
+registry_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_schemas_registry).resources
+policy_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_schemas_registry_policy).resources
+
+registries_with_policies = get_registries_with_policies(policy_resources)
+
+violations = collection.reject(registry_resources, func(res) {
+	# Try both "registry_name" and "name" attributes
+	registry_name = maps.get(res.values, "registry_name", "")
+	if length(registry_name) is 0 {
+		registry_name = maps.get(res.values, "name", "")
+	}
+	if length(registry_name) is 0 {
+		return false
+	}
+	# Check if registry has a policy by looking up in the map
+	has_policy = false
+	if registry_name in keys(registries_with_policies) {
+		has_policy = true
+	}
+	return has_policy
+})
+
+# Helper function to get registry name from resource
+get_registry_name = func(res) {
+	reg_name = maps.get(res.values, "registry_name", "")
+	if length(reg_name) is 0 {
+		reg_name = maps.get(res.values, "name", "")
+	}
+	return reg_name
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(get_registry_name(v)),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

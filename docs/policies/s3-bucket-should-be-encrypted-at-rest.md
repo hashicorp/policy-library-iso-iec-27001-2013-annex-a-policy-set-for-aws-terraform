@@ -12,7 +12,7 @@ This control checks whether an Amazon S3 general purpose bucket is encrypted wit
 
 Server-side encryption (SSE) is the encryption of data at its destination by the application or service that receives it. Unless you specify otherwise, S3 buckets use Amazon S3 managed keys (SSE-S3) by default for server-side encryption.
 
-This rule is covered by the [s3-bucket=should-be-encrypted-at-rest](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/s3/s3-bucket=should-be-encrypted-at-rest.sentinel) policy.
+This rule is covered by the [s3-bucket-should-be-encrypted-at-rest](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/s3/s3-bucket-should-be-encrypted-at-rest.sentinel) policy.
 
 ## Policy Results (Pass)
 

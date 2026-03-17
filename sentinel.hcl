@@ -605,3 +605,129 @@ policy "eventbridge-global-endpoints-should-have-event-replication-enabled" {
   source = "./policies/eventbridge/eventbridge-global-endpoints-should-have-event-replication-enabled.sentinel"
   enforcement_level = "advisory"
 }
+
+policy "cloudtrail-security-best-practices" {
+  source = "./policies/cloudtrail/cloudtrail-security-best-practices.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "cloudtrail-enabled-all-regions" {
+  source = "./policies/cloudtrail/cloudtrail-enabled-all-regions.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "cloudtrail-s3-dataevents-enabled" {
+  source = "./policies/cloudtrail/cloudtrail-s3-dataevents-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "api-gateway-cache-enabled-and-encrypted" {
+  source = "./policies/api-gateway/api-gateway-cache-enabled-and-encrypted.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "athena-workgroup-encrypted-at-rest" {
+  source = "./policies/athena/athena-workgroup-encrypted-at-rest.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "aurora-recovery-point-created" {
+  source = "./policies/aurora/aurora-recovery-point-created.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "cloudwatch-log-group-kms-encryption" {
+  source = "./policies/cloudwatch/cloudwatch-log-group-kms-encryption.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "codebuild-project-artifact-encryption" {
+  source = "./policies/codebuild/codebuild-project-artifact-encryption.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "codebuild-project-privileged-mode-disabled" {
+  source = "./policies/codebuild/codebuild-project-privileged-mode-disabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "dynamo-db-recovery-point-created" {
+  source = "./policies/dynamo-db/dynamo-db-recovery-point-created.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "dynamo-db-table-encryption-enabled" {
+  source = "./policies/dynamo-db/dynamo-db-table-encryption-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "dynamo-db-table-encrypted-kms" {
+  source = "./policies/dynamo-db/dynamo-db-table-encrypted-kms.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ecs-task-definition-nonroot-user" {
+  source = "./policies/ecs/ecs-task-definition-nonroot-user.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "efs-recovery-point-compliance" {
+  source = "./policies/efs/efs-recovery-point-compliance.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "eks-cluster-logging-enabled" {
+  source = "./policies/eks/eks-cluster-logging-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "eventbridge-schema-registry-policy-attached" {
+  source = "./policies/eventbridge/eventbridge-schema-registry-policy-attached.sentinel"
+  enforcement_level = "advisory"
+}
+
+
+policy "ebs-backup-recovery-point-created" {
+  source = "./policies/ec2/ebs-backup-recovery-point-created.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ebs-volumes-backup-plan-protection" {
+  source = "./policies/ec2/ebs-volumes-backup-plan-protection.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ec2-autoscaling-capacity-rebalancing-enabled" {
+  source = "./policies/ec2/ec2-autoscaling-capacity-rebalancing-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ec2-backup-recovery-point-time-period" {
+  source = "./policies/ec2/ec2-backup-recovery-point-time-period.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ec2-instance-profile-required" {
+  source = "./policies/ec2/ec2-instance-profile-required.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ec2-non-default-security-groups-attached-to-eni" {
+  source = "./policies/ec2/ec2-non-default-security-groups-attached-to-eni.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ec2-security-group-attached-to-eni-periodic" {
+  source = "./policies/ec2/ec2-security-group-attached-to-eni-periodic.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "backup-recovery-point-manual-deletion-disabled" {
+  source = "./policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "backup-recovery-point-manual-deletion-disabled" {
+  source = "./policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel"
+  enforcement_level = "advisory"
+}

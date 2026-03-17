@@ -1,0 +1,89 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_cloudtrail.trail_1": {
+			"address":        "aws_cloudtrail.trail_1",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "trail_1",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_cloudtrail",
+			"values": {
+				"name":                          "trail-1",
+				"s3_bucket_name":                "my-cloudtrail-bucket",
+				"include_global_service_events": false,
+				"is_multi_region_trail":         true,
+				"enable_log_file_validation":    true,
+				"kms_key_id":                    "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+				"event_selector": [
+					{
+						"read_write_type":                  "All",
+						"include_management_events":        true,
+						"exclude_management_event_sources": [],
+					},
+				],
+			},
+		},
+		"aws_cloudtrail.trail_2": {
+			"address":        "aws_cloudtrail.trail_2",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "trail_2",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_cloudtrail",
+			"values": {
+				"name":                          "trail-2",
+				"s3_bucket_name":                "my-cloudtrail-bucket",
+				"include_global_service_events": true,
+				"is_multi_region_trail":         true,
+				"enable_log_file_validation":    true,
+				"kms_key_id":                    "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+				"event_selector": [
+					{
+						"read_write_type":                  "All",
+						"include_management_events":        true,
+						"exclude_management_event_sources": [],
+					},
+				],
+			},
+		},
+		"aws_cloudtrail.trail_3": {
+			"address":        "aws_cloudtrail.trail_3",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "trail_3",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_cloudtrail",
+			"values": {
+				"name":                          "trail-3",
+				"s3_bucket_name":                "my-cloudtrail-bucket",
+				"include_global_service_events": true,
+				"is_multi_region_trail":         true,
+				"enable_log_file_validation":    false,
+				"kms_key_id":                    "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+				"event_selector": [
+					{
+						"read_write_type":                  "All",
+						"include_management_events":        true,
+						"exclude_management_event_sources": [],
+					},
+				],
+			},
+		},
+	},
+}

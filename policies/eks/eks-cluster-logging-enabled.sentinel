@@ -1,0 +1,117 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# This policy requires that Amazon EKS clusters have logging enabled for all log types
+# to provide comprehensive visibility into cluster operations and security events.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":   "eks-cluster-logging-enabled",
+	"resource_type": "aws_eks_cluster",
+	"required_log_types": [
+		"api",
+		"audit",
+		"authenticator",
+		"controllerManager",
+		"scheduler",
+	],
+}
+
+# Functions
+generate_violation_message = func(res, missing_log_types) {
+	if length(missing_log_types) is 0 {
+		return "EKS cluster must have all log types enabled (api, audit, authenticator, controllerManager, scheduler). No enabled_cluster_log_types configuration found. Refer to https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html for more details."
+	}
+	missing_types_str = ""
+	for missing_log_types as log_type {
+		if missing_types_str is "" {
+			missing_types_str = log_type
+		} else {
+			missing_types_str = missing_types_str + ", " + log_type
+		}
+	}
+	return "EKS cluster is missing the following required log types: " + missing_types_str + ". All log types (api, audit, authenticator, controllerManager, scheduler) must be enabled. Refer to https://docs.aws.amazon.com/eks/latest/userguide/control-plane-logs.html for more details."
+}
+
+# Get missing log types for a resource
+get_missing_log_types = func(res) {
+	enabled_types = maps.get(res.values, "enabled_cluster_log_types", [])
+
+	# If enabled_types is not a list or is empty, all types are missing
+	if length(enabled_types) is 0 {
+		return const.required_log_types
+	}
+
+	# Find missing log types
+	missing = []
+	for const.required_log_types as log_type {
+		type_found = false
+		for enabled_types as enabled_type {
+			if enabled_type is log_type {
+				type_found = true
+			}
+		}
+		if type_found is false {
+			missing = missing + [log_type]
+		}
+	}
+
+	return missing
+}
+
+# Check if all required log types are enabled
+has_all_log_types_enabled = func(res) {
+	enabled_types = maps.get(res.values, "enabled_cluster_log_types", [])
+
+	# If no enabled_cluster_log_types exists or is empty, return false
+	if length(enabled_types) is 0 {
+		return false
+	}
+
+	# Check if all required log types are present
+	for const.required_log_types as log_type {
+		type_found = false
+		for enabled_types as enabled_type {
+			if enabled_type is log_type {
+				type_found = true
+			}
+		}
+		if type_found is false {
+			return false
+		}
+	}
+
+	return true
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).resources
+violations = collection.reject(resources, func(res) {
+	return has_all_log_types_enabled(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v, get_missing_log_types(v)),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

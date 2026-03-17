@@ -1,0 +1,191 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# This policy checks if Amazon Elastic Block Store (Amazon EBS) volumes are protected by a backup plan.
+# EBS volumes should be included in AWS Backup plans to ensure data protection and disaster recovery.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+
+# Constants
+const = {
+	"policy_name":                   "ebs-volumes-backup-plan-protection",
+	"resource_aws_ebs_volume":       "aws_ebs_volume",
+	"resource_aws_backup_selection": "aws_backup_selection",
+	"message_no_backup":             "EBS volume is not protected by any backup plan. Ensure all EBS volumes are included in AWS Backup plans.",
+}
+
+# Functions
+# Check if any backup selections exist that could protect EBS volumes
+has_backup_protection = func() {
+	backup_selections = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_selection).resources
+
+	if length(backup_selections) == 0 {
+		return false
+	}
+
+	# Check if any backup selection includes resources or uses selection tags
+	for backup_selections as _, res {
+		resources_list = maps.get(res.values, "resources", [])
+		if length(resources_list) > 0 {
+			return true
+		}
+
+		selection_tags = maps.get(res.values, "selection_tag", [])
+		if length(selection_tags) > 0 {
+			return true
+		}
+	}
+
+	return false
+}
+
+# Check if a resource ARN pattern matches EBS volumes
+matches_ebs_volume_pattern = func(resource_ref) {
+	# Convert to string and check for EBS volume ARN patterns
+	ref_str = string(resource_ref)
+	ref_lower = strings.to_lower(ref_str)
+
+	# Check for various EBS volume ARN patterns:
+	# - arn:aws:ec2:*:*:volume/*
+	# - arn:aws:ec2:region:account:volume/*
+	# - arn:aws:ec2:*:*:volume/vol-*
+	if strings.has_prefix(ref_lower, "arn:aws:ec2:") and
+		(strings.has_suffix(ref_lower, ":volume/*") or
+			strings.has_suffix(ref_lower, ":volume/vol-*")) {
+		return true
+	}
+
+	return false
+}
+
+# Check if a specific EBS volume is referenced in backup selections
+is_volume_in_backup_selection = func(volume_res, backup_selections, all_ebs_volumes) {
+	volume_address = volume_res.address
+	volume_arn = maps.get(volume_res.values, "arn", "")
+	volume_name = volume_res.name
+
+	for backup_selections as _, backup_res {
+		resources_list = maps.get(backup_res.values, "resources", [])
+
+		# If resources list is empty, check if there are selection_tags (handled elsewhere)
+		if length(resources_list) == 0 {
+			continue
+		}
+
+		for resources_list as _, resource_ref {
+			ref_str = string(resource_ref)
+			ref_lower = strings.to_lower(ref_str)
+
+			# Check if the resource reference directly contains the volume address
+			# This handles Terraform resource references like aws_ebs_volume.example
+			if ref_str matches ".*" + volume_address + ".*" or
+				ref_str matches ".*" + volume_name + ".*" {
+				return true
+			}
+
+			# Check if the ARN matches exactly (for specific ARN references)
+			if length(volume_arn) > 0 and ref_str is volume_arn {
+				return true
+			}
+
+			# Check if it's an ARN wildcard pattern that matches ALL EBS volumes
+			if matches_ebs_volume_pattern(resource_ref) {
+				return true
+			}
+
+			# Special case: if this volume doesn't have an ARN exposed yet,
+			# but the backup selection has a specific EBS volume ARN,
+			# and there's only ONE EBS volume in the plan,
+			# assume this volume is the one being backed up
+			if length(volume_arn) is 0 and
+				ref_lower matches ".*arn:aws:ec2:.*:volume/vol-.*" and
+				length(all_ebs_volumes) is 1 {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+# Check if EBS volume tags match backup selection tag criteria
+is_volume_protected_by_tags = func(volume_res, backup_selections) {
+	volume_tags = maps.get(volume_res.values, "tags", {})
+
+	if length(volume_tags) == 0 {
+		return false
+	}
+
+	# Check if any backup selection uses tag-based selection that matches this volume
+	for backup_selections as _, backup_res {
+		selection_tags = maps.get(backup_res.values, "selection_tag", [])
+
+		if length(selection_tags) > 0 {
+			# Check if all selection tags match the volume tags
+			all_tags_match = true
+
+			for selection_tags as _, sel_tag {
+				tag_key = maps.get(sel_tag, "key", "")
+				tag_value = maps.get(sel_tag, "value", "")
+				tag_type = maps.get(sel_tag, "type", "STRINGEQUALS")
+
+				# Get the volume's tag value for this key
+				volume_tag_value = maps.get(volume_tags, tag_key, "")
+
+				# For STRINGEQUALS type, check if values match
+				if tag_type is "STRINGEQUALS" {
+					if volume_tag_value is not tag_value {
+						all_tags_match = false
+						break
+					}
+				}
+			}
+
+			# If all tags match for this backup selection, the volume is protected
+			if all_tags_match {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+# Variables
+ebs_volume_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_ebs_volume).resources
+backup_selection_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_selection).resources
+backup_protection_exists = has_backup_protection()
+
+# Identify violations: EBS volumes not protected by any backup plan
+violations = filter ebs_volume_resources as _, volume_res {
+	# If no backup protection exists at all, this is a violation
+	not backup_protection_exists or
+		# Otherwise, check if this specific volume is NOT protected
+		(not is_volume_in_backup_selection(volume_res, backup_selection_resources, ebs_volume_resources) and
+			not is_volume_protected_by_tags(volume_res, backup_selection_resources))
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        const.message_no_backup,
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

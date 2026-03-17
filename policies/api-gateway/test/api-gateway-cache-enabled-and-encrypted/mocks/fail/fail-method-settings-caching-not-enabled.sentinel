@@ -1,0 +1,39 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_api_gateway_stage.example": {
+			"address":        "aws_api_gateway_stage.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_api_gateway_stage",
+			"values": {
+				"stage_name":            "production",
+				"rest_api_id":           "abc123",
+				"deployment_id":         "def456",
+				"cache_cluster_enabled": true,
+				"cache_data_encrypted":  true,
+				"method_settings": [
+					{
+						"method_path":          "*/*",
+						"caching_enabled":      true,
+						"cache_data_encrypted": true,
+					},
+					{
+						"method_path":          "orders/GET",
+						"caching_enabled":      false,
+						"cache_data_encrypted": true,
+					},
+				],
+			},
+		},
+	},
+}

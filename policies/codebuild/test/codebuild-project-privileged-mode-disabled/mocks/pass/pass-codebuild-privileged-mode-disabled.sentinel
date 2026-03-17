@@ -1,0 +1,43 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_codebuild_project.example": {
+			"address":        "aws_codebuild_project.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_codebuild_project",
+			"values": {
+				"name":         "example-project",
+				"service_role": "arn:aws:iam::123456789012:role/codebuild-role",
+				"artifacts": [
+					{
+						"type": "NO_ARTIFACTS",
+					},
+				],
+				"environment": [
+					{
+						"compute_type":    "BUILD_GENERAL1_SMALL",
+						"image":           "aws/codebuild/standard:5.0",
+						"type":            "LINUX_CONTAINER",
+						"privileged_mode": false,
+					},
+				],
+				"source": [
+					{
+						"type":     "GITHUB",
+						"location": "https://github.com/example/repo.git",
+					},
+				],
+			},
+		},
+	},
+}

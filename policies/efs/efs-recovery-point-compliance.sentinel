@@ -1,0 +1,153 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# This policy requires that AWS EFS file systems have a recovery point (backup) created
+# within a specified time period by verifying the existence of AWS Backup vault recovery points
+# associated with EFS file systems.
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection/maps" as maps
+import "strings"
+
+# Params
+# recovery_point_max_age_hours refers to the maximum time (in hours) since the last recovery point was created
+param recovery_point_max_age_hours default 24
+
+# Constants
+const = {
+	"policy_name":                   "efs-recovery-point-compliance",
+	"resource_aws_efs_file_system":  "aws_efs_file_system",
+	"resource_aws_backup_plan":      "aws_backup_plan",
+	"resource_aws_backup_selection": "aws_backup_selection",
+	"message":                       "EFS file system must have an associated AWS Backup plan with selection to ensure recovery points are created within the specified time period.",
+}
+
+# Functions
+generate_violation_message = func(efs_address) {
+	hours_text = string(recovery_point_max_age_hours) + " hours"
+	if recovery_point_max_age_hours >= 24 {
+		days = recovery_point_max_age_hours / 24
+		hours_text = string(days) + " day(s)"
+	}
+
+	return "EFS file system '" + efs_address + "' does not have an associated backup plan or selection to ensure recovery points are created within " + hours_text + ". Configure AWS Backup to protect this EFS file system. Refer to https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html for more details."
+}
+
+# Check if a schedule string indicates compliant backup frequency
+is_schedule_string_compliant = func(schedule) {
+	if length(schedule) == 0 {
+		return false
+	}
+
+	# For daily or more frequent backups (24+ hours requirement)
+	if recovery_point_max_age_hours >= 24 {
+		if schedule matches ".*daily.*" or
+			schedule matches ".*hour.*" or
+			schedule matches ".*1 day.*" or
+			(strings.has_prefix(schedule, "cron(") and length(schedule) > 6) or
+			(strings.has_prefix(schedule, "rate(") and length(schedule) > 6) {
+			return true
+		}
+	}
+
+	# For hourly backups (less than 24 hours requirement)
+	if recovery_point_max_age_hours < 24 {
+		if schedule matches ".*hour.*" {
+			return true
+		}
+	}
+
+	return false
+}
+
+# Check if backup plan has compliant schedule
+has_compliant_schedule = func(plan) {
+	rules_list = maps.get(plan.values, "rule", [])
+
+	if length(rules_list) == 0 {
+		return false
+	}
+
+	for rules_list as r {
+		schedule = maps.get(r, "schedule", "")
+		if is_schedule_string_compliant(schedule) {
+			return true
+		}
+	}
+
+	return false
+}
+
+# Check if EFS is referenced in backup selection resources
+efs_has_backup_selection = func(efs_resource, backup_selections) {
+	efs_id = maps.get(efs_resource.values, "id", efs_resource.name)
+
+	for backup_selections as _, selection {
+		resources_list = maps.get(selection.values, "resources", [])
+		selection_tag = maps.get(selection.values, "selection_tag", [])
+
+		# Check explicit resource references
+		for resources_list as resource_arn {
+			if resource_arn matches ".*" + efs_id + ".*" or
+				resource_arn matches ".*elasticfilesystem.*" or
+				resource_arn matches ".*" + efs_resource.address + ".*" {
+				return true
+			}
+		}
+
+		# If selection uses tags, assume EFS might be included
+		if length(selection_tag) > 0 {
+			return true
+		}
+	}
+
+	return false
+}
+
+# Check if backup plans exist with compliant schedules
+has_compliant_backup_plans = func(backup_plans) {
+	if length(backup_plans) == 0 {
+		return false
+	}
+
+	for backup_plans as _, plan {
+		if has_compliant_schedule(plan) {
+			return true
+		}
+	}
+
+	return false
+}
+
+# Variables
+efs_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_efs_file_system).resources
+backup_plan_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_plan).resources
+backup_selection_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_selection).resources
+
+# Evaluate violations
+violations = filter efs_resources as _, efs_res {
+	efs_has_backup_selection(efs_res, backup_selection_resources) is false or
+		has_compliant_backup_plans(backup_plan_resources) is false
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v.address),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}
