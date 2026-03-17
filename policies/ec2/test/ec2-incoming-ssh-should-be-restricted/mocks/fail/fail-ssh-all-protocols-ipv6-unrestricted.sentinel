@@ -21,7 +21,7 @@ planned_values = {
 				"from_port":         0,
 				"ipv6_cidr_blocks":  ["::/0"],
 				"prefix_list_ids":   [],
-				"protocol":          "all",
+				"protocol":          "-1",
 				"security_group_id": "sg-12345678",
 				"self":              false,
 				"to_port":           0,
