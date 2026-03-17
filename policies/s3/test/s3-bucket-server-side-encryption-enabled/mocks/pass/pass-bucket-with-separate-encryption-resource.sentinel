@@ -2,46 +2,46 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_s3_bucket.example": {
-      "address": "aws_s3_bucket.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_s3_bucket",
-      "values": {
-        "bucket": "example-bucket",
-      },
-    },
-    "aws_s3_bucket_server_side_encryption_configuration.example": {
-      "address": "aws_s3_bucket_server_side_encryption_configuration.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_s3_bucket_server_side_encryption_configuration",
-      "values": {
-        "bucket": "aws_s3_bucket.example",
-        "rule": [
-          {
-            "apply_server_side_encryption_by_default": [
-              {
-                "sse_algorithm": "AES256",
-              },
-            ],
-          },
-        ],
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_s3_bucket.example": {
+			"address":        "aws_s3_bucket.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket",
+			"values": {
+				"bucket": "example-bucket",
+			},
+		},
+		"aws_s3_bucket_server_side_encryption_configuration.example": {
+			"address":        "aws_s3_bucket_server_side_encryption_configuration.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket_server_side_encryption_configuration",
+			"values": {
+				"bucket": "aws_s3_bucket.example",
+				"rule": [
+					{
+						"apply_server_side_encryption_by_default": [
+							{
+								"sse_algorithm": "AES256",
+							},
+						],
+					},
+				],
+			},
+		},
+	},
 }

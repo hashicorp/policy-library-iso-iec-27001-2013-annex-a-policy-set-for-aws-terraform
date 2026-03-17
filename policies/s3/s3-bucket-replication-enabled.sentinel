@@ -27,7 +27,7 @@ generate_violation_message = func(bucket_address, reason) {
 has_valid_replication = func(bucket_res) {
 	# Get replication_configuration from bucket values
 	replication_config = maps.get(bucket_res.values, "replication_configuration", null)
-	
+
 	# If no replication_configuration exists, fail
 	if replication_config is null {
 		return {
@@ -35,7 +35,7 @@ has_valid_replication = func(bucket_res) {
 			"reason": "no replication_configuration found",
 		}
 	}
-	
+
 	# replication_configuration is a list, check if it's not empty
 	if length(replication_config) == 0 {
 		return {
@@ -43,10 +43,10 @@ has_valid_replication = func(bucket_res) {
 			"reason": "replication_configuration is empty",
 		}
 	}
-	
+
 	# Get the first (and typically only) replication configuration
 	config = replication_config[0]
-	
+
 	# Check if rules exist
 	rules = maps.get(config, "rules", null)
 	if rules is null {
@@ -55,7 +55,7 @@ has_valid_replication = func(bucket_res) {
 			"reason": "no rules found in replication_configuration",
 		}
 	}
-	
+
 	# Check if rules array is empty
 	if length(rules) == 0 {
 		return {
@@ -63,7 +63,7 @@ has_valid_replication = func(bucket_res) {
 			"reason": "rules array is empty",
 		}
 	}
-	
+
 	# Check that ALL rules have status "Enabled"
 	for rules as _, r {
 		status = maps.get(r, "status", "")
@@ -74,7 +74,7 @@ has_valid_replication = func(bucket_res) {
 			}
 		}
 	}
-	
+
 	# All checks passed
 	return {
 		"valid":  true,

@@ -2,39 +2,39 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_iam_user_policy_attachment.attachment1": {
-      "address": "aws_iam_user_policy_attachment.attachment1",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "attachment1",
-      "provider_name": "registry.terraform.io/hashicorp/aws",
-      "tainted": false,
-      "type": "aws_iam_user_policy_attachment",
-      "values": {
-        "user": "test-user",
-        "policy_arn": "arn:aws:iam::aws:policy/ReadOnlyAccess",
-      },
-    },
-    "aws_iam_user_policy_attachment.attachment2": {
-      "address": "aws_iam_user_policy_attachment.attachment2",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "attachment2",
-      "provider_name": "registry.terraform.io/hashicorp/aws",
-      "tainted": false,
-      "type": "aws_iam_user_policy_attachment",
-      "values": {
-        "user": "test-user",
-        "policy_arn": "arn:aws:iam::aws:policy/AdministratorAccess",
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_iam_user_policy_attachment.attachment1": {
+			"address":        "aws_iam_user_policy_attachment.attachment1",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "attachment1",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_iam_user_policy_attachment",
+			"values": {
+				"user":       "test-user",
+				"policy_arn": "arn:aws:iam::aws:policy/ReadOnlyAccess",
+			},
+		},
+		"aws_iam_user_policy_attachment.attachment2": {
+			"address":        "aws_iam_user_policy_attachment.attachment2",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "attachment2",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_iam_user_policy_attachment",
+			"values": {
+				"user":       "test-user",
+				"policy_arn": "arn:aws:iam::aws:policy/AdministratorAccess",
+			},
+		},
+	},
 }

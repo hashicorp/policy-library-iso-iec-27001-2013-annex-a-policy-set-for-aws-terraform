@@ -12,13 +12,13 @@ import "collection/maps" as maps
 
 # Constants
 const = {
-	"policy_name":                         "elb-nlb-cross-zone-load-balancing-enabled",
-	"resource_aws_lb":                     "aws_lb",
-	"resource_aws_alb":                    "aws_alb",
-	"load_balancer_type":                  "load_balancer_type",
-	"enable_cross_zone_load_balancing":    "enable_cross_zone_load_balancing",
-	"cross_zone_load_balancing_enabled":   "cross_zone_load_balancing_enabled",
-	"network_load_balancer_type":          "network",
+	"policy_name":                       "elb-nlb-cross-zone-load-balancing-enabled",
+	"resource_aws_lb":                   "aws_lb",
+	"resource_aws_alb":                  "aws_alb",
+	"load_balancer_type":                "load_balancer_type",
+	"enable_cross_zone_load_balancing":  "enable_cross_zone_load_balancing",
+	"cross_zone_load_balancing_enabled": "cross_zone_load_balancing_enabled",
+	"network_load_balancer_type":        "network",
 }
 
 # Functions
@@ -26,18 +26,18 @@ generate_violation_message = func(violation) {
 	# Check both possible attribute names
 	cross_zone_value_enable = maps.get(violation.values, const.enable_cross_zone_load_balancing, null)
 	cross_zone_value_enabled = maps.get(violation.values, const.cross_zone_load_balancing_enabled, null)
-	
+
 	if cross_zone_value_enable is null and cross_zone_value_enabled is null {
 		return "Network Load Balancer '" + violation.address + "' does not have cross-zone load balancing attribute set. Cross-zone load balancing must be enabled for Network Load Balancers. Refer to https://docs.aws.amazon.com/config/latest/developerguide/nlb-cross-zone-load-balancing-enabled.html for more details."
 	}
-	
+
 	cross_zone_value = cross_zone_value_enable
 	attr_name = "enable_cross_zone_load_balancing"
 	if cross_zone_value is null {
 		cross_zone_value = cross_zone_value_enabled
 		attr_name = "cross_zone_load_balancing_enabled"
 	}
-	
+
 	return "Network Load Balancer '" + violation.address + "' has '" + attr_name + "' set to " + string(cross_zone_value) + ". Cross-zone load balancing must be enabled for Network Load Balancers. Refer to https://docs.aws.amazon.com/config/latest/developerguide/nlb-cross-zone-load-balancing-enabled.html for more details."
 }
 
@@ -50,7 +50,7 @@ is_cross_zone_enabled = func(res) {
 	# Check both possible attribute names
 	enable_attr = maps.get(res.values, const.enable_cross_zone_load_balancing, null)
 	enabled_attr = maps.get(res.values, const.cross_zone_load_balancing_enabled, null)
-	
+
 	# Return true if either attribute is explicitly set to true
 	return (enable_attr is true) or (enabled_attr is true)
 }

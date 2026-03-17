@@ -36,7 +36,7 @@ has_unrestricted_ssh = func(from_port, to_port, protocol, cidr_blocks, ipv6_cidr
 	# Check if protocol is TCP or all protocols
 	protocol_is_tcp = protocol is "tcp"
 	protocol_is_all = protocol is "-1" or protocol is "all"
-	
+
 	# For TCP protocol, check if the port range includes SSH port (22)
 	# For all protocols (-1 or "all"), any port range covers SSH since it covers all protocols/ports
 	ssh_port_covered = false
@@ -46,7 +46,7 @@ has_unrestricted_ssh = func(from_port, to_port, protocol, cidr_blocks, ipv6_cidr
 		# Protocol "-1" or "all" means all protocols and all ports, so SSH is always covered
 		ssh_port_covered = true
 	}
-	
+
 	if ssh_port_covered {
 		# Check for unrestricted IPv4 CIDR blocks
 		for cidr_blocks as cidr {
@@ -54,7 +54,7 @@ has_unrestricted_ssh = func(from_port, to_port, protocol, cidr_blocks, ipv6_cidr
 				return true
 			}
 		}
-		
+
 		# Check for unrestricted IPv6 CIDR blocks
 		for ipv6_cidr_blocks as cidr {
 			if is_unrestricted_cidr(cidr) {
@@ -62,48 +62,48 @@ has_unrestricted_ssh = func(from_port, to_port, protocol, cidr_blocks, ipv6_cidr
 			}
 		}
 	}
-	
+
 	return false
 }
 
 # Check aws_security_group resources for unrestricted SSH ingress
 is_security_group_compliant = func(sg_res) {
 	ingress_rules = maps.get(sg_res.values, "ingress", [])
-	
+
 	for ingress_rules as ingress {
 		from_port = maps.get(ingress, "from_port", 0)
 		to_port = maps.get(ingress, "to_port", 0)
 		protocol = maps.get(ingress, "protocol", "")
 		cidr_blocks = maps.get(ingress, "cidr_blocks", [])
 		ipv6_cidr_blocks = maps.get(ingress, "ipv6_cidr_blocks", [])
-		
+
 		if has_unrestricted_ssh(from_port, to_port, protocol, cidr_blocks, ipv6_cidr_blocks) {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
 # Check aws_security_group_rule resources for unrestricted SSH ingress
 is_security_group_rule_compliant = func(sgr_res) {
 	rule_type = maps.get(sgr_res.values, "type", "")
-	
+
 	# Only check ingress rules
 	if rule_type is not "ingress" {
 		return true
 	}
-	
+
 	from_port = maps.get(sgr_res.values, "from_port", 0)
 	to_port = maps.get(sgr_res.values, "to_port", 0)
 	protocol = maps.get(sgr_res.values, "protocol", "")
 	cidr_blocks = maps.get(sgr_res.values, "cidr_blocks", [])
 	ipv6_cidr_blocks = maps.get(sgr_res.values, "ipv6_cidr_blocks", [])
-	
+
 	if has_unrestricted_ssh(from_port, to_port, protocol, cidr_blocks, ipv6_cidr_blocks) {
 		return false
 	}
-	
+
 	return true
 }
 

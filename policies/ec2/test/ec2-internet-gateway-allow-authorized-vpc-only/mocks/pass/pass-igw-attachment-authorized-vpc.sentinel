@@ -2,23 +2,23 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_internet_gateway_attachment.attach": {
-      "address": "aws_internet_gateway_attachment.attach",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "attach",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_internet_gateway_attachment",
-      "values": {
-        "internet_gateway_id": "igw-0123456789abcdef0",
-        "vpc_id": "vpc-authorized888",
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_internet_gateway_attachment.attach": {
+			"address":        "aws_internet_gateway_attachment.attach",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "attach",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_internet_gateway_attachment",
+			"values": {
+				"internet_gateway_id": "igw-0123456789abcdef0",
+				"vpc_id":              "vpc-authorized888",
+			},
+		},
+	},
 }

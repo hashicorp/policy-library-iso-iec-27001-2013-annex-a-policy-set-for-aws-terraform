@@ -60,16 +60,16 @@ extract_account_id_from_arn = func(arn) {
 	if not strings.has_prefix(arn, "arn:aws:iam::") {
 		return ""
 	}
-	
+
 	# Remove the "arn:aws:iam::" prefix
 	remainder = strings.trim_prefix(arn, "arn:aws:iam::")
-	
+
 	# Split by ":" to get account ID (first part)
 	parts = strings.split(remainder, ":")
 	if types.type_of(parts) is not "list" or parts is empty {
 		return ""
 	}
-	
+
 	return parts[0]
 }
 
@@ -79,7 +79,7 @@ is_cross_account_principal = func(principal_value) {
 	if principal_value is "*" {
 		return true
 	}
-	
+
 	# Check if it's an IAM ARN
 	if strings.has_prefix(principal_value, "arn:aws:iam::") {
 		account_id = extract_account_id_from_arn(principal_value)
@@ -93,7 +93,7 @@ is_cross_account_principal = func(principal_value) {
 		# Same account - not cross-account
 		return false
 	}
-	
+
 	return false
 }
 
@@ -103,7 +103,7 @@ action_matches_pattern = func(action, pattern) {
 	if action is pattern {
 		return true
 	}
-	
+
 	# Wildcard match (e.g., "s3:GetBucket*" matches "s3:GetBucketAcl")
 	# Check if pattern has a wildcard by trying to split
 	parts = strings.split(pattern, "*")
@@ -116,7 +116,7 @@ action_matches_pattern = func(action, pattern) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -140,12 +140,12 @@ check_principal = func(principal) {
 	if principal is null {
 		return false
 	}
-	
+
 	# Handle Principal as string (e.g., "*")
 	if types.type_of(principal) is "string" {
 		return is_cross_account_principal(principal)
 	}
-	
+
 	# Handle Principal as map
 	if types.type_of(principal) is "map" {
 		aws_principals = maps.get(principal, "AWS", [])
@@ -160,7 +160,7 @@ check_principal = func(principal) {
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -171,25 +171,25 @@ check_statement = func(stmt) {
 	if effect is not "Allow" {
 		return false
 	}
-	
+
 	# Check if statement has cross-account principals
 	principal = maps.get(stmt, "Principal", null)
 	has_cross_account = check_principal(principal)
-	
+
 	if not has_cross_account {
 		return false
 	}
-	
+
 	# Check if statement allows any blocklisted actions
 	action = maps.get(stmt, "Action", [])
 	actions_list = []
-	
+
 	if types.type_of(action) is "string" {
 		actions_list = [action]
 	} else if types.type_of(action) is "list" {
 		actions_list = action
 	}
-	
+
 	return check_actions(actions_list)
 }
 
@@ -199,23 +199,23 @@ has_blocklisted_cross_account_access = func(res) {
 	if policy_str is "" {
 		return false
 	}
-	
+
 	policy_doc = parse_policy_document(policy_str)
 	if policy_doc is null {
 		return false
 	}
-	
+
 	statements = maps.get(policy_doc, "Statement", [])
 	if types.type_of(statements) is not "list" {
 		return false
 	}
-	
+
 	for statements as stmt {
 		if check_statement(stmt) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 

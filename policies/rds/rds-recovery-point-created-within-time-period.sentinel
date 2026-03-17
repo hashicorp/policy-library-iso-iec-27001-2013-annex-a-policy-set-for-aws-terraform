@@ -47,35 +47,35 @@ parse_iso8601_to_comparable = func(date_str) {
 	# Format: YYYY-MM-DDTHH:MM:SSZ
 	# Remove 'Z' suffix if present
 	clean_date = strings.trim_suffix(date_str, "Z")
-	
+
 	# Split by 'T' to separate date and time
 	parts = strings.split(clean_date, "T")
 	if length(parts) != 2 {
 		return 0
 	}
-	
-	date_part = parts[0]  # YYYY-MM-DD
-	time_part = parts[1]  # HH:MM:SS
-	
+
+	date_part = parts[0] # YYYY-MM-DD
+	time_part = parts[1] # HH:MM:SS
+
 	# Parse date components
 	date_components = strings.split(date_part, "-")
 	if length(date_components) != 3 {
 		return 0
 	}
-	
+
 	year = int(date_components[0])
 	month = int(date_components[1])
 	day = int(date_components[2])
-	
+
 	# Parse time components
 	time_components = strings.split(time_part, ":")
 	if length(time_components) < 2 {
 		return 0
 	}
-	
+
 	hour = int(time_components[0])
 	minute = int(time_components[1])
-	
+
 	# Convert to comparable integer: YYYYMMDDHHMM
 	# This allows simple numeric comparison
 	comparable = (year * 100000000) + (month * 1000000) + (day * 10000) + (hour * 100) + minute
@@ -94,7 +94,7 @@ calculate_hours_difference = func(newer_date_int, older_date_int) {
 	newer_remainder = newer_remainder % 10000
 	newer_hour = newer_remainder / 100
 	newer_minute = newer_remainder % 100
-	
+
 	older_year = older_date_int / 100000000
 	older_remainder = older_date_int % 100000000
 	older_month = older_remainder / 1000000
@@ -103,7 +103,7 @@ calculate_hours_difference = func(newer_date_int, older_date_int) {
 	older_remainder = older_remainder % 10000
 	older_hour = older_remainder / 100
 	older_minute = older_remainder % 100
-	
+
 	# Approximate calculation (assumes 30 days per month, 365 days per year)
 	# This is sufficient for the policy's purpose
 	year_diff = newer_year - older_year
@@ -111,7 +111,7 @@ calculate_hours_difference = func(newer_date_int, older_date_int) {
 	day_diff = newer_day - older_day
 	hour_diff = newer_hour - older_hour
 	minute_diff = newer_minute - older_minute
-	
+
 	total_hours = (year_diff * 365 * 24) + (month_diff * 30 * 24) + (day_diff * 24) + hour_diff + (minute_diff / 60)
 	return total_hours
 }
@@ -130,26 +130,26 @@ is_recovery_point_recent = func(creation_date) {
 	if creation_date == "" {
 		return false
 	}
-	
+
 	max_age_hours = get_max_age_hours()
-	
+
 	# Parse the creation date
 	creation_comparable = parse_iso8601_to_comparable(creation_date)
 	if creation_comparable == 0 {
 		return false
 	}
-	
+
 	# Get current time
 	current_comparable = get_current_time_comparable()
-	
+
 	# Check if creation date is in the future (invalid)
 	if creation_comparable > current_comparable {
 		return false
 	}
-	
+
 	# Calculate hours difference
 	hours_diff = calculate_hours_difference(current_comparable, creation_comparable)
-	
+
 	# Check if within allowed age
 	return hours_diff <= max_age_hours
 }
@@ -165,7 +165,7 @@ get_rds_identifier = func(res) {
 	if arn != "" {
 		parts = strings.split(arn, ":")
 		if length(parts) > 0 {
-			return parts[length(parts)-1]
+			return parts[length(parts) - 1]
 		}
 	}
 	return res.address
@@ -187,7 +187,7 @@ recovery_point_matches_rds = func(recovery_point, rds_identifier) {
 	}
 	# Also check if identifier is in the last part after splitting by /
 	if length(arn_parts) > 0 {
-		last_part = arn_parts[length(arn_parts)-1]
+		last_part = arn_parts[length(arn_parts) - 1]
 		if last_part == rds_identifier {
 			return true
 		}
@@ -199,13 +199,13 @@ recovery_point_matches_rds = func(recovery_point, rds_identifier) {
 find_recovery_points_for_rds = func(rds_res, recovery_points) {
 	rds_id = get_rds_identifier(rds_res)
 	matching_points = []
-	
+
 	for recovery_points as _, rp {
 		if recovery_point_matches_rds(rp, rds_id) {
 			matching_points += [rp]
 		}
 	}
-	
+
 	return matching_points
 }
 
@@ -247,11 +247,11 @@ filtered_rds_resources = collection.filter(all_rds_resources, func(res) {
 # Check each RDS resource for recent recovery points
 rds_violations = collection.reject(filtered_rds_resources, func(rds_res) {
 	recovery_points = find_recovery_points_for_rds(rds_res, recovery_point_resources)
-	
+
 	if length(recovery_points) == 0 {
-		return false  # No recovery points = violation
+		return false # No recovery points = violation
 	}
-	
+
 	return has_recent_recovery_point(recovery_points)
 })
 

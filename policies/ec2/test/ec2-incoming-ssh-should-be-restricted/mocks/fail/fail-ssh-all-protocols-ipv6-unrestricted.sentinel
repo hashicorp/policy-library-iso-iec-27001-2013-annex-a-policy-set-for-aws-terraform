@@ -2,31 +2,31 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_security_group_rule.example": {
-      "address": "aws_security_group_rule.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_security_group_rule",
-      "values": {
-        "cidr_blocks": [],
-        "description": "All protocols from IPv6 anywhere",
-        "from_port": 0,
-        "ipv6_cidr_blocks": ["::/0"],
-        "prefix_list_ids": [],
-        "protocol": "all",
-        "security_group_id": "sg-12345678",
-        "self": false,
-        "to_port": 0,
-        "type": "ingress",
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_security_group_rule.example": {
+			"address":        "aws_security_group_rule.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_security_group_rule",
+			"values": {
+				"cidr_blocks":       [],
+				"description":       "All protocols from IPv6 anywhere",
+				"from_port":         0,
+				"ipv6_cidr_blocks":  ["::/0"],
+				"prefix_list_ids":   [],
+				"protocol":          "all",
+				"security_group_id": "sg-12345678",
+				"self":              false,
+				"to_port":           0,
+				"type":              "ingress",
+			},
+		},
+	},
 }

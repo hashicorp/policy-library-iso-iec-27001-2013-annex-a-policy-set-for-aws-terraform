@@ -2,33 +2,33 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_route_table.example": {
-      "address": "aws_route_table.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_route_table",
-      "values": {
-        "route": [
-          {
-            "cidr_block": "",
-            "destination_cidr_block": "",
-            "gateway_id": "igw-12345678",
-            "nat_gateway_id": "",
-            "egress_only_gateway_id": "",
-            "ipv6_cidr_block": "::/0",
-            "destination_ipv6_cidr_block": "::/0",
-          },
-        ],
-        "vpc_id": "vpc-12345678",
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_route_table.example": {
+			"address":        "aws_route_table.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_route_table",
+			"values": {
+				"route": [
+					{
+						"cidr_block":                  "",
+						"destination_cidr_block":      "",
+						"gateway_id":                  "igw-12345678",
+						"nat_gateway_id":              "",
+						"egress_only_gateway_id":      "",
+						"ipv6_cidr_block":             "::/0",
+						"destination_ipv6_cidr_block": "::/0",
+					},
+				],
+				"vpc_id": "vpc-12345678",
+			},
+		},
+	},
 }

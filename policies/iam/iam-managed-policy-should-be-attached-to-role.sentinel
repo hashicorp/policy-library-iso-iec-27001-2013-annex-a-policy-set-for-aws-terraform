@@ -18,33 +18,33 @@ param required_managed_policies default []
 
 # Constants
 const = {
-	"policy_name":                                 "iam-managed-policy-should-be-attached-to-role",
-	"resource_aws_iam_role_policy_attachment":     "aws_iam_role_policy_attachment",
-	"resource_aws_iam_role":                       "aws_iam_role",
+	"policy_name":                             "iam-managed-policy-should-be-attached-to-role",
+	"resource_aws_iam_role_policy_attachment": "aws_iam_role_policy_attachment",
+	"resource_aws_iam_role":                   "aws_iam_role",
 }
 
 # Functions
 # Get all policy attachments grouped by role
 get_policy_attachments_by_role = func(roles) {
 	role_policies = {}
-	
+
 	# First, check for managed_policy_arns attribute directly on IAM roles
 	for roles as _, role {
 		role_name = maps.get(role.values, "name", "")
 		managed_policy_arns = maps.get(role.values, "managed_policy_arns", [])
-		
+
 		if role_name is not "" and length(managed_policy_arns) > 0 {
 			role_policies[role_name] = managed_policy_arns
 		}
 	}
-	
+
 	# Then, check for aws_iam_role_policy_attachment resources
 	attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_role_policy_attachment).resources
-	
+
 	for attachments as _, attachment {
 		role_name = maps.get(attachment.values, "role", "")
 		policy_arn = maps.get(attachment.values, "policy_arn", "")
-		
+
 		if role_name is not "" and policy_arn is not "" {
 			if role_name not in keys(role_policies) {
 				role_policies[role_name] = []
@@ -52,7 +52,7 @@ get_policy_attachments_by_role = func(roles) {
 			role_policies[role_name] = role_policies[role_name] + [policy_arn]
 		}
 	}
-	
+
 	return role_policies
 }
 
@@ -86,7 +86,7 @@ generate_violation_message = func(role_name, attached_policies) {
 			missing_policies = missing_policies + [required_policy]
 		}
 	}
-	
+
 	return "IAM role '" + role_name + "' is missing required managed policies: " + strings.join(missing_policies, ", ") + ". All required managed policies must be attached to IAM roles. Refer to https://docs.aws.amazon.com/config/latest/developerguide/iam-role-managed-policy-check.html for more details."
 }
 

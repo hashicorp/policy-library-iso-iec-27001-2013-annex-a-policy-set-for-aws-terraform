@@ -1,63 +1,62 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_internet_gateway.igw_one": {
-      "address": "aws_internet_gateway.igw_one",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "igw_one",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_internet_gateway",
-      "values": {
-        "vpc_id": "vpc-authorized111",
-        "tags": {
-          "Name": "igw-one",
-        },
-      },
-    },
-    "aws_internet_gateway.igw_two": {
-      "address": "aws_internet_gateway.igw_two",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "igw_two",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_internet_gateway",
-      "values": {
-        "vpc_id": "vpc-authorized222",
-        "tags": {
-          "Name": "igw-two",
-        },
-      },
-    },
-    "aws_internet_gateway.igw_three": {
-      "address": "aws_internet_gateway.igw_three",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "igw_three",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_internet_gateway",
-      "values": {
-        "vpc_id": "vpc-authorized333",
-        "tags": {
-          "Name": "igw-three",
-        },
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_internet_gateway.igw_one": {
+			"address":        "aws_internet_gateway.igw_one",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "igw_one",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_internet_gateway",
+			"values": {
+				"vpc_id": "vpc-authorized111",
+				"tags": {
+					"Name": "igw-one",
+				},
+			},
+		},
+		"aws_internet_gateway.igw_two": {
+			"address":        "aws_internet_gateway.igw_two",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "igw_two",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_internet_gateway",
+			"values": {
+				"vpc_id": "vpc-authorized222",
+				"tags": {
+					"Name": "igw-two",
+				},
+			},
+		},
+		"aws_internet_gateway.igw_three": {
+			"address":        "aws_internet_gateway.igw_three",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "igw_three",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_internet_gateway",
+			"values": {
+				"vpc_id": "vpc-authorized333",
+				"tags": {
+					"Name": "igw-three",
+				},
+			},
+		},
+	},
 }

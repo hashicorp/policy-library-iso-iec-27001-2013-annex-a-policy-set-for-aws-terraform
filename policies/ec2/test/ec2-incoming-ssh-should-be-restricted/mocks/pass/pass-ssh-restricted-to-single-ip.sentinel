@@ -2,37 +2,37 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_security_group.example": {
-      "address": "aws_security_group.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_security_group",
-      "values": {
-        "description": "Security group with SSH restricted to single IP",
-        "ingress": [
-          {
-            "cidr_blocks": ["203.0.113.5/32"],
-            "description": "SSH from single IP",
-            "from_port": 22,
-            "ipv6_cidr_blocks": [],
-            "prefix_list_ids": [],
-            "protocol": "tcp",
-            "security_groups": [],
-            "self": false,
-            "to_port": 22,
-          },
-        ],
-        "name": "allow-ssh-single-ip",
-        "vpc_id": "vpc-12345678",
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_security_group.example": {
+			"address":        "aws_security_group.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_security_group",
+			"values": {
+				"description": "Security group with SSH restricted to single IP",
+				"ingress": [
+					{
+						"cidr_blocks":      ["203.0.113.5/32"],
+						"description":      "SSH from single IP",
+						"from_port":        22,
+						"ipv6_cidr_blocks": [],
+						"prefix_list_ids":  [],
+						"protocol":         "tcp",
+						"security_groups":  [],
+						"self":             false,
+						"to_port":          22,
+					},
+				],
+				"name":   "allow-ssh-single-ip",
+				"vpc_id": "vpc-12345678",
+			},
+		},
+	},
 }

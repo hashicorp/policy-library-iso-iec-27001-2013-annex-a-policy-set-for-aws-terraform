@@ -31,33 +31,33 @@ const = {
 # Functions
 generate_violation_message = func(res) {
 	violations_list = []
-	
+
 	ignore_public_acls_value = maps.get(res.values, const.ignore_public_acls, null)
 	if ignore_public_acls_value is not ignore_public_acls {
 		violations_list += ["IgnorePublicAcls is " + string(ignore_public_acls_value) + " (expected: " + string(ignore_public_acls) + ")"]
 	}
-	
+
 	block_public_policy_value = maps.get(res.values, const.block_public_policy, null)
 	if block_public_policy_value is not block_public_policy {
 		violations_list += ["BlockPublicPolicy is " + string(block_public_policy_value) + " (expected: " + string(block_public_policy) + ")"]
 	}
-	
+
 	block_public_acls_value = maps.get(res.values, const.block_public_acls, null)
 	if block_public_acls_value is not block_public_acls {
 		violations_list += ["BlockPublicAcls is " + string(block_public_acls_value) + " (expected: " + string(block_public_acls) + ")"]
 	}
-	
+
 	restrict_public_buckets_value = maps.get(res.values, const.restrict_public_buckets, null)
 	if restrict_public_buckets_value is not restrict_public_buckets {
 		violations_list += ["RestrictPublicBuckets is " + string(restrict_public_buckets_value) + " (expected: " + string(restrict_public_buckets) + ")"]
 	}
-	
+
 	message = "Account-level S3 public access block settings are not compliant. "
 	if length(violations_list) > 0 {
 		message += "Issues: " + strings.join(violations_list, ", ")
 	}
 	message += ". All settings (IgnorePublicAcls, BlockPublicPolicy, BlockPublicAcls, RestrictPublicBuckets) must be enabled to prevent unintended public access to S3 buckets and objects. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-account-level-public-access-blocks.html for more details."
-	
+
 	return message
 }
 
@@ -66,7 +66,7 @@ is_compliant = func(res) {
 	block_public_policy_value = maps.get(res.values, const.block_public_policy, null)
 	block_public_acls_value = maps.get(res.values, const.block_public_acls, null)
 	restrict_public_buckets_value = maps.get(res.values, const.restrict_public_buckets, null)
-	
+
 	return ignore_public_acls_value is ignore_public_acls and
 		block_public_policy_value is block_public_policy and
 		block_public_acls_value is block_public_acls and

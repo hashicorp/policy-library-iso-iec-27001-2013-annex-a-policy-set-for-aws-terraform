@@ -2,30 +2,30 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_redshift_cluster.example": {
-      "address": "aws_redshift_cluster.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_redshift_cluster",
-      "values": {
-        "cluster_identifier": "example-cluster",
-        "encrypted": true,
-        "kms_key_id": "arn:aws:kms:us-east-1:123456789012:key/correct-key-id",
-        "logging": [
-          {
-            "enable": true,
-            "bucket_name": "my-redshift-logs",
-          },
-        ],
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_redshift_cluster.example": {
+			"address":        "aws_redshift_cluster.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_redshift_cluster",
+			"values": {
+				"cluster_identifier": "example-cluster",
+				"encrypted":          true,
+				"kms_key_id":         "arn:aws:kms:us-east-1:123456789012:key/correct-key-id",
+				"logging": [
+					{
+						"enable":      true,
+						"bucket_name": "my-redshift-logs",
+					},
+				],
+			},
+		},
+	},
 }

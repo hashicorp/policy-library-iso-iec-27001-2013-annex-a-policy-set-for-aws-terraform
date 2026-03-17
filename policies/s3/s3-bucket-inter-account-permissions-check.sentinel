@@ -53,20 +53,20 @@ has_unauthorized_inter_account_permissions = func(policy_string) {
 	if policy_string is "" {
 		return false
 	}
-	
+
 	# Parse the policy JSON
 	policy_doc = json.unmarshal(policy_string)
-	
+
 	# Get statements from the policy
 	statements = maps.get(policy_doc, "Statement", [])
-	
+
 	# Parse control policy if provided
 	control_statements = []
 	if controlPolicy is not "" {
 		control_doc = json.unmarshal(controlPolicy)
 		control_statements = maps.get(control_doc, "Statement", [])
 	}
-	
+
 	# Check each statement in the actual policy
 	for statements as stmt {
 		# Only check Allow statements
@@ -74,10 +74,10 @@ has_unauthorized_inter_account_permissions = func(policy_string) {
 		if effect is not "Allow" {
 			continue
 		}
-		
+
 		# Get principal
 		principal = maps.get(stmt, "Principal", {})
-		
+
 		# Check for wildcard principal (string "*")
 		if types.type_of(principal) is "string" {
 			if principal is "*" {
@@ -104,17 +104,17 @@ has_unauthorized_inter_account_permissions = func(policy_string) {
 			}
 			continue
 		}
-		
+
 		# Check for AWS principals in map
 		if types.type_of(principal) is not "map" {
 			continue
 		}
-		
+
 		aws_principals = maps.get(principal, "AWS", null)
 		if aws_principals is null {
 			continue
 		}
-		
+
 		# Normalize to list
 		aws_principal_list = []
 		if types.type_of(aws_principals) is "string" {
@@ -122,14 +122,14 @@ has_unauthorized_inter_account_permissions = func(policy_string) {
 		} else if types.type_of(aws_principals) is "list" {
 			aws_principal_list = aws_principals
 		}
-		
+
 		# Check each AWS principal
 		for aws_principal_list as aws_p {
 			# Skip if not inter-account
 			if is_inter_account_arn(aws_p) is false {
 				continue
 			}
-			
+
 			# If wildcard in actual
 			if aws_p is "*" {
 				if controlPolicy is "" {
@@ -163,18 +163,18 @@ has_unauthorized_inter_account_permissions = func(policy_string) {
 				}
 				continue
 			}
-			
+
 			# Extract account ID from actual principal
 			actual_account = extract_account_id(aws_p)
 			if actual_account is "" {
 				continue
 			}
-			
+
 			# If no control policy, any inter-account is unauthorized
 			if controlPolicy is "" {
 				return true
 			}
-			
+
 			# Check if this account is allowed in control policy
 			account_allowed = false
 			for control_statements as cs {
@@ -182,17 +182,17 @@ has_unauthorized_inter_account_permissions = func(policy_string) {
 				if cs_effect is not "Allow" {
 					continue
 				}
-				
+
 				cs_principal = maps.get(cs, "Principal", {})
 				if types.type_of(cs_principal) is not "map" {
 					continue
 				}
-				
+
 				cs_aws = maps.get(cs_principal, "AWS", null)
 				if cs_aws is null {
 					continue
 				}
-				
+
 				# Normalize control AWS principals
 				cs_aws_list = []
 				if types.type_of(cs_aws) is "string" {
@@ -200,7 +200,7 @@ has_unauthorized_inter_account_permissions = func(policy_string) {
 				} else if types.type_of(cs_aws) is "list" {
 					cs_aws_list = cs_aws
 				}
-				
+
 				# Check if account matches
 				for cs_aws_list as cs_aws_p {
 					if cs_aws_p is "*" {
@@ -213,13 +213,13 @@ has_unauthorized_inter_account_permissions = func(policy_string) {
 					}
 				}
 			}
-			
+
 			if account_allowed is false {
 				return true
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -234,12 +234,12 @@ resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).r
 violations = collection.reject(resources, func(res) {
 	# Get the policy attribute
 	policy_value = maps.get(res.values, const.policy_attribute, "")
-	
+
 	# If policy is empty or not defined, consider it compliant
 	if policy_value is "" {
 		return true
 	}
-	
+
 	# Check if the policy has unauthorized inter-account permissions
 	return has_unauthorized_inter_account_permissions(policy_value) is false
 })

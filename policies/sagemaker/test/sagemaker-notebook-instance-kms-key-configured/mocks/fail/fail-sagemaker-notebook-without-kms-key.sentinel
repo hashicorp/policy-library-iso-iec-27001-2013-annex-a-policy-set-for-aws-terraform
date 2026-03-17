@@ -2,25 +2,25 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-  "outputs": {},
-  "resources": {
-    "aws_sagemaker_notebook_instance.example": {
-      "address": "aws_sagemaker_notebook_instance.example",
-      "depends_on": [],
-      "deposed_key": "",
-      "index": null,
-      "mode": "managed",
-      "module_address": "",
-      "name": "example",
-      "provider_name": "aws",
-      "tainted": false,
-      "type": "aws_sagemaker_notebook_instance",
-      "values": {
-        "name": "my-notebook-instance",
-        "role_arn": "arn:aws:iam::123456789012:role/service-role/AmazonSageMaker-ExecutionRole",
-        "instance_type": "ml.t2.medium",
-        "tags": {},
-      },
-    },
-  },
+	"outputs": {},
+	"resources": {
+		"aws_sagemaker_notebook_instance.example": {
+			"address":        "aws_sagemaker_notebook_instance.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_sagemaker_notebook_instance",
+			"values": {
+				"name":          "my-notebook-instance",
+				"role_arn":      "arn:aws:iam::123456789012:role/service-role/AmazonSageMaker-ExecutionRole",
+				"instance_type": "ml.t2.medium",
+				"tags":          {},
+			},
+		},
+	},
 }

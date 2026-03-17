@@ -26,61 +26,61 @@ const = {
 # Functions
 generate_violation_message = func(res, target_bucket) {
 	logging_blocks = maps.get(res.values, const.logging_attribute, [])
-	
+
 	if length(logging_blocks) is 0 {
 		return "Redshift cluster must have audit logging configured. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
 	}
-	
+
 	logging_block = logging_blocks[0]
 	enable_value = maps.get(logging_block, const.enable_attribute, false)
-	
+
 	if enable_value is false {
 		return "Redshift cluster must have audit logging enabled. The 'logging.enable' attribute must be set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
 	}
-	
+
 	bucket_name = maps.get(logging_block, const.bucket_name_attribute, "")
 	if bucket_name is "" {
 		return "Redshift cluster must have a valid S3 bucket name specified for audit logging. The 'logging.bucket_name' attribute cannot be empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
 	}
-	
+
 	if target_bucket is not "" {
 		if bucket_name is not target_bucket {
 			return "Redshift cluster must log audits to bucket '" + target_bucket + "', but is configured to use '" + bucket_name + "'. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
 		}
 	}
-	
+
 	return "Redshift cluster audit logging configuration is not compliant. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
 }
 
 is_logging_compliant = func(res, target_bucket) {
 	logging_blocks = maps.get(res.values, const.logging_attribute, [])
-	
+
 	# Check if logging block exists
 	if length(logging_blocks) is 0 {
 		return false
 	}
-	
+
 	logging_block = logging_blocks[0]
-	
+
 	# Check if logging is enabled
 	enable_value = maps.get(logging_block, const.enable_attribute, false)
 	if enable_value is not true {
 		return false
 	}
-	
+
 	# Check if bucket_name is present and not empty
 	bucket_name = maps.get(logging_block, const.bucket_name_attribute, "")
 	if bucket_name is "" {
 		return false
 	}
-	
+
 	# If target_bucket is specified, check if it matches
 	if target_bucket is not "" {
 		if bucket_name is not target_bucket {
 			return false
 		}
 	}
-	
+
 	return true
 }
 

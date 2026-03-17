@@ -15,9 +15,9 @@ import "json"
 
 # Constants
 const = {
-	"policy_name":                          "s3-bucket-server-side-encryption-enabled",
-	"resource_aws_s3_bucket":               "aws_s3_bucket",
-	"resource_aws_s3_bucket_policy":        "aws_s3_bucket_policy",
+	"policy_name":                                                 "s3-bucket-server-side-encryption-enabled",
+	"resource_aws_s3_bucket":                                      "aws_s3_bucket",
+	"resource_aws_s3_bucket_policy":                               "aws_s3_bucket_policy",
 	"resource_aws_s3_bucket_server_side_encryption_configuration": "aws_s3_bucket_server_side_encryption_configuration",
 }
 
@@ -49,36 +49,36 @@ is_valid_deny_statement = func(statement) {
 	if effect is not "Deny" {
 		return false
 	}
-	
+
 	# Must have s3:PutObject action
 	actions_raw = maps.get(statement, "Action", "")
 	has_putobject = false
-	
+
 	# Check if it's a direct match (string case)
 	if actions_raw is "s3:PutObject" or actions_raw is "s3:*" {
 		has_putobject = true
 	}
-	
+
 	# Also check if it's in a list
 	if actions_raw contains "s3:PutObject" or actions_raw contains "s3:*" {
 		has_putobject = true
 	}
-	
+
 	if not has_putobject {
 		return false
 	}
-	
+
 	# Must have a condition that checks for encryption
 	condition = maps.get(statement, "Condition", {})
 	if condition is {} {
 		return false
 	}
-	
+
 	# Check for valid encryption-denying conditions
 	# StringNotEquals or Null are valid for denying unencrypted uploads
 	# StringEquals would require encryption to match a specific value, not deny unencrypted
 	has_valid_condition = false
-	
+
 	# Check for StringNotEquals with s3:x-amz-server-side-encryption
 	string_not_equals = maps.get(condition, "StringNotEquals", {})
 	if string_not_equals is not {} {
@@ -86,7 +86,7 @@ is_valid_deny_statement = func(statement) {
 			has_valid_condition = true
 		}
 	}
-	
+
 	# Check for Null condition with s3:x-amz-server-side-encryption
 	null_condition = maps.get(condition, "Null", {})
 	if null_condition is not {} {
@@ -98,7 +98,7 @@ is_valid_deny_statement = func(statement) {
 			}
 		}
 	}
-	
+
 	return has_valid_condition
 }
 
@@ -107,15 +107,15 @@ has_deny_unencrypted_policy = func(bucket_address, bucket_name, policy_resources
 	for policy_resources as _, policy_res {
 		bucket_ref = maps.get(policy_res.values, "bucket", "")
 		policy_json_str = maps.get(policy_res.values, "policy", "")
-		
+
 		# Check if policy is for this bucket
 		# Match by address, bucket name, or if bucket_ref contains the address
 		bucket_matches = strings.has_suffix(bucket_ref, bucket_address) or bucket_ref is bucket_address or bucket_ref is bucket_name or strings.has_suffix(bucket_address, bucket_ref)
-		
+
 		if bucket_matches and policy_json_str is not "" {
 			# Parse the JSON policy
 			policy_doc = json.unmarshal(policy_json_str)
-			
+
 			# Get statements from policy
 			statements_raw = maps.get(policy_doc, "Statement", [])
 			# Handle both single statement and list of statements
@@ -126,7 +126,7 @@ has_deny_unencrypted_policy = func(bucket_address, bucket_name, policy_resources
 			} else {
 				statements = statements_raw
 			}
-			
+
 			# Check if any statement properly denies unencrypted uploads
 			for statements as _, statement {
 				if is_valid_deny_statement(statement) {
@@ -144,20 +144,20 @@ is_bucket_compliant = func(bucket_res, policy_resources, encryption_resources) {
 	if has_bucket_encryption(bucket_res) {
 		return true
 	}
-	
+
 	# Check if there's a separate encryption configuration resource
 	if has_separate_encryption_resource(bucket_res.address, encryption_resources) {
 		return true
 	}
-	
+
 	# Get bucket name from values
 	bucket_name = maps.get(bucket_res.values, "bucket", "")
-	
+
 	# Check if bucket policy denies unencrypted uploads
 	if has_deny_unencrypted_policy(bucket_res.address, bucket_name, policy_resources) {
 		return true
 	}
-	
+
 	return false
 }
 
