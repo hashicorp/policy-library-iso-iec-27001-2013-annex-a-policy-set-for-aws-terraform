@@ -2,7 +2,7 @@
 
 ## Repository Purpose
 
-This repository contains pre-written HashiCorp Sentinel policies for AWS Terraform that enforce ISO/IEC 27001:2013 Annex A security controls. The policies are consumed by HCP Terraform and Terraform Enterprise to validate infrastructure-as-code configurations before they are applied. All policies use `enforcement_level = "advisory"`, meaning violations surface as warnings without blocking applies. The library covers ~107 policies across 41 AWS services.
+This repository contains pre-written HashiCorp Sentinel policies for AWS Terraform that enforce ISO/IEC 27001:2013 Annex A security controls. The policies are consumed by HCP Terraform and Terraform Enterprise to validate infrastructure-as-code configurations before they are applied. All policies use `enforcement_level = "advisory"`, meaning violations surface as warnings without blocking applies. The library currently contains approximately 107 policies covering 41 AWS services.
 
 ---
 
@@ -15,6 +15,53 @@ When reviewing a pull request, Copilot must only review and comment on files and
 - If context from an unchanged file is needed to validate changed code, reference it briefly but place findings only on the changed PR content.
 - Do not suggest opportunistic refactors outside the PR scope.
 - If a broader issue is noticed outside changed files, mention it only as a non-blocking note and explicitly state it is out of scope for this PR.
+
+## Severity Levels
+
+Use these severity levels consistently in review comments:
+
+**BLOCKING**
+- Directory structure violations
+- Missing tests
+- Missing required documentation file
+- Policy logic mismatch between code and description
+
+**ADVISORY**
+- Grammar and spelling issues
+- Minor naming inconsistencies
+- Documentation clarity improvements
+
+## Review Comment Format
+
+Copilot should structure review comments as:
+
+```
+[SEVERITY] Title
+
+Description:
+Explain the issue.
+
+Location:
+File path and line reference.
+
+Recommendation:
+Provide a concrete fix or example.
+```
+
+Example:
+
+```text
+BLOCKING: Policy name mismatch
+
+Description:
+The value of const.policy_name must match the Sentinel filename exactly.
+
+Location:
+policies/s3/s3-bucket-encryption.sentinel
+
+Recommendation:
+Change "policy_name": "s3_bucket_encryption" to "policy_name": "s3-bucket-encryption".
+```
 
 ---
 
@@ -43,9 +90,12 @@ policies/
         mocks/
           [policy-success|policy-failure|pass|fail]-[scenario]/  ← mock directory; name must match test file basename
             mock-tfplan-v2.sentinel         ← OR mock-tfconfig-v2.sentinel / mock-tfstate-v2.sentinel
-          OR the structure that the mocks would follow
-          [pass|fail]/ 
-            [pass|fail]-[scenario].sentinel
+
+          Alternative legacy layout:
+          pass/
+            [pass-scenario].sentinel
+          fail/
+            [fail-scenario].sentinel
 
 docs/
   policies/
@@ -67,7 +117,7 @@ modules/                                    ← shared modules; must not be modi
 - Invalid: `ecr_image_scanning.sentinel`, `rds-ensure=automatic-backups.sentinel`
 
 ### 2. Test case files
-- Must start with `success-`, `failure-`, `pass-`, or `fail-` followed by a scenario description
+- Test files must begin with one of: `success-`, `failure-`, `pass-`, `fail-`, followed by a scenario description
 - Located at `policies/[service]/test/[policy-name]/[success|failure|pass|fail]-[scenario].hcl`
 - The parent directory name must exactly match the `.sentinel` policy basename
 
@@ -100,7 +150,8 @@ import "tfplan/v2" as tfplan        # or tfconfig/v2 or tfstate/v2
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
-import "collection/maps" as maps
+# Common imports may also include:
+# import "collection/maps" as maps
 
 const = {
     "policy_name": "[filename-without-extension]",   # MUST match filename exactly (dashes only)
@@ -129,6 +180,7 @@ main = rule {
 - `const.policy_name` value must match the `.sentinel` filename exactly — using hyphens, not underscores, not equals signs. Example: a file named `s3-bucket-should-be-encrypted-at-rest.sentinel` must have `"policy_name": "s3-bucket-should-be-encrypted-at-rest"`, not `"s3-bucket=should-be-encrypted-at-rest"`
 - `summary` must have both `"policy_name"` and `"violations"` keys
 - `print(report.generate_policy_report(summary))` must be called
+- The policy file must end with the `main` rule.
 - `main = rule { [violations_variable] is empty }` must be the final rule
 
 ---
