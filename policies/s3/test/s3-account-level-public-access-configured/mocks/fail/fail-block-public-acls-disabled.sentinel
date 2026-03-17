@@ -1,0 +1,27 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_s3_account_public_access_block.example": {
+      "address": "aws_s3_account_public_access_block.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_s3_account_public_access_block",
+      "values": {
+        "block_public_acls": false,
+        "block_public_policy": true,
+        "ignore_public_acls": true,
+        "restrict_public_buckets": true,
+      },
+    },
+  },
+}

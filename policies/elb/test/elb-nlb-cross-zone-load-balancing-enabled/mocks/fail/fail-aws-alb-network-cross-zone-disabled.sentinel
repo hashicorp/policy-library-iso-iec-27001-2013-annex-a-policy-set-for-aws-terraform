@@ -1,0 +1,25 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_alb.network_alb": {
+      "address": "aws_alb.network_alb",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "network_alb",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_alb",
+      "values": {
+        "load_balancer_type": "network",
+        "enable_cross_zone_load_balancing": false,
+        "name": "network-alb",
+      },
+    },
+  },
+}

@@ -1,0 +1,151 @@
+# This policy ensures that there is at least one multi-region AWS CloudTrail that includes management events and does not exclude KMS or RDS Data API events.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":                          "cloudtrail-multi-region-enabled",
+	"resource_cloudtrail":                  "aws_cloudtrail",
+	"is_multi_region_trail":                "is_multi_region_trail",
+	"include_global_service_events":        "include_global_service_events",
+	"event_selector":                       "event_selector",
+	"include_management_events":            "include_management_events",
+	"exclude_management_event_sources":     "exclude_management_event_sources",
+	"advanced_event_selector":              "advanced_event_selector",
+	"field_selector":                       "field_selector",
+}
+
+# Functions
+is_multi_region_compliant = func(res) {
+	# Check if multi-region trail is enabled
+	is_multi_region = maps.get(res.values, const.is_multi_region_trail, false)
+	
+	if is_multi_region is not true {
+		return false
+	}
+	
+	# Check event selectors for management events
+	event_selectors = maps.get(res.values, const.event_selector, [])
+	advanced_event_selectors = maps.get(res.values, const.advanced_event_selector, [])
+	
+	# If no event selectors or advanced event selectors are defined, management events are included by default
+	if length(event_selectors) is 0 and length(advanced_event_selectors) is 0 {
+		return true
+	}
+	
+	# Check each event selector (legacy format)
+	for event_selectors as selector {
+		include_mgmt = maps.get(selector, const.include_management_events, true)
+		excluded_sources = maps.get(selector, const.exclude_management_event_sources, [])
+		
+		# If management events are included and no exclusions, this is compliant
+		if include_mgmt is true and length(excluded_sources) is 0 {
+			return true
+		}
+		
+		# If management events are included but there are exclusions, check if KMS or RDS are excluded
+		if include_mgmt is true and length(excluded_sources) > 0 {
+			has_kms_or_rds_exclusion = false
+			for excluded_sources as source {
+				if source is "kms.amazonaws.com" or source is "rdsdata.amazonaws.com" {
+					has_kms_or_rds_exclusion = true
+				}
+			}
+			# If KMS or RDS are not excluded, this is compliant
+			if has_kms_or_rds_exclusion is false {
+				return true
+			}
+		}
+	}
+	
+	# Check each advanced event selector
+	for advanced_event_selectors as adv_selector {
+		field_selectors = maps.get(adv_selector, const.field_selector, [])
+		
+		# Check if this selector includes management events
+		has_management_category = false
+		excludes_kms = false
+		excludes_rds = false
+		
+		for field_selectors as field {
+			field_name = maps.get(field, "field", "")
+			
+			# Check if eventCategory equals Management
+			if field_name is "eventCategory" {
+				equals_list = maps.get(field, "equals", [])
+				for equals_list as val {
+					if val is "Management" {
+						has_management_category = true
+					}
+				}
+			}
+			
+			# Check if eventSource excludes KMS or RDS
+			if field_name is "eventSource" {
+				not_equals_list = maps.get(field, "not_equals", [])
+				for not_equals_list as val {
+					if val is "kms.amazonaws.com" {
+						excludes_kms = true
+					}
+					if val is "rdsdata.amazonaws.com" {
+						excludes_rds = true
+					}
+				}
+			}
+		}
+		
+		# If this selector includes management events and doesn't exclude KMS or RDS, it's compliant
+		if has_management_category is true and excludes_kms is false and excludes_rds is false {
+			return true
+		}
+	}
+	
+	return false
+}
+
+has_compliant_trail = func(resources) {
+	if length(resources) is 0 {
+		return false
+	}
+	
+	for resources as _, res {
+		if is_multi_region_compliant(res) is true {
+			return true
+		}
+	}
+	
+	return false
+}
+
+# Variables
+cloudtrail_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_cloudtrail).resources
+violations = []
+
+# Check if there is at least one compliant multi-region trail
+if has_compliant_trail(cloudtrail_resources) is false {
+	violations = [{
+		"address":        "global",
+		"module_address": "",
+		"message":        "At least one multi-region AWS CloudTrail must be configured with management events enabled and without excluding KMS or RDS Data API events. Refer to https://docs.aws.amazon.com/config/latest/developerguide/multi-region-cloudtrail-enabled.html for more details.",
+	}]
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations":  violations,
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

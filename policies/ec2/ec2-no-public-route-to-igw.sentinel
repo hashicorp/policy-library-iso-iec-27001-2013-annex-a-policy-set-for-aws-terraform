@@ -1,0 +1,129 @@
+# This policy checks if there are public routes in the route table to an Internet Gateway (IGW)
+# with unrestricted access (0.0.0.0/0 or ::/0).
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+
+# Constants
+const = {
+	"policy_name":       "ec2-no-public-route-to-igw",
+	"resource_type":     "aws_route",
+	"route_table_type":  "aws_route_table",
+	"cidr_block":        "cidr_block",
+	"ipv6_cidr_block":   "ipv6_cidr_block",
+	"gateway_id":        "gateway_id",
+	"unrestricted_ipv4": "0.0.0.0/0",
+	"unrestricted_ipv6": "::/0",
+}
+
+# Functions
+generate_violation_message = func(violation) {
+	cidr = maps.get(violation.values, const.cidr_block, "")
+	ipv6_cidr = maps.get(violation.values, const.ipv6_cidr_block, "")
+	gateway_id = maps.get(violation.values, const.gateway_id, "")
+	
+	if cidr is const.unrestricted_ipv4 {
+		return "Route with unrestricted IPv4 access (0.0.0.0/0) to Internet Gateway '" + gateway_id + "' detected. This creates a public route with unrestricted access. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
+	}
+	if ipv6_cidr is const.unrestricted_ipv6 {
+		return "Route with unrestricted IPv6 access (::/0) to Internet Gateway '" + gateway_id + "' detected. This creates a public route with unrestricted access. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
+	}
+	return "Route with unrestricted access to Internet Gateway '" + gateway_id + "' detected. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
+}
+
+is_internet_gateway = func(gateway_id) {
+	# Check if gateway_id is empty, null, or undefined
+	if gateway_id else "" is "" {
+		return false
+	}
+	return strings.has_prefix(gateway_id, "igw-")
+}
+
+has_unrestricted_cidr = func(res) {
+	cidr = maps.get(res.values, const.cidr_block, "")
+	ipv6_cidr = maps.get(res.values, const.ipv6_cidr_block, "")
+	
+	return cidr is const.unrestricted_ipv4 or ipv6_cidr is const.unrestricted_ipv6
+}
+
+is_public_route_to_igw = func(res) {
+	gateway_id = maps.get(res.values, const.gateway_id, "")
+	
+	return is_internet_gateway(gateway_id) and has_unrestricted_cidr(res)
+}
+
+check_route_table_routes = func(route_table_res) {
+	routes = maps.get(route_table_res.values, "route", [])
+	
+	for routes as route {
+		gateway_id = maps.get(route, const.gateway_id, "")
+		cidr = maps.get(route, const.cidr_block, "")
+		ipv6_cidr = maps.get(route, const.ipv6_cidr_block, "")
+		
+		if is_internet_gateway(gateway_id) and (cidr is const.unrestricted_ipv4 or ipv6_cidr is const.unrestricted_ipv6) {
+			return true
+		}
+	}
+	
+	return false
+}
+
+generate_route_table_violation_message = func(violation) {
+	return "Route table contains routes with unrestricted access (0.0.0.0/0 or ::/0) to an Internet Gateway. This creates public routes with unrestricted access. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
+}
+
+# Variables
+route_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).resources
+route_table_resources = tf.plan(tfplan.planned_values.resources).type(const.route_table_type).resources
+
+# Check individual aws_route resources
+route_violations = filter route_resources as _, res {
+	is_public_route_to_igw(res) is true
+}
+
+# Check aws_route_table resources with inline route blocks
+route_table_violations = filter route_table_resources as _, res {
+	check_route_table_routes(res) is true
+}
+
+# Combine violations
+route_violation_list = []
+for route_violations as _, v {
+	route_violation_list += [{
+		"address":        v.address else "",
+		"module_address": v.module_address else "",
+		"message":        generate_violation_message(v),
+	}]
+}
+
+route_table_violation_list = []
+for route_table_violations as _, v {
+	route_table_violation_list += [{
+		"address":        v.address else "",
+		"module_address": v.module_address else "",
+		"message":        generate_route_table_violation_message(v),
+	}]
+}
+
+all_violations = route_violation_list + route_table_violation_list
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations":  all_violations,
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	all_violations is empty
+}

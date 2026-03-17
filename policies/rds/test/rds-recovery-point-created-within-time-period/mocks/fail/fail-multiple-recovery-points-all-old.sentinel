@@ -1,0 +1,66 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_db_instance.main": {
+      "address": "aws_db_instance.main",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "main",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_db_instance",
+      "values": {
+        "identifier": "test-rds-instance-all-old",
+        "engine": "postgres",
+        "instance_class": "db.t3.micro",
+        "allocated_storage": 20,
+        "backup_retention_period": 30,
+        "tags": {
+          "Name": "test-rds-all-old",
+          "BackupStatus": "outdated",
+        },
+      },
+    },
+    "aws_backup_selection.main": {
+      "address": "aws_backup_selection.main",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "main",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_selection",
+      "values": {
+        "name": "rds-backup-selection-all-old",
+        "plan_id": "backup-plan-999",
+        "resources": [
+          "arn:aws:rds:us-east-1:123456789012:db:test-rds-instance-all-old",
+        ],
+      },
+    },
+    "aws_backup_vault.main": {
+      "address": "aws_backup_vault.main",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "main",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_vault",
+      "values": {
+        "name": "rds-backup-vault-all-old",
+        "recovery_points": 8,
+      },
+    },
+  },
+}

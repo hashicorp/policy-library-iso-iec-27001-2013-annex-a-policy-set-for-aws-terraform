@@ -1,0 +1,41 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_cloudtrail.non_compliant": {
+      "address": "aws_cloudtrail.non_compliant",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "non_compliant",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_cloudtrail",
+      "values": {
+        "is_multi_region_trail": true,
+        "include_global_service_events": true,
+        "name": "multi-region-trail",
+        "s3_bucket_name": "my-cloudtrail-bucket",
+        "advanced_event_selector": [
+          {
+            "name": "exclude-rds-data-api",
+            "field_selector": [
+              {
+                "field": "eventCategory",
+                "equals": ["Management"],
+              },
+              {
+                "field": "eventSource",
+                "not_equals": ["rdsdata.amazonaws.com"],
+              },
+            ],
+          },
+        ],
+      },
+    },
+  },
+}

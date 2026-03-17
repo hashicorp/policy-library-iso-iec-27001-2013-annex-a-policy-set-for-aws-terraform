@@ -1,0 +1,40 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_route_table.main": {
+      "address": "aws_route_table.main",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "main",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_route_table",
+      "values": {
+        "route": [
+          {
+            "cidr_block": "0.0.0.0/0",
+            "gateway_id": "",
+            "ipv6_cidr_block": "",
+            "nat_gateway_id": "",
+            "egress_only_gateway_id": "eigw-12345678",
+            "vpc_peering_connection_id": "",
+            "network_interface_id": "",
+            "transit_gateway_id": "",
+            "carrier_gateway_id": "",
+            "core_network_arn": "",
+            "destination_prefix_list_id": "",
+            "local_gateway_id": "",
+            "vpc_endpoint_id": "",
+          },
+        ],
+        "vpc_id": "vpc-12345678",
+      },
+    },
+  },
+}

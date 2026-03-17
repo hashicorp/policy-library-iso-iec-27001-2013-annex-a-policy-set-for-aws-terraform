@@ -1,0 +1,25 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_emr_cluster.example": {
+      "address": "aws_emr_cluster.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_emr_cluster",
+      "values": {
+        "name": "emr-cluster-without-kerberos",
+        "release_label": "emr-6.10.0",
+        "service_role": "EMR_DefaultRole",
+      },
+    },
+  },
+}

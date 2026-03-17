@@ -1,0 +1,66 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_db_instance.main": {
+      "address": "aws_db_instance.main",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "main",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_db_instance",
+      "values": {
+        "identifier": "mydb-instance",
+        "engine": "mysql",
+        "instance_class": "db.t3.micro",
+        "allocated_storage": 20,
+        "backup_retention_period": 7,
+        "tags": {
+          "Name": "MyRDSInstance",
+        },
+      },
+    },
+    "aws_backup_selection.rds_backup": {
+      "address": "aws_backup_selection.rds_backup",
+      "depends_on": ["aws_db_instance.main"],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "rds_backup",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_selection",
+      "values": {
+        "name": "rds-backup-selection",
+        "plan_id": "backup-plan-123",
+        "resources": ["arn:aws:rds:us-east-1:123456789012:db:mydb-instance"],
+      },
+    },
+    "aws_backup_recovery_point.rds_recovery": {
+      "address": "aws_backup_recovery_point.rds_recovery",
+      "depends_on": ["aws_db_instance.main"],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "rds_recovery",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_backup_recovery_point",
+      "values": {
+        "backup_vault_name": "Default",
+        "resource_arn": "arn:aws:rds:us-east-1:123456789012:db:mydb-instance",
+        "creation_date": "2026-03-16T10:00:00Z",
+        "completion_date": "2026-03-16T10:30:00Z",
+        "status": "COMPLETED",
+      },
+    },
+  },
+}
