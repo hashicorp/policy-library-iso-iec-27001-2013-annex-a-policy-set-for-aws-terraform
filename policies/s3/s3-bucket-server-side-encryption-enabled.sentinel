@@ -15,7 +15,7 @@ import "json"
 
 # Constants
 const = {
-	"policy_name":                          "ss3-bucket-server-side-encryption-enabled",
+	"policy_name":                          "s3-bucket-server-side-encryption-enabled",
 	"resource_aws_s3_bucket":               "aws_s3_bucket",
 	"resource_aws_s3_bucket_policy":        "aws_s3_bucket_policy",
 	"resource_aws_s3_bucket_server_side_encryption_configuration": "aws_s3_bucket_server_side_encryption_configuration",

@@ -33,14 +33,21 @@ is_unrestricted_cidr = func(cidr) {
 
 # Check if an ingress rule allows SSH from unrestricted sources
 has_unrestricted_ssh = func(from_port, to_port, protocol, cidr_blocks, ipv6_cidr_blocks) {
-	# Check if the rule applies to SSH port
-	ssh_port_covered = (from_port <= const.ssh_port and to_port >= const.ssh_port) or
-		(from_port is 0 and to_port is 0)
-	
 	# Check if protocol is TCP or all protocols
-	protocol_matches = protocol is "tcp" or protocol is "-1" or protocol is "all"
+	protocol_is_tcp = protocol is "tcp"
+	protocol_is_all = protocol is "-1" or protocol is "all"
 	
-	if ssh_port_covered and protocol_matches {
+	# For TCP protocol, check if the port range includes SSH port (22)
+	# For all protocols (-1 or "all"), any port range covers SSH since it covers all protocols/ports
+	ssh_port_covered = false
+	if protocol_is_tcp {
+		ssh_port_covered = from_port <= const.ssh_port and to_port >= const.ssh_port
+	} else if protocol_is_all {
+		# Protocol "-1" or "all" means all protocols and all ports, so SSH is always covered
+		ssh_port_covered = true
+	}
+	
+	if ssh_port_covered {
 		# Check for unrestricted IPv4 CIDR blocks
 		for cidr_blocks as cidr {
 			if is_unrestricted_cidr(cidr) {
@@ -129,6 +136,8 @@ for sgr_violations as _, v {
 	}]
 }
 
+violations = sg_violations + sgr_violations
+
 summary = {
 	"policy_name": const.policy_name,
 	"violations":  all_violations,
@@ -141,5 +150,3 @@ print(report.generate_policy_report(summary))
 main = rule {
 	violations is empty
 }
-
-violations = sg_violations + sgr_violations

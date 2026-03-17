@@ -84,22 +84,15 @@ generate_route_table_violation_message = func(violation) {
 route_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).resources
 route_table_resources = tf.plan(tfplan.planned_values.resources).type(const.route_table_type).resources
 
-print("DEBUG: route_resources count:", length(route_resources))
-print("DEBUG: route_table_resources count:", length(route_table_resources))
-
 # Check individual aws_route resources
 route_violations = filter route_resources as _, res {
 	is_public_route_to_igw(res) is true
 }
 
-print("DEBUG: route_violations count:", length(route_violations))
-
 # Check aws_route_table resources with inline route blocks
 route_table_violations = filter route_table_resources as _, res {
 	check_route_table_routes(res) is true
 }
-
-print("DEBUG: route_table_violations count:", length(route_table_violations))
 
 # Combine violations
 route_violation_list = []
@@ -113,9 +106,6 @@ for route_violations as _, v {
 
 route_table_violation_list = []
 for route_table_violations as _, v {
-	print("DEBUG: Processing route_table violation:", v.address)
-	print("DEBUG: v.address:", v.address)
-	print("DEBUG: v.module_address:", v.module_address)
 	route_table_violation_list += [{
 		"address":        v.address else "",
 		"module_address": v.module_address else "",
@@ -124,7 +114,6 @@ for route_table_violations as _, v {
 }
 
 all_violations = route_violation_list + route_table_violation_list
-print("DEBUG: all_violations:", all_violations)
 
 summary = {
 	"policy_name": const.policy_name,

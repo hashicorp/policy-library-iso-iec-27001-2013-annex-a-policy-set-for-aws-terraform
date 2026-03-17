@@ -1,0 +1,38 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+  "outputs": {},
+  "resources": {
+    "aws_security_group.example": {
+      "address": "aws_security_group.example",
+      "depends_on": [],
+      "deposed_key": "",
+      "index": null,
+      "mode": "managed",
+      "module_address": "",
+      "name": "example",
+      "provider_name": "aws",
+      "tainted": false,
+      "type": "aws_security_group",
+      "values": {
+        "description": "Security group with all protocols (-1) open to world",
+        "ingress": [
+          {
+            "cidr_blocks": ["0.0.0.0/0"],
+            "description": "All protocols from anywhere",
+            "from_port": 0,
+            "ipv6_cidr_blocks": [],
+            "prefix_list_ids": [],
+            "protocol": "-1",
+            "security_groups": [],
+            "self": false,
+            "to_port": 0,
+          },
+        ],
+        "name": "allow-all-protocols-public",
+        "vpc_id": "vpc-12345678",
+      },
+    },
+  },
+}

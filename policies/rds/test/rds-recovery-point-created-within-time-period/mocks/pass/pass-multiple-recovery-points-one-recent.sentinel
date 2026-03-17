@@ -75,8 +75,8 @@ planned_values = {
       "values": {
         "backup_vault_name": "rds-backup-vault-multiple",
         "resource_arn": "arn:aws:rds:us-east-1:123456789012:db:test-rds-instance-multiple",
-        "creation_date": "2023-01-15T10:00:00Z",
-        "completion_date": "2023-01-15T10:30:00Z",
+        "creation_date": "2025-01-15T10:00:00Z",
+        "completion_date": "2025-01-15T10:30:00Z",
         "status": "COMPLETED",
       },
     },
@@ -94,8 +94,8 @@ planned_values = {
       "values": {
         "backup_vault_name": "rds-backup-vault-multiple",
         "resource_arn": "arn:aws:rds:us-east-1:123456789012:db:test-rds-instance-multiple",
-        "creation_date": "2024-03-10T10:00:00Z",
-        "completion_date": "2024-03-10T10:30:00Z",
+        "creation_date": "2026-03-16T10:00:00Z",
+        "completion_date": "2026-03-16T10:30:00Z",
         "status": "COMPLETED",
       },
     },
