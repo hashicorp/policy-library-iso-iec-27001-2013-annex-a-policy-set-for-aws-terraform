@@ -18,8 +18,8 @@ const = {
 	"policy_name":                    "ec2-security-group-attached-to-eni-periodic",
 	"resource_aws_network_interface": "aws_network_interface",
 	"security_groups":                "security_groups",
-	"message_no_sg":                  "Elastic network interface must have security groups attached. Refer to AWS Audit Manager requirements for more details.",
-	"message_default_sg":             "Elastic network interface must not use default security groups. Refer to AWS Audit Manager requirements for more details.",
+	"message_no_sg":                  "Elastic network interface must have security groups attached. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-security-group-attached-to-eni-periodic.html for more details.",
+	"message_default_sg":             "Elastic network interface must not use default security groups. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-security-group-attached-to-eni-periodic.html for more details.",
 }
 
 # Functions

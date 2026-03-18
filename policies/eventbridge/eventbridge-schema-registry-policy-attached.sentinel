@@ -16,16 +16,16 @@ const = {
 	"policy_name":                          "eventbridge-schema-registry-policy-attached",
 	"resource_aws_schemas_registry":        "aws_schemas_registry",
 	"resource_aws_schemas_registry_policy": "aws_schemas_registry_policy",
-	"message": "Custom Amazon EventBridge schema registries must have a resource policy attached.",
+	"message": "Custom Amazon EventBridge schema registries must have a resource policy attached. Refer to https://docs.aws.amazon.com/config/latest/developerguide/custom-schema-registry-policy-attached.html for more details.",
 }
 
 # Functions
 generate_violation_message = func(registry_name) {
 	# Handle null, empty string, or missing registry name
 	if length(registry_name) is 0 {
-		return const.message + " Registry name is undefined."
+		return "Custom Amazon EventBridge schema registries must have a resource policy attached. Registry name is undefined. Refer to https://docs.aws.amazon.com/config/latest/developerguide/custom-schema-registry-policy-attached.html for more details."
 	}
-	return const.message + " Registry '" + registry_name + "' does not have a resource policy attached."
+	return "Custom Amazon EventBridge schema registries must have a resource policy attached. Registry '" + registry_name + "' does not have a resource policy attached. Refer to https://docs.aws.amazon.com/config/latest/developerguide/custom-schema-registry-policy-attached.html for more details."
 }
 
 # Get all registry names that have policies

@@ -20,6 +20,7 @@ param max_recovery_point_age_hours default 24
 # Constants
 const = {
 	"policy_name":                   "ec2-backup-recovery-point-time-period",
+	"message":                       "EC2 instances must have a compliant backup plan that creates recovery points within the specified time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-last-backup-recovery-point-created.html for more details.",
 	"resource_aws_backup_plan":      "aws_backup_plan",
 	"resource_aws_backup_selection": "aws_backup_selection",
 	"resource_aws_instance":         "aws_instance",
@@ -140,9 +141,9 @@ get_plan_name_from_address = func(address) {
 
 generate_violation_message = func(violation) {
 	if violation.type is "aws_instance" {
-		return "EC2 instance '" + violation.address + "' does not have a compliant backup plan that creates recovery points within " + string(max_recovery_point_age_hours) + " hours. Ensure EC2 instances are covered by backup plans that meet AWS Audit Manager requirements."
+		return "EC2 instance '" + violation.address + "' does not have a compliant backup plan that creates recovery points within " + string(max_recovery_point_age_hours) + " hours. Ensure EC2 instances are covered by backup plans that meet the requirements. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-last-backup-recovery-point-created.html for more details."
 	}
-	return "AWS Backup plan '" + violation.address + "' does not have a backup rule with a schedule that creates recovery points within " + string(max_recovery_point_age_hours) + " hours for EC2 instances. Ensure backup plans create recovery points within the specified time period to meet AWS Audit Manager requirements."
+	return "AWS Backup plan '" + violation.address + "' does not have a backup rule with a schedule that creates recovery points within " + string(max_recovery_point_age_hours) + " hours for EC2 instances. Ensure backup plans create recovery points within the specified time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-last-backup-recovery-point-created.html for more details."
 }
 
 # Variables

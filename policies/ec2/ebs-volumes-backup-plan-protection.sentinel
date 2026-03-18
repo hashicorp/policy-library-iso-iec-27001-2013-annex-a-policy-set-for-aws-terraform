@@ -17,7 +17,7 @@ const = {
 	"policy_name":                   "ebs-volumes-backup-plan-protection",
 	"resource_aws_ebs_volume":       "aws_ebs_volume",
 	"resource_aws_backup_selection": "aws_backup_selection",
-	"message_no_backup":             "EBS volume is not protected by any backup plan. Ensure all EBS volumes are included in AWS Backup plans.",
+	"message_no_backup":             "EBS volume is not protected by any backup plan. Ensure all EBS volumes are included in AWS Backup plans. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-in-backup-plan.html for more details.",
 }
 
 # Functions

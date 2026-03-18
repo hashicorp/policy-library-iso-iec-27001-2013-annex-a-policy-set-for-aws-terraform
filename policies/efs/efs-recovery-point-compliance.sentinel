@@ -22,7 +22,7 @@ const = {
 	"resource_aws_efs_file_system":  "aws_efs_file_system",
 	"resource_aws_backup_plan":      "aws_backup_plan",
 	"resource_aws_backup_selection": "aws_backup_selection",
-	"message":                       "EFS file system must have an associated AWS Backup plan with selection to ensure recovery points are created within the specified time period.",
+	"message":                       "EFS file system must have an associated AWS Backup plan with selection to ensure recovery points are created within the specified time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/efs-last-backup-recovery-point-created.html for more details.",
 }
 
 # Functions
@@ -33,7 +33,7 @@ generate_violation_message = func(efs_address) {
 		hours_text = string(days) + " day(s)"
 	}
 
-	return "EFS file system '" + efs_address + "' does not have an associated backup plan or selection to ensure recovery points are created within " + hours_text + ". Configure AWS Backup to protect this EFS file system. Refer to https://docs.aws.amazon.com/aws-backup/latest/devguide/whatisbackup.html for more details."
+	return "EFS file system '" + efs_address + "' does not have an associated backup plan or selection to ensure recovery points are created within " + hours_text + ". Configure AWS Backup to protect this EFS file system. Refer to https://docs.aws.amazon.com/config/latest/developerguide/efs-last-backup-recovery-point-created.html for more details."
 }
 
 # Check if a schedule string indicates compliant backup frequency

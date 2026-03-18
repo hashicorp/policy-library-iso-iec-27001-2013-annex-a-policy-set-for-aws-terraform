@@ -14,6 +14,7 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":                    "codebuild-project-artifact-encryption",
+	"message":                        "AWS CodeBuild project must have encryption enabled for all artifacts. Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-artifact-encryption.html for more details.",
 	"resource_aws_codebuild_project": "aws_codebuild_project",
 	"artifacts":                      "artifacts",
 	"secondary_artifacts":            "secondary_artifacts",
@@ -60,7 +61,7 @@ are_all_artifacts_encrypted = func(res) {
 }
 
 generate_violation_message = func(violation) {
-	return "AWS CodeBuild project '" + violation.address + "' must have encryption enabled for all artifacts. Set 'encryption_disabled' to false or omit it to enable encryption."
+	return "AWS CodeBuild project '" + violation.address + "' must have encryption enabled for all artifacts. Set 'encryption_disabled' to false or omit it to enable encryption. Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-artifact-encryption.html for more details."
 }
 
 # Variables

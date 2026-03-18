@@ -17,6 +17,7 @@ import "types"
 # Constants
 const = {
 	"policy_name":                      "ecs-task-definition-nonroot-user",
+	"message":                          "ECS task definition must specify a non-root user for all container definitions. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details.",
 	"resource_aws_ecs_task_definition": "aws_ecs_task_definition",
 	"container_definitions":            "container_definitions",
 	"user":                             "user",
@@ -70,7 +71,7 @@ check_container_definitions = func(res) {
 }
 
 generate_violation_message = func(violation) {
-	return "ECS task definition '" + violation.address + "' must specify a non-root user for all container definitions. Each container must have a 'user' attribute set to a non-root user (not '0' or 'root'). Refer to AWS Audit Manager best practices for container security."
+	return "ECS task definition '" + violation.address + "' must specify a non-root user for all container definitions. Each container must have a 'user' attribute set to a non-root user (not '0' or 'root'). Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details."
 }
 
 # Variables

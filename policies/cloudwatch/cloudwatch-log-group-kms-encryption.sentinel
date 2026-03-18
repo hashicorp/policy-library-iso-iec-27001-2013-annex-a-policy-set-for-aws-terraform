@@ -19,6 +19,7 @@ param kms_key_id default ""
 # Constants
 const = {
 	"policy_name":                       "cloudwatch-log-group-kms-encryption",
+	"message":                           "CloudWatch Log Group must be encrypted with an AWS KMS key. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details.",
 	"resource_aws_cloudwatch_log_group": "aws_cloudwatch_log_group",
 	"kms_key_id_attr":                   "kms_key_id",
 }
@@ -29,16 +30,16 @@ generate_violation_message = func(violation) {
 
 	if kms_key_id is "" {
 		if kms_key is "" {
-			return "CloudWatch Log Group must be encrypted with an AWS KMS key. Attribute 'kms_key_id' is not set."
+			return "CloudWatch Log Group must be encrypted with an AWS KMS key. Attribute 'kms_key_id' is not set. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details."
 		}
 	} else {
 		if kms_key is "" {
-			return "CloudWatch Log Group must be encrypted with AWS KMS key '" + kms_key_id + "'. Attribute 'kms_key_id' is not set."
+			return "CloudWatch Log Group must be encrypted with AWS KMS key '" + kms_key_id + "'. Attribute 'kms_key_id' is not set. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details."
 		}
-		return "CloudWatch Log Group must be encrypted with AWS KMS key '" + kms_key_id + "'. Current value is '" + kms_key + "'."
+		return "CloudWatch Log Group must be encrypted with AWS KMS key '" + kms_key_id + "'. Current value is '" + kms_key + "'. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details."
 	}
 
-	return "CloudWatch Log Group encryption check failed."
+	return "CloudWatch Log Group encryption check failed. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details."
 }
 
 is_encrypted_with_kms = func(res) {

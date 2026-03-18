@@ -17,7 +17,7 @@ const = {
 	"policy_name":                    "ec2-non-default-security-groups-attached-to-eni",
 	"resource_aws_network_interface": "aws_network_interface",
 	"security_groups":                "security_groups",
-	"message":                        "Elastic network interfaces should be attached to non-default security groups. Refer to AWS Audit Manager best practices for more details.",
+	"message":                        "Elastic network interfaces should be attached to non-default security groups. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-security-group-attached-to-eni.html for more details.",
 }
 
 # Functions

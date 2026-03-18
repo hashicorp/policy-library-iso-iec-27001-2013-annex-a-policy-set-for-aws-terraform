@@ -14,6 +14,7 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":          "ec2-instance-profile-required",
+	"message":              "EC2 instance must have an IAM instance profile attached for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details.",
 	"resource_type":        "aws_instance",
 	"iam_instance_profile": "iam_instance_profile",
 }
@@ -22,9 +23,9 @@ const = {
 generate_violation_message = func(violation) {
 	profile = maps.get(violation.values, const.iam_instance_profile, null)
 	if profile is null {
-		return "EC2 instance '" + violation.address + "' must have an IAM instance profile attached. The 'iam_instance_profile' attribute is required for proper identity and access management."
+		return "EC2 instance '" + violation.address + "' must have an IAM instance profile attached. The 'iam_instance_profile' attribute is required for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
 	}
-	return "EC2 instance '" + violation.address + "' has an empty 'iam_instance_profile' attribute. A valid IAM instance profile must be specified for proper identity and access management."
+	return "EC2 instance '" + violation.address + "' has an empty 'iam_instance_profile' attribute. A valid IAM instance profile must be specified for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
 }
 
 # Variables

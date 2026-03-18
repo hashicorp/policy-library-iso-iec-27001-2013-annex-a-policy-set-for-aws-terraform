@@ -14,6 +14,7 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":                              "api-gateway-cache-enabled-and-encrypted",
+	"message":                                  "API Gateway stages must have cache enabled and encrypted. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details.",
 	"resource_aws_api_gateway_stage":           "aws_api_gateway_stage",
 	"resource_aws_api_gateway_method_settings": "aws_api_gateway_method_settings",
 	"cache_cluster_enabled":                    "cache_cluster_enabled",
@@ -27,22 +28,22 @@ generate_stage_violation_message = func(violation) {
 	cache_encrypted = maps.get(violation.values, const.cache_data_encrypted, false)
 
 	if not cache_enabled {
-		return "API Gateway stage must have cache cluster enabled. Attribute 'cache_cluster_enabled' must be set to true. Refer to AWS Audit Manager API_GW_CACHE_ENABLED_AND_ENCRYPTED for more details."
+		return "API Gateway stage must have cache cluster enabled. Attribute 'cache_cluster_enabled' must be set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
 	}
 	if not cache_encrypted {
-		return "API Gateway stage must have cache data encrypted. Attribute 'cache_data_encrypted' must be set to true. Refer to AWS Audit Manager API_GW_CACHE_ENABLED_AND_ENCRYPTED for more details."
+		return "API Gateway stage must have cache data encrypted. Attribute 'cache_data_encrypted' must be set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
 	}
-	return "API Gateway stage must have cache enabled and encrypted. Refer to AWS Audit Manager API_GW_CACHE_ENABLED_AND_ENCRYPTED for more details."
+	return "API Gateway stage must have cache enabled and encrypted. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
 }
 
 generate_method_settings_violation_message = func(violation) {
 	settings = maps.get(violation.values, "settings", [])
 
 	if length(settings) == 0 {
-		return "API Gateway method settings must have caching enabled and cache encrypted. Settings block is missing or empty. Refer to AWS Audit Manager API_GW_CACHE_ENABLED_AND_ENCRYPTED for more details."
+		return "API Gateway method settings must have caching enabled and cache encrypted. Settings block is missing or empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
 	}
 
-	return "API Gateway method settings must have caching enabled and cache encrypted in the settings block. Refer to AWS Audit Manager API_GW_CACHE_ENABLED_AND_ENCRYPTED for more details."
+	return "API Gateway method settings must have caching enabled and cache encrypted in the settings block. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
 }
 
 is_stage_compliant = func(res) {

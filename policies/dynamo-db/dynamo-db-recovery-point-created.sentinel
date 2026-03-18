@@ -18,6 +18,7 @@ param backup_period_days default 1
 # Constants
 const = {
 	"policy_name":               "dynamo-db-recovery-point-created",
+	"message":                   "DynamoDB table must have point-in-time recovery enabled or be associated with an AWS Backup plan. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-last-backup-recovery-point-created.html for more details.",
 	"resource_dynamodb_table":   "aws_dynamodb_table",
 	"resource_backup_plan":      "aws_backup_plan",
 	"resource_backup_selection": "aws_backup_selection",
@@ -27,7 +28,7 @@ const = {
 
 # Functions
 generate_violation_message = func(violation) {
-	return "DynamoDB table '" + violation.address + "' does not have point-in-time recovery enabled or is not associated with an AWS Backup plan. Recovery points must be created within " + string(backup_period_days) + " day(s). Refer to AWS Audit Manager backup requirements for DynamoDB tables."
+	return "DynamoDB table '" + violation.address + "' does not have point-in-time recovery enabled or is not associated with an AWS Backup plan. Recovery points must be created within " + string(backup_period_days) + " day(s). Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-last-backup-recovery-point-created.html for more details."
 }
 
 # Check if point-in-time recovery is enabled for the DynamoDB table

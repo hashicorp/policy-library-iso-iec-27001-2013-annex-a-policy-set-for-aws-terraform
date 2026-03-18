@@ -14,7 +14,7 @@ import "collection/maps" as maps
 const = {
 	"policy_name":                   "athena-workgroup-encrypted-at-rest",
 	"resource_aws_athena_workgroup": "aws_athena_workgroup",
-	"message":                       "Amazon Athena workgroup must have encryption enabled at rest.",
+	"message":                       "Amazon Athena workgroup must have encryption enabled at rest. Refer to https://docs.aws.amazon.com/config/latest/developerguide/athena-workgroup-encrypted-at-rest.html for more details.",
 }
 
 # Functions

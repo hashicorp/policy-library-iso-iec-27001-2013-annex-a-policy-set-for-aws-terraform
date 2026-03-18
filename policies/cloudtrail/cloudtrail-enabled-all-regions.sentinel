@@ -14,6 +14,7 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":             "cloudtrail-enabled-all-regions",
+	"message":                 "CloudTrail must be enabled in all regions with multi-region trail and logging enabled. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-enabled.html for more details.",
 	"resource_aws_cloudtrail": "aws_cloudtrail",
 	"is_multi_region_trail":   "is_multi_region_trail",
 	"enable_logging":          "enable_logging",
@@ -25,11 +26,11 @@ generate_violation_message = func(violation) {
 	enable_logging = maps.get(violation.values, const.enable_logging, true)
 
 	if is_multi_region is false and enable_logging is false {
-		return "CloudTrail '" + violation.address + "' must have 'is_multi_region_trail' set to true and 'enable_logging' set to true. Refer to AWS Audit Manager best practices for more details."
+		return "CloudTrail '" + violation.address + "' must have 'is_multi_region_trail' set to true and 'enable_logging' set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-enabled.html for more details."
 	} else if is_multi_region is false {
-		return "CloudTrail '" + violation.address + "' must have 'is_multi_region_trail' set to true to enable logging in all regions. Refer to AWS Audit Manager best practices for more details."
+		return "CloudTrail '" + violation.address + "' must have 'is_multi_region_trail' set to true to enable logging in all regions. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-enabled.html for more details."
 	} else {
-		return "CloudTrail '" + violation.address + "' must have 'enable_logging' set to true. Refer to AWS Audit Manager best practices for more details."
+		return "CloudTrail '" + violation.address + "' must have 'enable_logging' set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-enabled.html for more details."
 	}
 }
 

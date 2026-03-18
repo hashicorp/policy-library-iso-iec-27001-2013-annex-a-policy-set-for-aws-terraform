@@ -726,8 +726,3 @@ policy "backup-recovery-point-manual-deletion-disabled" {
   source = "./policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel"
   enforcement_level = "advisory"
 }
-
-policy "backup-recovery-point-manual-deletion-disabled" {
-  source = "./policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel"
-  enforcement_level = "advisory"
-}

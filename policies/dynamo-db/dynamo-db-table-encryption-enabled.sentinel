@@ -14,6 +14,7 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":                 "dynamo-db-table-encryption-enabled",
+	"message":                     "DynamoDB table must have encryption enabled at rest. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encryption-enabled.html for more details.",
 	"resource_aws_dynamodb_table": "aws_dynamodb_table",
 	"server_side_encryption":      "server_side_encryption",
 	"enabled":                     "enabled",
@@ -24,10 +25,10 @@ generate_violation_message = func(violation) {
 	sse_blocks = maps.get(violation.values, const.server_side_encryption, [])
 
 	if length(sse_blocks) is 0 {
-		return "DynamoDB table '" + violation.address + "' must have server_side_encryption block configured to enable encryption at rest. Refer to https://docs.aws.amazon.com/securityhub/latest/userguide/dynamodb-controls.html for more details."
+		return "DynamoDB table '" + violation.address + "' must have server_side_encryption block configured to enable encryption at rest. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encryption-enabled.html for more details."
 	}
 
-	return "DynamoDB table '" + violation.address + "' must have encryption enabled. The 'enabled' attribute in the server_side_encryption block must be set to true. Refer to https://docs.aws.amazon.com/securityhub/latest/userguide/dynamodb-controls.html for more details."
+	return "DynamoDB table '" + violation.address + "' must have encryption enabled. The 'enabled' attribute in the server_side_encryption block must be set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encryption-enabled.html for more details."
 }
 
 is_encryption_enabled = func(res) {

@@ -19,6 +19,7 @@ param max_days_since_backup default 1
 # Constants
 const = {
 	"policy_name":              "aurora-recovery-point-created",
+	"message":                  "Aurora DB cluster must have automated backups configured to ensure recovery points are created. Refer to https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html for more details.",
 	"resource_aws_rds_cluster": "aws_rds_cluster",
 	"backup_retention_period":  "backup_retention_period",
 	"engine":                   "engine",
@@ -39,10 +40,10 @@ generate_violation_message = func(violation) {
 	backup_retention = maps.get(violation.values, const.backup_retention_period, 0)
 
 	if backup_retention is 0 {
-		return "Aurora DB cluster '" + violation.address + "' does not have automated backups enabled. The 'backup_retention_period' must be at least " + string(max_days_since_backup) + " day(s) to ensure recovery points are created. Refer to AWS Audit Manager best practices for backup and disaster recovery."
+		return "Aurora DB cluster '" + violation.address + "' does not have automated backups enabled. The 'backup_retention_period' must be at least " + string(max_days_since_backup) + " day(s) to ensure recovery points are created. Refer to https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html for more details."
 	}
 
-	return "Aurora DB cluster '" + violation.address + "' must have automated backups configured with a backup_retention_period of at least " + string(max_days_since_backup) + " day(s) to ensure recent recovery points are available. Current backup_retention_period: " + string(backup_retention) + ". Refer to AWS Audit Manager best practices for backup and disaster recovery."
+	return "Aurora DB cluster '" + violation.address + "' must have automated backups configured with a backup_retention_period of at least " + string(max_days_since_backup) + " day(s) to ensure recent recovery points are available. Current backup_retention_period: " + string(backup_retention) + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html for more details."
 }
 
 # Variables

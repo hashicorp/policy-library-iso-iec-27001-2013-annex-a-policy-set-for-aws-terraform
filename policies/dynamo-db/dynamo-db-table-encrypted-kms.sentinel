@@ -14,6 +14,7 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":             "dynamo-db-table-encrypted-kms",
+	"message":                 "DynamoDB table must have server-side encryption enabled with AWS KMS. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details.",
 	"resource_dynamodb_table": "aws_dynamodb_table",
 	"server_side_encryption":  "server_side_encryption",
 	"enabled":                 "enabled",
@@ -25,10 +26,10 @@ generate_violation_message = func(violation) {
 	sse_blocks = maps.get(violation.values, const.server_side_encryption, [])
 
 	if length(sse_blocks) is 0 {
-		return "DynamoDB table must have 'server_side_encryption' block configured with KMS encryption enabled. Refer to AWS Audit Manager compliance standards for more details."
+		return "DynamoDB table must have 'server_side_encryption' block configured with KMS encryption enabled. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
 	}
 
-	return "DynamoDB table 'server_side_encryption' block must have 'enabled' set to true and 'kms_key_arn' specified for KMS encryption. Refer to AWS Audit Manager compliance standards for more details."
+	return "DynamoDB table 'server_side_encryption' block must have 'enabled' set to true and 'kms_key_arn' specified for KMS encryption. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
 }
 
 is_kms_encrypted = func(res) {

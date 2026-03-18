@@ -20,6 +20,7 @@ param max_hours_since_backup default 24
 # Constants
 const = {
 	"policy_name":                "ebs-backup-recovery-point-created",
+	"message":                    "Amazon EBS volumes require a backup plan with recovery points created within the specified timeframe. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details.",
 	"resource_aws_backup_plan":   "aws_backup_plan",
 	"resource_aws_backup_vault":  "aws_backup_vault",
 	"resource_ebs_volume":        "aws_ebs_volume",
@@ -29,9 +30,9 @@ const = {
 # Functions
 generate_violation_message = func(violation, backup_plans_count) {
 	if backup_plans_count is 0 {
-		return "No AWS Backup plan found. Amazon EBS volumes require a backup plan with recovery points created within " + string(max_hours_since_backup) + " hours. Refer to AWS Backup documentation for more details."
+		return "No AWS Backup plan found. Amazon EBS volumes require a backup plan with recovery points created within " + string(max_hours_since_backup) + " hours. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details."
 	}
-	return "AWS Backup plan does not ensure recovery points are created within " + string(max_hours_since_backup) + " hours for Amazon EBS volumes. Verify backup schedule configuration."
+	return "AWS Backup plan does not ensure recovery points are created within " + string(max_hours_since_backup) + " hours for Amazon EBS volumes. Verify backup schedule configuration. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details."
 }
 
 # Check if a date string is within the allowed timeframe
