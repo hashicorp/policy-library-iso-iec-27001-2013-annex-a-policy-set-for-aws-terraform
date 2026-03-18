@@ -21,7 +21,7 @@ planned_values = {
 				"stage_name":            "prod",
 				"cache_cluster_enabled": true,
 				"cache_data_encrypted":  true,
-				"settings": [
+				"method_settings": [
 					{
 						"method_path":          "*/GET",
 						"caching_enabled":      true,
