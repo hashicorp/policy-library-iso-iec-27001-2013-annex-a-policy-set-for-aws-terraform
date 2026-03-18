@@ -611,11 +611,6 @@ policy "cloudtrail-security-best-practices" {
   enforcement_level = "advisory"
 }
 
-policy "cloudtrail-enabled-all-regions" {
-  source = "./policies/cloudtrail/cloudtrail-enabled-all-regions.sentinel"
-  enforcement_level = "advisory"
-}
-
 policy "cloudtrail-s3-dataevents-enabled" {
   source = "./policies/cloudtrail/cloudtrail-s3-dataevents-enabled.sentinel"
   enforcement_level = "advisory"
