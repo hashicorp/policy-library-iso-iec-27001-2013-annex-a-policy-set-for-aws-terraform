@@ -6,7 +6,7 @@
 
 ## Description
 
-This policy checks whether a private Amazon ECR repository has image scanning configured. The policy fails if the private ECR repository isn't configured for scan on push.
+This policy checks whether a private Amazon ECR repository has image scanning configured. The policy fails if the private ECR repository isn't configured for scan on push or continuous scanning.
 
 ECR image scanning helps in identifying software vulnerabilities in your container images. Configuring image scanning on ECR repositories adds a layer of verification for the integrity and safety of the images being stored.
 
