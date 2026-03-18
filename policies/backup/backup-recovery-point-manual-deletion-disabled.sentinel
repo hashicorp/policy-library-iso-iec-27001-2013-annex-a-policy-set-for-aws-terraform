@@ -6,7 +6,6 @@
 # a suitable 'Deny' statement with backup:DeleteRecoveryPoint, backup:UpdateRecoveryPointLifecycle,
 # and backup:PutBackupVaultAccessPolicy permissions.
 
-
 # Imports
 import "tfplan/v2" as tfplan
 import "tfresources" as tf
