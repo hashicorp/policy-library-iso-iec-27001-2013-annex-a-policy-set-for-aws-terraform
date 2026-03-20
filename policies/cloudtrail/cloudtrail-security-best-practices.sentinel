@@ -1,8 +1,10 @@
+# This policy ensures that at least one AWS CloudTrail trail is defined with security best practices
+# according to AWS Audit Manager requirements.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy ensures that at least one AWS CloudTrail trail is defined with security best practices
-# according to AWS Audit Manager requirements.
+
 
 # Imports
 import "tfplan/v2" as tfplan

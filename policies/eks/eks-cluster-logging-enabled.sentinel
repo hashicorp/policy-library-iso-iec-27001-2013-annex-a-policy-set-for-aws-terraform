@@ -1,8 +1,9 @@
+# This policy requires that Amazon EKS clusters have logging enabled for all log types
+# to provide comprehensive visibility into cluster operations and security events.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy requires that Amazon EKS clusters have logging enabled for all log types
-# to provide comprehensive visibility into cluster operations and security events.
 
 # Imports
 import "tfplan/v2" as tfplan

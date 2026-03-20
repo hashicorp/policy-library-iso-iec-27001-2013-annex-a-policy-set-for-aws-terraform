@@ -1,10 +1,12 @@
-# Copyright IBM Corp. 2026
-# SPDX-License-Identifier: BUSL-1.1
-
 # This policy checks if AWS Backup vaults have resource-based policies that prevent manual deletion of recovery points.
 # The rule is NON_COMPLIANT if the Backup Vault does not have resource-based policies or has policies without
 # a suitable 'Deny' statement with backup:DeleteRecoveryPoint, backup:UpdateRecoveryPointLifecycle,
 # and backup:PutBackupVaultAccessPolicy permissions.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+
 
 # Imports
 import "tfplan/v2" as tfplan

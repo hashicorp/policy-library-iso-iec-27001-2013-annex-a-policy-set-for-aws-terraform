@@ -1,9 +1,10 @@
-# Copyright IBM Corp. 2026
-# SPDX-License-Identifier: BUSL-1.1
-
 # This policy requires that AWS EFS file systems have a recovery point (backup) created
 # within a specified time period by verifying the existence of AWS Backup vault recovery points
 # associated with EFS file systems.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
 
 # Imports
 import "tfplan/v2" as tfplan

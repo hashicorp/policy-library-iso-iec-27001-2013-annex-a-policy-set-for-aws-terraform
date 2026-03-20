@@ -1,8 +1,9 @@
+# This policy verifies that Amazon CloudWatch Log Groups are encrypted with AWS KMS.
+# Optionally, it can check for a specific KMS key ID if provided.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy verifies that Amazon CloudWatch Log Groups are encrypted with AWS KMS.
-# Optionally, it can check for a specific KMS key ID if provided.
 
 # Imports
 import "tfplan/v2" as tfplan

@@ -1,8 +1,9 @@
+# This policy ensures that non-default security groups are attached to elastic network interfaces.
+# It validates that ENIs have security groups configured and that none of them are default security groups.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy ensures that non-default security groups are attached to elastic network interfaces.
-# It validates that ENIs have security groups configured and that none of them are default security groups.
 
 # Imports
 import "tfplan/v2" as tfplan

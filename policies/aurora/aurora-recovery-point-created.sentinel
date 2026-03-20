@@ -1,8 +1,8 @@
-# Copyright IBM Corp. 2026
-# SPDX-License-Identifier: BUSL-1.1
-
 # This policy ensures that a recovery point was created for Amazon Aurora DB clusters
 # within the specified time period to enable backup and disaster recovery capabilities.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
 
 # Imports
 import "tfplan/v2" as tfplan

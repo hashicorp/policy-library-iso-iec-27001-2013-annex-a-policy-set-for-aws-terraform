@@ -1,8 +1,9 @@
+# This policy ensures that recovery points are created for Amazon EBS volumes
+# within the specified time period by validating AWS Backup plan configuration.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy ensures that recovery points are created for Amazon EBS volumes
-# within the specified time period by validating AWS Backup plan configuration.
 
 # Imports
 import "tfplan/v2" as tfplan

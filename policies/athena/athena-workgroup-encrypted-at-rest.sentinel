@@ -1,7 +1,8 @@
+# This policy ensures that Amazon Athena workgroups are encrypted at rest.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy ensures that Amazon Athena workgroups are encrypted at rest.
 
 # Imports
 import "tfplan/v2" as tfplan

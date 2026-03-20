@@ -1,8 +1,9 @@
+# This policy requires that AWS EventBridge schema registries have a resource policy attached.
+# It checks that 'aws_schemas_registry_policy' resources are defined for 'aws_schemas_registry' resources.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy requires that AWS EventBridge schema registries have a resource policy attached.
-# It checks that 'aws_schemas_registry_policy' resources are defined for 'aws_schemas_registry' resources.
 
 # Imports
 import "tfplan/v2" as tfplan

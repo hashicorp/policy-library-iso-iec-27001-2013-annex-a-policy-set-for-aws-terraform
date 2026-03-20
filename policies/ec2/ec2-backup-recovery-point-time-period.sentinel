@@ -1,8 +1,9 @@
+# This policy verifies that a recovery point is created for EC2 instances within
+# the specified time period by checking AWS Backup plans and their associated rules.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy verifies that a recovery point is created for EC2 instances within
-# the specified time period by checking AWS Backup plans and their associated rules.
 
 # Imports
 import "tfplan/v2" as tfplan

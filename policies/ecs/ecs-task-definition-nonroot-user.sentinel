@@ -1,9 +1,10 @@
-# Copyright IBM Corp. 2026
-# SPDX-License-Identifier: BUSL-1.1
-
 # This policy requires that ECS task definitions specify a non-root user for container execution.
 # Each container definition in the task definition must have a 'user' attribute that specifies
 # a non-root user (not '0' or 'root').
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
 
 # Imports
 import "tfplan/v2" as tfplan

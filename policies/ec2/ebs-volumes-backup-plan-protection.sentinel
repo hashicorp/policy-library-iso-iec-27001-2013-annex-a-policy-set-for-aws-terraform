@@ -1,8 +1,9 @@
+# This policy checks if Amazon Elastic Block Store (Amazon EBS) volumes are protected by a backup plan.
+# EBS volumes should be included in AWS Backup plans to ensure data protection and disaster recovery.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy checks if Amazon Elastic Block Store (Amazon EBS) volumes are protected by a backup plan.
-# EBS volumes should be included in AWS Backup plans to ensure data protection and disaster recovery.
 
 # Imports
 import "tfplan/v2" as tfplan

@@ -1,8 +1,9 @@
+# This policy verifies that all methods in Amazon API Gateway stages have cache enabled and encrypted.
+# It checks both aws_api_gateway_stage and aws_api_gateway_method_settings resources.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy verifies that all methods in Amazon API Gateway stages have cache enabled and encrypted.
-# It checks both aws_api_gateway_stage and aws_api_gateway_method_settings resources.
 
 # Imports
 import "tfplan/v2" as tfplan

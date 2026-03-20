@@ -1,8 +1,9 @@
+# This policy requires that Capacity Rebalancing is enabled for Amazon EC2 Auto Scaling groups
+# that use multiple instance types.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy requires that Capacity Rebalancing is enabled for Amazon EC2 Auto Scaling groups
-# that use multiple instance types.
 
 # Imports
 import "tfplan/v2" as tfplan

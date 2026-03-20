@@ -1,8 +1,9 @@
+# This policy requires that EC2 instances have an IAM instance profile attached.
+# This ensures proper identity and access management for EC2 instances.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy requires that EC2 instances have an IAM instance profile attached.
-# This ensures proper identity and access management for EC2 instances.
 
 # Imports
 import "tfplan/v2" as tfplan

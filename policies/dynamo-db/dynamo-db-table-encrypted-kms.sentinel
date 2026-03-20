@@ -1,8 +1,9 @@
+# This policy verifies that AWS DynamoDB tables are encrypted with AWS KMS.
+# It checks the `server_side_encryption` block to ensure KMS encryption is enabled.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy verifies that AWS DynamoDB tables are encrypted with AWS KMS.
-# It checks the `server_side_encryption` block to ensure KMS encryption is enabled.
 
 # Imports
 import "tfplan/v2" as tfplan

@@ -1,8 +1,9 @@
+# This policy verifies that Amazon DynamoDB tables have backup recovery points
+# created within a specified period to support disaster recovery requirements.
+
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# This policy verifies that Amazon DynamoDB tables have backup recovery points
-# created within a specified period to support disaster recovery requirements.
 
 # Imports
 import "tfplan/v2" as tfplan
