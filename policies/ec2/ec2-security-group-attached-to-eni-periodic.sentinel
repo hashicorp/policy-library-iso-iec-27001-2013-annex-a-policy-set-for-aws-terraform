@@ -4,7 +4,6 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-
 # Imports
 import "tfplan/v2" as tfplan
 import "tfresources" as tf
