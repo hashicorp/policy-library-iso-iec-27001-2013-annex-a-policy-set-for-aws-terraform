@@ -12,7 +12,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "example",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_instance",
 			"values": {
@@ -23,6 +23,7 @@ planned_values = {
 						"device_index":          0,
 						"network_interface_id":  "eni-0123456789abcdef0",
 						"delete_on_termination": false,
+						"network_card_index":    0,
 					},
 				],
 				"vpc_security_group_ids": null,

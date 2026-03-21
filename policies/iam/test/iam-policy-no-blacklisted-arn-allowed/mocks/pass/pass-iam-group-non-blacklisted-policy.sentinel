@@ -12,7 +12,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "example",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_iam_group_policy_attachment",
 			"values": {

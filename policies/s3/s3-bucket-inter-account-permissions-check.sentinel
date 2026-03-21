@@ -14,8 +14,30 @@ import "json"
 import "types"
 
 # Parameters
-# controlPolicy is the JSON string of the control S3 bucket policy
+# controlPolicy is the JSON string of the control S3 bucket policy (max 1024 characters)
 param controlPolicy default ""
+
+# Validate controlPolicy parameter
+# Returns true if valid, false if invalid
+validate_control_policy = func() {
+	# Empty control policy is valid
+	if controlPolicy is "" {
+		return true
+	}
+
+	# Check length (max 1024 characters as per AWS Config rule)
+	if length(controlPolicy) > 1024 {
+		print("Error: Value for controlPolicy parameter must be an Amazon S3 bucket policy (max 1024 characters).")
+		return false
+	}
+
+	# Note: Invalid JSON will cause json.unmarshal to fail with an error during policy execution
+	# This is the expected behavior as per AWS Config rule documentation
+	return true
+}
+
+# Validate control policy at load time
+control_policy_valid = validate_control_policy()
 
 # Constants
 const = {
@@ -260,5 +282,5 @@ print(report.generate_policy_report(summary))
 
 # Rules
 main = rule {
-	violations is empty
+	control_policy_valid and violations is empty
 }

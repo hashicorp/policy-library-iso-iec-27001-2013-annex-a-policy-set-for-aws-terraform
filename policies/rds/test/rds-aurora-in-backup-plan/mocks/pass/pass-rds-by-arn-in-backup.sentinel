@@ -12,7 +12,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "database",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_db_instance",
 			"values": {
@@ -30,7 +30,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "prod",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_backup_plan",
 			"values": {
@@ -46,7 +46,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "prod",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_backup_selection",
 			"values": {

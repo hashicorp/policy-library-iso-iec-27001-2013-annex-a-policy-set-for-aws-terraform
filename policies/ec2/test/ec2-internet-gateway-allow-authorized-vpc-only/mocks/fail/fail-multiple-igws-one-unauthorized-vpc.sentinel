@@ -12,7 +12,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "igw_authorized",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_internet_gateway",
 			"values": {
@@ -30,7 +30,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "igw_unauthorized",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_internet_gateway",
 			"values": {

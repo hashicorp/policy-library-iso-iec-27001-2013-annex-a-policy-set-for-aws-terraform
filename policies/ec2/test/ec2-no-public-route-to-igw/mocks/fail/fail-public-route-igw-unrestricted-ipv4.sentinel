@@ -12,10 +12,11 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "example",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_route_table",
 			"values": {
+				"id": "rtb-fail123",
 				"route": [
 					{
 						"cidr_block":                  "0.0.0.0/0",

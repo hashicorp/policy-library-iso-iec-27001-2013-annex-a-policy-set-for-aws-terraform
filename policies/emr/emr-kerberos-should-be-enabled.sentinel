@@ -8,6 +8,9 @@ import "tfresources" as tf
 import "report" as report
 import "collection" as collection
 import "collection/maps" as maps
+import "strings"
+import "types"
+import "json"
 
 # Constants
 const = {
@@ -20,58 +23,190 @@ const = {
 
 # Functions
 generate_violation_message = func(violation) {
-	return "Amazon EMR cluster must have Kerberos authentication enabled. Either the 'kerberos_attributes' block must be configured or a 'security_configuration' with Kerberos must be attached. Refer to https://docs.aws.amazon.com/config/latest/developerguide/emr-kerberos-enabled.html for more details."
+	return "Amazon EMR cluster must have Kerberos authentication enabled with valid configuration. Either the 'kerberos_attributes' block must be properly configured or a 'security_configuration' with Kerberos must be attached. " + violation.details + " Refer to https://docs.aws.amazon.com/config/latest/developerguide/emr-kerberos-enabled.html for more details."
 }
 
-# Check if a security configuration has Kerberos enabled
+# Validate Kerberos parameters in kerberos_attributes
+validate_kerberos_params = func(kerberos_attrs) {
+	if length(kerberos_attrs) == 0 {
+		return {
+			"valid":   false,
+			"details": "kerberos_attributes block is empty.",
+		}
+	}
+
+	attrs = kerberos_attrs[0]
+
+	# Get all relevant attributes
+	realm = maps.get(attrs, "realm", null)
+	kdc_admin_password = maps.get(attrs, "kdc_admin_password", null)
+	ad_domain_join_user = maps.get(attrs, "ad_domain_join_user", null)
+	ad_domain_join_password = maps.get(attrs, "ad_domain_join_password", null)
+
+	# Check conditions
+	has_realm = realm is not null and realm != ""
+	has_kdc_password = kdc_admin_password is not null and kdc_admin_password != ""
+	has_ad_user = ad_domain_join_user is not null and ad_domain_join_user != ""
+	has_ad_password = ad_domain_join_password is not null and ad_domain_join_password != ""
+
+	# Build issues list by collecting all issues first
+	issue1 = ""
+	issue2 = ""
+	issue3 = ""
+
+	# Check 1: At least realm or kdc_admin_password should be present
+	if not has_realm and not has_kdc_password {
+		issue1 = "Either 'realm' or 'kdc_admin_password' must be specified in kerberos_attributes"
+	}
+
+	# Check 2: If realm is present, validate it's a string
+	if has_realm and types.type_of(realm) != "string" {
+		issue2 = "realm must be a string"
+	}
+
+	# Check 3: Validate cross-realm trust parameters
+	if has_ad_user and not has_ad_password {
+		issue3 = "ad_domain_join_password is required when ad_domain_join_user is specified"
+	}
+
+	# Collect non-empty issues
+	issues = []
+	if issue1 != "" {
+		issues = append(issues, issue1)
+	}
+	if issue2 != "" {
+		issues = append(issues, issue2)
+	}
+	if issue3 != "" {
+		issues = append(issues, issue3)
+	}
+
+	# Note: cross_realm_trust_principal_password is optional and only required
+	# when establishing cross-realm trust with a KDC in a different realm
+	# We don't enforce it here as it's context-dependent
+
+	if length(issues) > 0 {
+		return {
+			"valid":   false,
+			"details": "Kerberos configuration issues: " + strings.join(issues, "; "),
+		}
+	}
+
+	return {
+		"valid":   true,
+		"details": "",
+	}
+}
+
+# Validate Kerberos parameters in security configuration JSON
+validate_security_config_kerberos = func(config_json) {
+	if config_json is null or config_json == "" {
+		return {
+			"valid":   false,
+			"details": "Security configuration JSON is empty",
+		}
+	}
+
+	# Parse the JSON configuration
+	config = json.unmarshal(config_json)
+	if config is null {
+		return {
+			"valid":   false,
+			"details": "Failed to parse security configuration JSON",
+		}
+	}
+
+	# Navigate to KerberosConfiguration
+	auth_config = maps.get(config, "AuthenticationConfiguration", null)
+	if auth_config is null {
+		return {
+			"valid":   false,
+			"details": "No AuthenticationConfiguration found in security configuration",
+		}
+	}
+
+	kerberos_config = maps.get(auth_config, "KerberosConfiguration", null)
+	if kerberos_config is null {
+		return {
+			"valid":   false,
+			"details": "No KerberosConfiguration found in security configuration",
+		}
+	}
+
+	# If we reach here, Kerberos is configured - just return valid
+	# Advanced parameter validation can be added later if needed
+	return {
+		"valid":   true,
+		"details": "",
+	}
+}
+
+# Check if a security configuration has Kerberos enabled and validate it
 has_kerberos_in_config = func(config_name, security_configs) {
 	for security_configs as _, sc {
 		if maps.get(sc.values, "name", "") == config_name {
 			config_json = maps.get(sc.values, "configuration", "")
 			# Check if the configuration JSON contains Kerberos settings
 			if config_json contains "KerberosConfiguration" {
-				return true
+				# Validate the Kerberos configuration
+				return validate_security_config_kerberos(config_json)
 			}
 		}
 	}
-	return false
+	return {
+		"valid":   false,
+		"details": "Security configuration not found or does not contain KerberosConfiguration",
+	}
 }
 
-is_kerberos_enabled = func(res, security_configs) {
+is_kerberos_enabled_and_valid = func(res, security_configs) {
 	# Check if kerberos_attributes block exists and is not empty
 	# kerberos_attributes is a list in Terraform plan
 	kerberos_attrs = maps.get(res.values, const.kerberos_attributes, [])
 
-	# If kerberos_attributes is configured, Kerberos is enabled
+	# If kerberos_attributes is configured, validate parameters
 	if length(kerberos_attrs) > 0 {
-		return true
+		validation = validate_kerberos_params(kerberos_attrs)
+		return validation
 	}
 
 	# Check if security_configuration is set and has Kerberos enabled
 	security_config = maps.get(res.values, const.security_configuration, null)
 	if security_config is not null and security_config != "" {
-		return has_kerberos_in_config(security_config, security_configs)
+		validation = has_kerberos_in_config(security_config, security_configs)
+		return validation
 	}
 
-	return false
+	return {
+		"valid":   false,
+		"details": "No Kerberos configuration found (neither kerberos_attributes nor security_configuration with Kerberos).",
+	}
 }
 
 # Variables
 resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_emr_cluster).resources
 security_configs = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_emr_security_config).resources
 
+# Helper function to create violation entry
+create_violation = func(res, security_configs) {
+	validation = is_kerberos_enabled_and_valid(res, security_configs)
+	return {
+		"address":        res.address,
+		"module_address": res.module_address,
+		"message":        generate_violation_message({"details": validation.details}),
+	}
+}
+
+# Check each resource and collect violations
 violations = collection.reject(resources, func(res) {
-	return is_kerberos_enabled(res, security_configs)
+	validation = is_kerberos_enabled_and_valid(res, security_configs)
+	return validation.valid
 })
 
 summary = {
 	"policy_name": const.policy_name,
 	"violations": map violations as _, v {
-		{
-			"address":        v.address,
-			"module_address": v.module_address,
-			"message":        generate_violation_message(v),
-		}
+		create_violation(v, security_configs)
 	},
 }
 

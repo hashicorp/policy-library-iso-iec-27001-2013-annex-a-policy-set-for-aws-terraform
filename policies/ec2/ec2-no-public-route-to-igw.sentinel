@@ -12,10 +12,12 @@ import "collection" as collection
 import "collection/maps" as maps
 import "strings"
 
+# Parameters
+param routeTableIds default ""
+
 # Constants
 const = {
 	"policy_name":       "ec2-no-public-route-to-igw",
-	"resource_type":     "aws_route",
 	"route_table_type":  "aws_route_table",
 	"cidr_block":        "cidr_block",
 	"ipv6_cidr_block":   "ipv6_cidr_block",
@@ -25,18 +27,20 @@ const = {
 }
 
 # Functions
-generate_violation_message = func(violation) {
-	cidr = maps.get(violation.values, const.cidr_block, "")
-	ipv6_cidr = maps.get(violation.values, const.ipv6_cidr_block, "")
-	gateway_id = maps.get(violation.values, const.gateway_id, "")
-
-	if cidr is const.unrestricted_ipv4 {
-		return "Route with unrestricted IPv4 access (0.0.0.0/0) to Internet Gateway '" + gateway_id + "' detected. This creates a public route with unrestricted access. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
+parse_allowed_route_table_ids = func() {
+	if routeTableIds is "" {
+		return []
 	}
-	if ipv6_cidr is const.unrestricted_ipv6 {
-		return "Route with unrestricted IPv6 access (::/0) to Internet Gateway '" + gateway_id + "' detected. This creates a public route with unrestricted access. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
+	# Split by comma and trim whitespace
+	ids = strings.split(routeTableIds, ",")
+	trimmed_ids = []
+	for ids as id {
+		trimmed_id = strings.trim_space(id)
+		if trimmed_id != "" {
+			trimmed_ids += [trimmed_id]
+		}
 	}
-	return "Route with unrestricted access to Internet Gateway '" + gateway_id + "' detected. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
+	return trimmed_ids
 }
 
 is_internet_gateway = func(gateway_id) {
@@ -47,20 +51,30 @@ is_internet_gateway = func(gateway_id) {
 	return strings.has_prefix(gateway_id, "igw-")
 }
 
-has_unrestricted_cidr = func(res) {
-	cidr = maps.get(res.values, const.cidr_block, "")
-	ipv6_cidr = maps.get(res.values, const.ipv6_cidr_block, "")
+is_route_table_allowed = func(route_table_id, allowed_ids) {
+	# If no allowed IDs specified, all route tables are subject to the policy
+	if length(allowed_ids) is 0 {
+		return false
+	}
 
-	return cidr is const.unrestricted_ipv4 or ipv6_cidr is const.unrestricted_ipv6
+	# Check if this route table ID is in the allowed list
+	for allowed_ids as allowed_id {
+		if route_table_id is allowed_id {
+			return true
+		}
+	}
+	return false
 }
 
-is_public_route_to_igw = func(res) {
-	gateway_id = maps.get(res.values, const.gateway_id, "")
+check_route_table_routes = func(route_table_res, allowed_ids) {
+	# Get the route table ID if available
+	route_table_id = maps.get(route_table_res.values, "id", "")
 
-	return is_internet_gateway(gateway_id) and has_unrestricted_cidr(res)
-}
+	# If this route table is in the allowed list, skip validation
+	if is_route_table_allowed(route_table_id, allowed_ids) {
+		return false
+	}
 
-check_route_table_routes = func(route_table_res) {
 	routes = maps.get(route_table_res.values, "route", [])
 
 	for routes as route {
@@ -77,43 +91,28 @@ check_route_table_routes = func(route_table_res) {
 }
 
 generate_route_table_violation_message = func(violation) {
-	return "Route table contains routes with unrestricted access (0.0.0.0/0 or ::/0) to an Internet Gateway. This creates public routes with unrestricted access. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
+	route_table_id = maps.get(violation.values, "id", "unknown")
+	return "Route table '" + route_table_id + "' contains routes with unrestricted access (0.0.0.0/0 or ::/0) to an Internet Gateway. This creates public routes with unrestricted access. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
 }
 
 # Variables
-route_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).resources
+allowed_route_table_ids = parse_allowed_route_table_ids()
 route_table_resources = tf.plan(tfplan.planned_values.resources).type(const.route_table_type).resources
-
-# Check individual aws_route resources
-route_violations = filter route_resources as _, res {
-	is_public_route_to_igw(res) is true
-}
 
 # Check aws_route_table resources with inline route blocks
 route_table_violations = filter route_table_resources as _, res {
-	check_route_table_routes(res) is true
+	check_route_table_routes(res, allowed_route_table_ids) is true
 }
 
-# Combine violations
-route_violation_list = []
-for route_violations as _, v {
-	route_violation_list += [{
-		"address":        v.address else "",
-		"module_address": v.module_address else "",
-		"message":        generate_violation_message(v),
-	}]
-}
-
-route_table_violation_list = []
+# Build violations list
+all_violations = []
 for route_table_violations as _, v {
-	route_table_violation_list += [{
+	all_violations += [{
 		"address":        v.address else "",
 		"module_address": v.module_address else "",
 		"message":        generate_route_table_violation_message(v),
 	}]
 }
-
-all_violations = route_violation_list + route_table_violation_list
 
 summary = {
 	"policy_name": const.policy_name,

@@ -20,12 +20,8 @@ mock "report" {
   }
 }
 
-param "required_managed_policies" {
-  value = [
-    "arn:aws:iam::aws:policy/ReadOnlyAccess",
-    "arn:aws:iam::aws:policy/SecurityAudit",
-    "arn:aws:iam::aws:policy/ViewOnlyAccess"
-  ]
+param "managedPolicyArns" {
+  value = "arn:aws:iam::aws:policy/ReadOnlyAccess,arn:aws:iam::aws:policy/SecurityAudit,arn:aws:iam::aws:policy/ViewOnlyAccess"
 }
 
 test {

@@ -13,6 +13,10 @@ import "collection/maps" as maps
 import "strings"
 import "json"
 
+# Parameters
+param policyARN default ""
+param policyUsageType default "ANY"
+
 # Constants
 const = {
 	"policy_name":                              "iam-policy-arn-should-be-attached",
@@ -36,13 +40,6 @@ get_policy_arn = func(res) {
 }
 
 # Helper function to check if a policy_arn reference matches a policy identifier
-# Matching strategy:
-# 1. Direct match: policy_arn == policy_identifier
-# 2. Reference match: policy_arn contains the policy address (e.g., "${aws_iam_policy.my_policy.arn}")
-# 3. Terraform reference patterns: Handles various reference formats like:
-#    - aws_iam_policy.my_policy.arn
-#    - ${aws_iam_policy.my_policy.arn}
-#    - module.my_module.aws_iam_policy.my_policy.arn
 matches_policy = func(policy_arn, policy_identifier) {
 	# Direct match
 	if policy_arn is policy_identifier {
@@ -159,26 +156,62 @@ is_policy_attached_via_generic = func(policy_identifier, generic_attachments) {
 	return false
 }
 
-is_policy_in_use = func(policy, user_attachments, group_attachments, role_attachments, generic_attachments, group_memberships, roles) {
+is_policy_in_use = func(policy, user_attachments, group_attachments, role_attachments, generic_attachments, group_memberships, roles, usage_type) {
 	policy_identifier = get_policy_arn(policy)
 
-	# Check if policy is attached to any users
-	if is_policy_attached_to_user(policy_identifier, user_attachments) {
+	# Check based on policyUsageType parameter
+	if usage_type is "IAM_USER" or usage_type is "ANY" {
+		# Check if policy is attached to any users
+		if is_policy_attached_to_user(policy_identifier, user_attachments) {
+			return true
+		}
+	}
+
+	if usage_type is "IAM_GROUP" or usage_type is "ANY" {
+		# Check if policy is attached to groups with members
+		if is_policy_attached_to_group(policy_identifier, group_attachments, group_memberships) {
+			return true
+		}
+	}
+
+	if usage_type is "IAM_ROLE" or usage_type is "ANY" {
+		# Check if policy is attached to roles with trusted entities
+		if is_policy_attached_to_role(policy_identifier, role_attachments, roles) {
+			return true
+		}
+	}
+
+	# Check generic policy attachments (only if usage_type is ANY)
+	if usage_type is "ANY" {
+		if is_policy_attached_via_generic(policy_identifier, generic_attachments) {
+			return true
+		}
+	}
+
+	return false
+}
+
+# Helper function to check if a policy matches the policyARN parameter
+matches_policy_arn_param = func(policy, policy_arn_param) {
+	# If no policyARN parameter is specified, match all policies
+	if policy_arn_param is "" or policy_arn_param is null {
 		return true
 	}
 
-	# Check if policy is attached to groups with members
-	if is_policy_attached_to_group(policy_identifier, group_attachments, group_memberships) {
+	policy_identifier = get_policy_arn(policy)
+
+	# Direct match
+	if policy_identifier is policy_arn_param {
 		return true
 	}
 
-	# Check if policy is attached to roles with trusted entities
-	if is_policy_attached_to_role(policy_identifier, role_attachments, roles) {
+	# Check if the policy ARN contains the parameter (for partial matches)
+	if policy_identifier contains policy_arn_param {
 		return true
 	}
 
-	# Check generic policy attachments
-	if is_policy_attached_via_generic(policy_identifier, generic_attachments) {
+	# Check if parameter contains the policy identifier (for reference matches)
+	if policy_arn_param contains policy_identifier {
 		return true
 	}
 
@@ -190,7 +223,7 @@ generate_violation_message = func(violation) {
 }
 
 # Variables
-policies = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_policy).resources
+all_policies = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_policy).resources
 user_attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_user_policy_attachment).resources
 group_attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_group_policy_attachment).resources
 role_attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_role_policy_attachment).resources
@@ -198,8 +231,21 @@ generic_attachments = tf.plan(tfplan.planned_values.resources).type(const.resour
 group_memberships = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_group_membership).resources
 roles = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_role).resources
 
+# Filter policies based on policyARN parameter
+policies = collection.filter(all_policies, func(policy) {
+	return matches_policy_arn_param(policy, policyARN)
+})
+
+# Validate policyUsageType parameter
+valid_usage_types = ["IAM_USER", "IAM_GROUP", "IAM_ROLE", "ANY"]
+usage_type = policyUsageType
+if not (usage_type in valid_usage_types) {
+	print("Warning: Invalid policyUsageType '", usage_type, "'. Using default 'ANY'. Valid values are: IAM_USER, IAM_GROUP, IAM_ROLE, ANY")
+	usage_type = "ANY"
+}
+
 violations = collection.reject(policies, func(policy) {
-	return is_policy_in_use(policy, user_attachments, group_attachments, role_attachments, generic_attachments, group_memberships, roles)
+	return is_policy_in_use(policy, user_attachments, group_attachments, role_attachments, generic_attachments, group_memberships, roles, usage_type)
 })
 
 summary = {

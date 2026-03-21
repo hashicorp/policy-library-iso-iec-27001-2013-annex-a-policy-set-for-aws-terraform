@@ -13,8 +13,8 @@ import "collection/maps" as maps
 import "strings"
 
 # Parameters
-# required_managed_policies is a list of managed policy ARNs that must be attached to IAM roles
-param required_managed_policies default []
+# managedPolicyArns is a comma-separated list of managed policy ARNs that must be attached to IAM roles
+param managedPolicyArns default ""
 
 # Constants
 const = {
@@ -23,10 +23,29 @@ const = {
 	"resource_aws_iam_role":                   "aws_iam_role",
 }
 
+# Parse the CSV parameter into a list and trim whitespace
+parse_managed_policy_arns = func(csv_string) {
+	if length(csv_string) is 0 {
+		return []
+	}
+
+	policy_list = strings.split(csv_string, ",")
+	trimmed_list = []
+
+	for policy_list as policy {
+		trimmed_list = trimmed_list + [strings.trim_space(policy)]
+	}
+
+	return trimmed_list
+}
+
+trimmed_required_policies = parse_managed_policy_arns(managedPolicyArns)
+
 # Functions
 # Get all policy attachments grouped by role
 get_policy_attachments_by_role = func(roles) {
 	role_policies = {}
+	roles_with_inline_policies = {}
 
 	# First, check for managed_policy_arns attribute directly on IAM roles
 	for roles as _, role {
@@ -35,10 +54,13 @@ get_policy_attachments_by_role = func(roles) {
 
 		if role_name is not "" and length(managed_policy_arns) > 0 {
 			role_policies[role_name] = managed_policy_arns
+			roles_with_inline_policies[role_name] = true
 		}
 	}
 
 	# Then, check for aws_iam_role_policy_attachment resources
+	# Note: If a role already has managed_policy_arns defined, we skip attachment resources
+	# to avoid conflicts as these two methods are incompatible per Terraform docs
 	attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_role_policy_attachment).resources
 
 	for attachments as _, attachment {
@@ -46,10 +68,13 @@ get_policy_attachments_by_role = func(roles) {
 		policy_arn = maps.get(attachment.values, "policy_arn", "")
 
 		if role_name is not "" and policy_arn is not "" {
-			if role_name not in keys(role_policies) {
-				role_policies[role_name] = []
+			# Only process attachment if role doesn't use managed_policy_arns attribute
+			if role_name not in keys(roles_with_inline_policies) {
+				if role_name not in keys(role_policies) {
+					role_policies[role_name] = []
+				}
+				role_policies[role_name] = role_policies[role_name] + [policy_arn]
 			}
-			role_policies[role_name] = role_policies[role_name] + [policy_arn]
 		}
 	}
 
@@ -58,7 +83,7 @@ get_policy_attachments_by_role = func(roles) {
 
 # Check if a role has all required managed policies attached
 has_all_required_policies = func(role_name, attached_policies) {
-	for required_managed_policies as required_policy {
+	for trimmed_required_policies as required_policy {
 		policy_found = false
 		for attached_policies as attached_policy {
 			if attached_policy is required_policy {
@@ -75,7 +100,7 @@ has_all_required_policies = func(role_name, attached_policies) {
 # Generate violation message
 generate_violation_message = func(role_name, attached_policies) {
 	missing_policies = []
-	for required_managed_policies as required_policy {
+	for trimmed_required_policies as required_policy {
 		policy_found = false
 		for attached_policies as attached_policy {
 			if attached_policy is required_policy {
@@ -96,7 +121,7 @@ role_policy_map = get_policy_attachments_by_role(roles)
 
 # Use collection.reject to identify violations
 violations = collection.reject(roles, func(res) {
-	if length(required_managed_policies) is 0 {
+	if length(trimmed_required_policies) is 0 {
 		return true
 	}
 	role_name = maps.get(res.values, "name", "")

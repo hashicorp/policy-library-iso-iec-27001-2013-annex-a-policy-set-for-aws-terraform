@@ -20,7 +20,7 @@ mock "report" {
 }
 
 param "authorized_vpc_ids" {
-  value = ["vpc-authorized888"]
+  value = "vpc-authorized888"
 }
 
 test {

@@ -1,0 +1,72 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_iam_policy.example": {
+			"address":        "aws_iam_policy.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_iam_policy",
+			"values": {
+				"arn":    "arn:aws:iam::123456789012:policy/example-policy",
+				"name":   "example-policy",
+				"policy": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:ListBucket\",\"Resource\":\"*\"}]}",
+			},
+		},
+		"aws_iam_group.example": {
+			"address":        "aws_iam_group.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_iam_group",
+			"values": {
+				"name": "example-group",
+			},
+		},
+		"aws_iam_group_policy_attachment.example": {
+			"address":        "aws_iam_group_policy_attachment.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_iam_group_policy_attachment",
+			"values": {
+				"policy_arn": "arn:aws:iam::123456789012:policy/example-policy",
+				"group":      "example-group",
+			},
+		},
+		"aws_iam_group_membership.example": {
+			"address":        "aws_iam_group_membership.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_iam_group_membership",
+			"values": {
+				"group": "example-group",
+				"users": ["user1", "user2"],
+			},
+		},
+	},
+}

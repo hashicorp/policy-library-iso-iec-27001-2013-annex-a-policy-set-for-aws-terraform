@@ -20,7 +20,7 @@ mock "report" {
   }
 }
 
-param "blacklisted_policy_arns" {
+param "policyArns" {
   value = [
     "arn:aws:iam::aws:policy/AdministratorAccess",
     "arn:aws:iam::aws:policy/PowerUserAccess"

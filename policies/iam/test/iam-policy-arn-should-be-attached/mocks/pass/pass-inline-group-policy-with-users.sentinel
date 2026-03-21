@@ -12,7 +12,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "example",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_iam_group",
 			"values": {
@@ -27,7 +27,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "example",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_iam_user",
 			"values": {
@@ -42,7 +42,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "example",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_iam_group_membership",
 			"values": {
@@ -59,7 +59,7 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "example",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_iam_group_policy",
 			"values": {

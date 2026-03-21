@@ -19,26 +19,9 @@ import "types"
 # This is used to distinguish between same-account and cross-account principals
 param current_account_id default "111111111111"
 
-# blocklisted_actions defines the list of S3 actions that should not be allowed for cross-account principals
-# Note: Read-only actions like s3:GetBucketLocation and s3:ListBucket are NOT blocklisted
-param blocklisted_actions default [
-	"s3:DeleteBucket",
-	"s3:DeleteBucketPolicy",
-	"s3:DeleteBucketWebsite",
-	"s3:DeleteObject",
-	"s3:DeleteObjectVersion",
-	"s3:PutBucketAcl",
-	"s3:PutBucketPolicy",
-	"s3:PutEncryptionConfiguration",
-	"s3:PutLifecycleConfiguration",
-	"s3:PutReplicationConfiguration",
-	"s3:ReplicateDelete",
-	"s3:RestoreObject",
-	"s3:PutObjectAcl",
-	"s3:GetBucketAcl",
-	"s3:GetBucketPolicy",
-	"s3:GetBucketTagging",
-]
+# blacklistedActionPattern defines comma-separated list of S3 action patterns that should not be allowed for cross-account principals
+# Supports wildcards (e.g., "s3:GetBucket*,s3:DeleteObject")
+param blacklistedActionPattern default "s3:DeleteBucket,s3:DeleteBucketPolicy,s3:DeleteBucketWebsite,s3:DeleteObject,s3:DeleteObjectVersion,s3:PutBucketAcl,s3:PutBucketPolicy,s3:PutEncryptionConfiguration,s3:PutLifecycleConfiguration,s3:PutReplicationConfiguration,s3:ReplicateDelete,s3:RestoreObject,s3:PutObjectAcl,s3:GetBucketAcl,s3:GetBucketPolicy,s3:GetBucketTagging"
 
 # Constants
 const = {
@@ -49,6 +32,24 @@ const = {
 }
 
 # Functions
+# parse_csv_to_list converts a CSV string to a list of trimmed values
+parse_csv_to_list = func(csv_string) {
+	if csv_string is "" {
+		return []
+	}
+	# Split by comma
+	parts = strings.split(csv_string, ",")
+	# Trim whitespace from each part
+	trimmed = []
+	for parts as part {
+		trimmed_part = strings.trim_space(part)
+		if trimmed_part is not "" {
+			trimmed = trimmed + [trimmed_part]
+		}
+	}
+	return trimmed
+}
+
 # parse_policy_document parses the JSON policy document
 parse_policy_document = func(policy_json) {
 	return json.unmarshal(policy_json)
@@ -122,6 +123,9 @@ action_matches_pattern = func(action, pattern) {
 
 # check_actions checks if any actions are blocklisted
 check_actions = func(actions_list) {
+	# Parse the CSV parameter into a list
+	blocklisted_actions = parse_csv_to_list(blacklistedActionPattern)
+
 	for actions_list as a {
 		if a is "s3:*" {
 			return true

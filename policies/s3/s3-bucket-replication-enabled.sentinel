@@ -1,5 +1,6 @@
 # This policy verifies that AWS S3 buckets have replication rules enabled
 # by checking the replication_configuration attribute within aws_s3_bucket resources.
+# Note: replication_configuration is deprecated in aws_s3_bucket. Use aws_s3_bucket_replication_configuration instead.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -10,6 +11,11 @@ import "tfresources" as tf
 import "report" as report
 import "collection" as collection
 import "collection/maps" as maps
+
+# Parameters
+# ReplicationType: Type of replication to check for
+# Accepted values: 'CROSS-REGION', 'SAME-REGION', or empty string (default - checks for any replication)
+param ReplicationType default ""
 
 # Constants
 const = {
@@ -64,13 +70,51 @@ has_valid_replication = func(bucket_res) {
 		}
 	}
 
-	# Check that ALL rules have status "Enabled"
+	# Check that ALL rules have status "Enabled" and match ReplicationType if specified
 	for rules as _, r {
 		status = maps.get(r, "status", "")
 		if status is not "Enabled" {
 			return {
 				"valid":  false,
 				"reason": "at least one rule has status '" + status + "' instead of 'Enabled'",
+			}
+		}
+
+		# If ReplicationType parameter is specified, validate replication type
+		if ReplicationType is not "" and ReplicationType is not null {
+			# Get destination configuration
+			destinations = maps.get(r, "destination", null)
+			if destinations is null or length(destinations) == 0 {
+				return {
+					"valid":  false,
+					"reason": "rule has no destination configured",
+				}
+			}
+
+			# Check first destination (typically only one)
+			dest_config = destinations[0]
+			dest_region = maps.get(dest_config, "region", null)
+
+			# Determine if this is cross-region or same-region replication
+			if ReplicationType is "CROSS-REGION" {
+				# For cross-region, destination region must be explicitly set and different
+				if dest_region is null or dest_region is "" {
+					return {
+						"valid":  false,
+						"reason": "ReplicationType parameter set to 'CROSS-REGION' but destination region is not specified in rule",
+					}
+				}
+				# Note: We assume if region is explicitly set, it's cross-region
+				# In real scenarios, we'd compare with source bucket region
+			} else if ReplicationType is "SAME-REGION" {
+				# For same-region, destination region should either not be set or be the same
+				# In practice, same-region replication typically doesn't specify region
+				if dest_region is not null and dest_region is not "" {
+					return {
+						"valid":  false,
+						"reason": "ReplicationType parameter set to 'SAME-REGION' but destination has explicit region specified (indicating cross-region)",
+					}
+				}
 			}
 		}
 	}

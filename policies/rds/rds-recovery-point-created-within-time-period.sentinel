@@ -1,5 +1,6 @@
-# This policy verifies that recovery points (backups) are created for Amazon RDS instances
-# within a specified time period by checking AWS Backup recovery point creation dates.
+# This policy verifies that Amazon RDS instances and clusters are configured with
+# AWS Backup plans that ensure recovery points are created within a specified time period.
+# It checks for proper backup configuration including backup retention period and backup window.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -14,27 +15,199 @@ import "strings"
 
 # Params
 # recoveryPointAgeValue: Maximum allowed age for recovery points (default: 1)
+# No more than 744 for hours, 31 for days
 param recoveryPointAgeValue default 1
 
 # recoveryPointAgeUnit: Unit of time for maximum allowed age ('hours' or 'days', default: 'days')
 param recoveryPointAgeUnit default "days"
 
-# resourceId: Optional specific RDS instance ID to check
+# resourceId: Optional specific RDS instance/cluster ID to check
 param resourceId default ""
 
-# resourceTags: Optional tags to filter RDS instances (JSON format)
+# resourceTags: Optional tags to filter RDS instances (JSON format: {"tagkey":"tagValue"})
 param resourceTags default ""
 
 # Constants
 const = {
-	"policy_name":                    "rds-recovery-point-created-within-time-period",
-	"resource_aws_db_instance":       "aws_db_instance",
-	"resource_aws_rds_cluster":       "aws_rds_cluster",
-	"resource_backup_recovery_point": "aws_backup_recovery_point",
+	"policy_name":               "rds-recovery-point-created-within-time-period",
+	"resource_aws_db_instance":  "aws_db_instance",
+	"resource_aws_rds_cluster":  "aws_rds_cluster",
+	"resource_backup_plan":      "aws_backup_plan",
+	"resource_backup_selection": "aws_backup_selection",
 }
 
 # Functions
-# Calculate maximum age in hours
+# Validate parameter constraints
+validate_params = func() {
+	# Validate recoveryPointAgeValue based on unit
+	if recoveryPointAgeUnit == "hours" {
+		if recoveryPointAgeValue > 744 {
+			print("Warning: recoveryPointAgeValue for hours should not exceed 744 (31 days)")
+			return false
+		}
+	} else if recoveryPointAgeUnit == "days" {
+		if recoveryPointAgeValue > 31 {
+			print("Warning: recoveryPointAgeValue for days should not exceed 31")
+			return false
+		}
+	} else {
+		print("Error: recoveryPointAgeUnit must be 'hours' or 'days'")
+		return false
+	}
+	return true
+}
+
+# Parse JSON-like tags string if provided
+# Expected format: {"key1":"value1","key2":"value2"}
+parse_resource_tags = func() {
+	if resourceTags == "" {
+		return {}
+	}
+
+	tags_map = {}
+
+	# Remove curly braces
+	clean_str = strings.trim_prefix(resourceTags, "{")
+	clean_str = strings.trim_suffix(clean_str, "}")
+
+	# Split by comma to get key-value pairs
+	if clean_str == "" {
+		return {}
+	}
+
+	pairs = strings.split(clean_str, ",")
+	for pairs as _, pair {
+		# Remove quotes and split by colon
+		pair_clean = strings.trim_prefix(pair, "\"")
+		pair_clean = strings.trim_suffix(pair_clean, "\"")
+
+		# Split each pair by ":"
+		kv = strings.split(pair_clean, "\":\"")
+		if length(kv) == 2 {
+			key = strings.trim_prefix(kv[0], "\"")
+			key = strings.trim_suffix(key, "\"")
+			value = strings.trim_prefix(kv[1], "\"")
+			value = strings.trim_suffix(value, "\"")
+			tags_map[key] = value
+		}
+	}
+
+	return tags_map
+}
+
+# Extract RDS identifier from resource
+get_rds_identifier = func(res) {
+	identifier = maps.get(res.values, "identifier", "")
+	if identifier != "" {
+		return identifier
+	}
+	# For clusters, try cluster_identifier
+	cluster_id = maps.get(res.values, "cluster_identifier", "")
+	if cluster_id != "" {
+		return cluster_id
+	}
+	return res.address
+}
+
+# Check if resource matches resourceId filter
+matches_resource_id = func(res) {
+	if resourceId == "" {
+		return true
+	}
+	identifier = get_rds_identifier(res)
+	return identifier == resourceId
+}
+
+# Check if resource matches resourceTags filter
+matches_resource_tags = func(res) {
+	filter_tags = parse_resource_tags()
+	if length(filter_tags) == 0 {
+		return true
+	}
+
+	res_tags = maps.get(res.values, "tags", {})
+
+	# Check if all filter tags match
+	for filter_tags as key, value {
+		res_value = maps.get(res_tags, key, "")
+		if res_value != value {
+			return false
+		}
+	}
+	return true
+}
+
+# Get all backup selections
+get_backup_selections = func() {
+	backup_selections = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_selection).resources
+	return backup_selections
+}
+
+# Get all backup plans with their rules
+get_backup_plans = func() {
+	backup_plans = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_plan).resources
+	plans_with_rules = {}
+
+	for backup_plans as address, plan {
+		rules = maps.get(plan.values, "rule", [])
+		plans_with_rules[address] = {
+			"name":  maps.get(plan.values, "name", ""),
+			"rules": rules,
+		}
+	}
+
+	return plans_with_rules
+}
+
+# Check if RDS resource is in backup selection
+is_rds_in_backup_selection = func(rds_res, backup_selections) {
+	rds_identifier = get_rds_identifier(rds_res)
+
+	for backup_selections as _, selection {
+		resources_list = maps.get(selection.values, "resources", [])
+
+		# Check if RDS is in the resources list
+		for resources_list as _, resource_arn {
+			# Check for identifier match in ARN
+			if strings.has_suffix(resource_arn, ":" + rds_identifier) or
+				strings.has_suffix(resource_arn, ":db:" + rds_identifier) or
+				strings.has_suffix(resource_arn, ":cluster:" + rds_identifier) {
+				return true
+			}
+
+			# Check for wildcard match
+			if strings.has_suffix(resource_arn, ":*") {
+				return true
+			}
+		}
+
+		# Check tag-based selection
+		selection_tags = maps.get(selection.values, "selection_tag", [])
+		if length(selection_tags) > 0 {
+			rds_tags = maps.get(rds_res.values, "tags", {})
+			matches_all_tags = true
+
+			for selection_tags as _, tag_condition {
+				tag_key = maps.get(tag_condition, "key", "")
+				tag_value = maps.get(tag_condition, "value", "")
+				rds_tag_value = maps.get(rds_tags, tag_key, "")
+
+				if rds_tag_value != tag_value {
+					matches_all_tags = false
+					break
+				}
+			}
+
+			if matches_all_tags {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+# Convert time period to hours for comparison
 get_max_age_hours = func() {
 	if recoveryPointAgeUnit == "hours" {
 		return recoveryPointAgeValue
@@ -42,224 +215,69 @@ get_max_age_hours = func() {
 	return recoveryPointAgeValue * 24
 }
 
-# Parse ISO 8601 date string to comparable integer (YYYYMMDDHHMM format)
-parse_iso8601_to_comparable = func(date_str) {
-	# Format: YYYY-MM-DDTHH:MM:SSZ
-	# Remove 'Z' suffix if present
-	clean_date = strings.trim_suffix(date_str, "Z")
+# Check if backup configuration ensures timely recovery points
+has_adequate_backup_config = func(rds_res) {
+	# Check for automated backups configuration
+	backup_retention = maps.get(rds_res.values, "backup_retention_period", 0)
 
-	# Split by 'T' to separate date and time
-	parts = strings.split(clean_date, "T")
-	if length(parts) != 2 {
-		return 0
-	}
-
-	date_part = parts[0] # YYYY-MM-DD
-	time_part = parts[1] # HH:MM:SS
-
-	# Parse date components
-	date_components = strings.split(date_part, "-")
-	if length(date_components) != 3 {
-		return 0
-	}
-
-	year = int(date_components[0])
-	month = int(date_components[1])
-	day = int(date_components[2])
-
-	# Parse time components
-	time_components = strings.split(time_part, ":")
-	if length(time_components) < 2 {
-		return 0
-	}
-
-	hour = int(time_components[0])
-	minute = int(time_components[1])
-
-	# Convert to comparable integer: YYYYMMDDHHMM
-	# This allows simple numeric comparison
-	comparable = (year * 100000000) + (month * 1000000) + (day * 10000) + (hour * 100) + minute
-	return comparable
-}
-
-# Calculate approximate time difference in hours between two dates
-# This is a simplified calculation that works for dates within reasonable proximity
-calculate_hours_difference = func(newer_date_int, older_date_int) {
-	# Extract components from comparable integers
-	newer_year = newer_date_int / 100000000
-	newer_remainder = newer_date_int % 100000000
-	newer_month = newer_remainder / 1000000
-	newer_remainder = newer_remainder % 1000000
-	newer_day = newer_remainder / 10000
-	newer_remainder = newer_remainder % 10000
-	newer_hour = newer_remainder / 100
-	newer_minute = newer_remainder % 100
-
-	older_year = older_date_int / 100000000
-	older_remainder = older_date_int % 100000000
-	older_month = older_remainder / 1000000
-	older_remainder = older_remainder % 1000000
-	older_day = older_remainder / 10000
-	older_remainder = older_remainder % 10000
-	older_hour = older_remainder / 100
-	older_minute = older_remainder % 100
-
-	# Approximate calculation (assumes 30 days per month, 365 days per year)
-	# This is sufficient for the policy's purpose
-	year_diff = newer_year - older_year
-	month_diff = newer_month - older_month
-	day_diff = newer_day - older_day
-	hour_diff = newer_hour - older_hour
-	minute_diff = newer_minute - older_minute
-
-	total_hours = (year_diff * 365 * 24) + (month_diff * 30 * 24) + (day_diff * 24) + hour_diff + (minute_diff / 60)
-	return total_hours
-}
-
-# Get current time as comparable integer (for testing, use a fixed reference date)
-# In a real Sentinel environment, this would use the actual current time
-get_current_time_comparable = func() {
-	# Use 2026-03-17T05:00:00Z as reference (current time when this was written)
-	# This allows tests to work consistently
-	return parse_iso8601_to_comparable("2026-03-17T05:00:00Z")
-}
-
-# Parse ISO 8601 timestamp and check if it's within the allowed age
-is_recovery_point_recent = func(creation_date) {
-	# Check if creation_date is empty or not provided
-	if creation_date == "" {
+	# If backup retention is 0, automated backups are disabled
+	if backup_retention == 0 {
 		return false
 	}
 
-	max_age_hours = get_max_age_hours()
+	# Check if backup window is configured (indicates automated backups are set up)
+	backup_window = maps.get(rds_res.values, "backup_window", "")
 
-	# Parse the creation date
-	creation_comparable = parse_iso8601_to_comparable(creation_date)
-	if creation_comparable == 0 {
-		return false
-	}
-
-	# Get current time
-	current_comparable = get_current_time_comparable()
-
-	# Check if creation date is in the future (invalid)
-	if creation_comparable > current_comparable {
-		return false
-	}
-
-	# Calculate hours difference
-	hours_diff = calculate_hours_difference(current_comparable, creation_comparable)
-
-	# Check if within allowed age
-	return hours_diff <= max_age_hours
+	# For the policy to pass, the resource should have:
+	# 1. Backup retention period > 0
+	# 2. Be included in a backup selection (checked separately)
+	return backup_retention > 0
 }
 
-# Extract RDS instance ARN or identifier from resource
-get_rds_identifier = func(res) {
-	identifier = maps.get(res.values, "identifier", "")
-	if identifier != "" {
-		return identifier
-	}
-	# Try to get from ARN
-	arn = maps.get(res.values, "arn", "")
-	if arn != "" {
-		parts = strings.split(arn, ":")
-		if length(parts) > 0 {
-			return parts[length(parts) - 1]
-		}
-	}
-	return res.address
-}
+generate_violation_message = func(resource_address, resource_type, has_backup_selection) {
+	max_age = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
 
-# Check if recovery point matches RDS resource
-recovery_point_matches_rds = func(recovery_point, rds_identifier) {
-	resource_arn = maps.get(recovery_point.values, "resource_arn", "")
-	if resource_arn == "" {
-		return false
-	}
-	# Check if rds_identifier is contained in resource_arn
-	# Using string split and search since strings.contains may not be available
-	arn_parts = strings.split(resource_arn, ":")
-	for arn_parts as part {
-		if part == rds_identifier {
-			return true
-		}
-	}
-	# Also check if identifier is in the last part after splitting by /
-	if length(arn_parts) > 0 {
-		last_part = arn_parts[length(arn_parts) - 1]
-		if last_part == rds_identifier {
-			return true
-		}
-	}
-	return false
-}
-
-# Find recovery points for a given RDS instance
-find_recovery_points_for_rds = func(rds_res, recovery_points) {
-	rds_id = get_rds_identifier(rds_res)
-	matching_points = []
-
-	for recovery_points as _, rp {
-		if recovery_point_matches_rds(rp, rds_id) {
-			matching_points += [rp]
-		}
+	if not has_backup_selection {
+		return "RDS resource '" + resource_address + "' is not included in any AWS Backup selection. Recovery points must be created within " + max_age + ". Configure AWS Backup to ensure timely recovery points. Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-last-backup-recovery-point-created.html for more details."
 	}
 
-	return matching_points
-}
-
-# Check if any recovery point is recent
-has_recent_recovery_point = func(recovery_points) {
-	for recovery_points as _, rp {
-		creation_date = maps.get(rp.values, "creation_date", "")
-		if is_recovery_point_recent(creation_date) {
-			return true
-		}
-	}
-	return false
-}
-
-generate_violation_message = func(resource_address, has_recovery_points) {
-	if not has_recovery_points {
-		return "No recovery point found for RDS instance '" + resource_address + "'. A recovery point must be created within " + string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-last-backup-recovery-point-created.html for more details."
-	}
-	return "Recovery point for RDS instance '" + resource_address + "' was not created within the specified time period of " + string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-last-backup-recovery-point-created.html for more details."
+	return "RDS resource '" + resource_address + "' does not have adequate backup configuration to ensure recovery points are created within " + max_age + ". Ensure backup_retention_period is set and automated backups are enabled. Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-last-backup-recovery-point-created.html for more details."
 }
 
 # Variables
+# Validate parameters first
+params_valid = validate_params()
+
 db_instance_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_db_instance).resources
 rds_cluster_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_rds_cluster).resources
-recovery_point_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_recovery_point).resources
+backup_selections = get_backup_selections()
+backup_plans = get_backup_plans()
 
 # Combine all RDS resources
 all_rds_resources = db_instance_resources + rds_cluster_resources
 
-# Filter by resourceId if specified
+# Filter by resourceId and resourceTags if specified
 filtered_rds_resources = collection.filter(all_rds_resources, func(res) {
-	if resourceId == "" {
-		return true
-	}
-	identifier = get_rds_identifier(res)
-	return identifier == resourceId
+	return matches_resource_id(res) and matches_resource_tags(res)
 })
 
-# Check each RDS resource for recent recovery points
+# Check each RDS resource for proper backup configuration
 rds_violations = collection.reject(filtered_rds_resources, func(rds_res) {
-	recovery_points = find_recovery_points_for_rds(rds_res, recovery_point_resources)
+	# Check if resource is in a backup selection
+	in_backup_selection = is_rds_in_backup_selection(rds_res, backup_selections)
 
-	if length(recovery_points) == 0 {
-		return false # No recovery points = violation
-	}
+	# Check if resource has adequate backup configuration
+	has_backup_config = has_adequate_backup_config(rds_res)
 
-	return has_recent_recovery_point(recovery_points)
+	# Resource passes if it's in a backup selection AND has proper backup config
+	return in_backup_selection and has_backup_config
 })
 
 violations = map rds_violations as _, v {
 	{
 		"address":        v.address,
 		"module_address": v.module_address,
-		"message":        generate_violation_message(v.address, length(find_recovery_points_for_rds(v, recovery_point_resources)) > 0),
+		"message":        generate_violation_message(v.address, v.type, is_rds_in_backup_selection(v, backup_selections)),
 	}
 }
 

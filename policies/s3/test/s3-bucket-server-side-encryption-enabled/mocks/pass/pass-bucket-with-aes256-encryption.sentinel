@@ -12,20 +12,31 @@ planned_values = {
 			"mode":           "managed",
 			"module_address": "",
 			"name":           "example",
-			"provider_name":  "aws",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
 			"type":           "aws_s3_bucket",
 			"values": {
 				"bucket": "example-bucket",
-				"server_side_encryption_configuration": [
+			},
+		},
+		"aws_s3_bucket_server_side_encryption_configuration.example": {
+			"address":        "aws_s3_bucket_server_side_encryption_configuration.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket_server_side_encryption_configuration",
+			"values": {
+				"bucket": "aws_s3_bucket.example",
+				"rule": [
 					{
-						"rule": [
+						"apply_server_side_encryption_by_default": [
 							{
-								"apply_server_side_encryption_by_default": [
-									{
-										"sse_algorithm": "AES256",
-									},
-								],
+								"sse_algorithm": "AES256",
 							},
 						],
 					},

@@ -1,0 +1,105 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_db_instance.prod": {
+			"address":        "aws_db_instance.prod",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "prod",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_db_instance",
+			"values": {
+				"identifier":              "prod-db-instance",
+				"engine":                  "mysql",
+				"instance_class":          "db.t3.micro",
+				"allocated_storage":       20,
+				"backup_retention_period": 7,
+				"backup_window":           "03:00-04:00",
+				"arn":                     "arn:aws:rds:us-east-1:123456789012:db:prod-db-instance",
+				"tags": {
+					"Name":        "ProductionDB",
+					"Environment": "production",
+				},
+			},
+		},
+		"aws_db_instance.dev": {
+			"address":        "aws_db_instance.dev",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "dev",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_db_instance",
+			"values": {
+				"identifier":              "dev-db-instance",
+				"engine":                  "postgres",
+				"instance_class":          "db.t3.micro",
+				"allocated_storage":       20,
+				"backup_retention_period": 0,
+				"arn": "arn:aws:rds:us-east-1:123456789012:db:dev-db-instance",
+				"tags": {
+					"Name":        "DevelopmentDB",
+					"Environment": "development",
+				},
+			},
+		},
+		"aws_backup_plan.main": {
+			"address":        "aws_backup_plan.main",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "main",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_backup_plan",
+			"values": {
+				"name": "rds-backup-plan",
+				"rule": [
+					{
+						"rule_name":         "daily_backup",
+						"target_vault_name": "Default",
+						"schedule":          "cron(0 2 * * ? *)",
+						"lifecycle": {
+							"delete_after": 30,
+						},
+					},
+				],
+			},
+		},
+		"aws_backup_selection.prod_backup": {
+			"address":        "aws_backup_selection.prod_backup",
+			"depends_on":     ["aws_db_instance.prod", "aws_backup_plan.main"],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "prod_backup",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_backup_selection",
+			"values": {
+				"name":    "prod-backup-selection",
+				"plan_id": "backup-plan-123",
+				"selection_tag": [
+					{
+						"type":  "STRINGEQUALS",
+						"key":   "Environment",
+						"value": "production",
+					},
+				],
+			},
+		},
+	},
+}

@@ -1,0 +1,49 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_redshift_cluster.example": {
+		"address":             "aws_redshift_cluster.example",
+		"mode":                "managed",
+		"type":                "aws_redshift_cluster",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"expressions": {
+			"cluster_identifier": {
+				"constant_value": "example-cluster",
+			},
+			"encrypted": {
+				"constant_value": true,
+			},
+			"node_type": {
+				"constant_value": "dc1.large",
+			},
+		},
+		"schema_version": 0,
+	},
+	"aws_redshift_logging.example": {
+		"address":             "aws_redshift_logging.example",
+		"mode":                "managed",
+		"type":                "aws_redshift_logging",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"expressions": {
+			"cluster_identifier": {
+				"references": [
+					"aws_redshift_cluster.example.id",
+					"aws_redshift_cluster.example",
+				],
+			},
+			"bucket_name": {
+				"constant_value": "my-redshift-logs",
+			},
+			"log_destination_type": {
+				"constant_value": "s3",
+			},
+			"s3_key_prefix": {
+				"constant_value": "redshift-logs/",
+			},
+		},
+		"schema_version": 0,
+	},
+}

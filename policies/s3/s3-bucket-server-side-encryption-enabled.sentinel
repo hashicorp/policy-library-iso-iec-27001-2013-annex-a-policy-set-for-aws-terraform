@@ -1,5 +1,6 @@
-# This policy requires that AWS S3 buckets have default encryption enabled
-# or have a bucket policy that explicitly denies put-object requests without server side encryption
+# This policy checks if your Amazon S3 bucket either has the Amazon S3 default encryption enabled
+# or that the Amazon S3 bucket policy explicitly denies put-object requests without server side
+# encryption that uses AES-256 or AWS Key Management Service.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -22,15 +23,6 @@ const = {
 }
 
 # Functions
-# Check if bucket has server_encryption_configuration block defined
-has_bucket_encryption = func(bucket_res) {
-	server_side_encryption_configuration = maps.get(bucket_res.values, "server_side_encryption_configuration", [])
-	if length(server_side_encryption_configuration) > 0 {
-		return true
-	}
-	return false
-}
-
 # Check if there's a separate aws_s3_bucket_server_side_encryption_configuration resource for this bucket
 has_separate_encryption_resource = func(bucket_address, encryption_resources) {
 	for encryption_resources as _, enc_res {
@@ -140,11 +132,6 @@ has_deny_unencrypted_policy = func(bucket_address, bucket_name, policy_resources
 
 # Check if bucket is compliant
 is_bucket_compliant = func(bucket_res, policy_resources, encryption_resources) {
-	# Check if bucket has encryption in the bucket resource itself
-	if has_bucket_encryption(bucket_res) {
-		return true
-	}
-
 	# Check if there's a separate encryption configuration resource
 	if has_separate_encryption_resource(bucket_res.address, encryption_resources) {
 		return true
@@ -162,7 +149,7 @@ is_bucket_compliant = func(bucket_res, policy_resources, encryption_resources) {
 }
 
 generate_violation_message = func(violation) {
-	return "S3 bucket '" + violation.address + "' must have default encryption enabled or a bucket policy that explicitly denies put-object requests without server side encryption. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html for more details."
+	return "S3 bucket '" + violation.address + "' must have default encryption enabled using aws_s3_bucket_server_side_encryption_configuration resource or a bucket policy that explicitly denies put-object requests without server side encryption that uses AES-256 or AWS KMS. The server_side_encryption_configuration attribute on aws_s3_bucket is deprecated. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html for more details."
 }
 
 # Variables

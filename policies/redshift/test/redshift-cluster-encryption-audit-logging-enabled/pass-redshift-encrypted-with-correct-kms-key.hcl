@@ -7,6 +7,12 @@ mock "tfplan/v2" {
   }
 }
 
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/pass/pass-redshift-encrypted-with-correct-kms-key-config.sentinel"
+  }
+}
+
 mock "tfresources" {
   module {
     source = "../../../../modules/tfresources/tfresources.sentinel"
