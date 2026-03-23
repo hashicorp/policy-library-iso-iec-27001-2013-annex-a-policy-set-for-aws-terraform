@@ -6,7 +6,7 @@
 
 ## Description
 
-This control checks if Amazon API Gateway REST API stages have caching enabled and encrypted. This control fails if caching is not enabled or if cache encryption is not configured.
+This control checks if Amazon API Gateway REST API stages have the cache cluster enabled and if the associated method settings have caching and cache encryption enabled. This control fails if the stage cache cluster is disabled or if the related method settings do not enable caching and cache encryption.
 
 API Gateway caching improves performance by storing responses from your backend and serving them directly for subsequent identical requests. Encrypting the cache ensures that sensitive data stored in the cache is protected at rest, preventing unauthorized access to cached API responses.
 

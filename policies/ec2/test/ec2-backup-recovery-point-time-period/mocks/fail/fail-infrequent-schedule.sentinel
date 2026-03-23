@@ -1,0 +1,68 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_ebs_volume.example": {
+			"address":        "aws_ebs_volume.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_ebs_volume",
+			"values": {
+				"arn":               "arn:aws:ec2:us-east-1:123456789012:volume/vol-44444444",
+				"availability_zone": "us-east-1a",
+				"encrypted":         true,
+				"id":                "vol-44444444",
+				"size":              80,
+				"type":              "gp3",
+			},
+		},
+		"aws_backup_selection.example": {
+			"address":        "aws_backup_selection.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_selection",
+			"values": {
+				"name":         "monthly-selection",
+				"plan_id":      "aws_backup_plan.example",
+				"iam_role_arn": "arn:aws:iam::123456789012:role/aws-backup-role",
+				"resources":    ["arn:aws:ec2:us-east-1:123456789012:volume/vol-44444444"],
+			},
+		},
+		"aws_backup_plan.example": {
+			"address":        "aws_backup_plan.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_plan",
+			"values": {
+				"name": "monthly-plan",
+				"rule": [
+					{
+						"rule_name":         "monthly-backup",
+						"schedule":          "cron(0 2 1 * ? *)",
+						"target_vault_name": "Default",
+					},
+				],
+			},
+		},
+	},
+}

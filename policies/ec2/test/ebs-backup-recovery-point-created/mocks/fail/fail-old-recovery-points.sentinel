@@ -16,14 +16,19 @@ planned_values = {
 			"tainted":        false,
 			"type":           "aws_ebs_volume",
 			"values": {
+				"arn":               "arn:aws:ec2:us-east-1:123456789012:volume/vol-12345678",
 				"availability_zone": "us-east-1a",
 				"encrypted":         true,
+				"id":                "vol-12345678",
 				"size":              100,
+				"tags": {
+					"Environment": "production",
+				},
 				"type":              "gp3",
 			},
 		},
-		"aws_backup_vault.example": {
-			"address":        "aws_backup_vault.example",
+		"aws_backup_selection.example": {
+			"address":        "aws_backup_selection.example",
 			"depends_on":     [],
 			"deposed_key":    "",
 			"index":          null,
@@ -32,14 +37,32 @@ planned_values = {
 			"name":           "example",
 			"provider_name":  "aws",
 			"tainted":        false,
-			"type":           "aws_backup_vault",
+			"type":           "aws_backup_selection",
 			"values": {
-				"name": "example-backup-vault",
-				"recovery_points": [
+				"iam_role_arn": "arn:aws:iam::123456789012:role/backup-role",
+				"name":         "example-backup-selection",
+				"plan_id":      "aws_backup_plan.example",
+				"resources":    ["arn:aws:ec2:us-east-1:123456789012:volume/vol-12345678"],
+			},
+		},
+		"aws_backup_plan.example": {
+			"address":        "aws_backup_plan.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_plan",
+			"values": {
+				"name": "example-backup-plan",
+				"rule": [
 					{
-						"creation_date":   "2023-01-15T10:30:00Z",
-						"completion_date": "2023-01-15T11:00:00Z",
-						"status":          "COMPLETED",
+						"rule_name":         "monthly-backup",
+						"schedule":          "cron(0 2 1 * ? *)",
+						"target_vault_name": "Default",
 					},
 				],
 			},

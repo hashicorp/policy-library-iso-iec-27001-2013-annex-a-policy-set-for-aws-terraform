@@ -10,6 +10,7 @@ import "tfresources" as tf
 import "report" as report
 import "collection" as collection
 import "collection/maps" as maps
+import "strings"
 
 # Constants
 const = {
@@ -32,15 +33,10 @@ generate_violation_message = func(registry_name) {
 get_registries_with_policies = func(policies) {
 	registry_names = {}
 	for policies as _, res {
-		# Try both "registry_name" and "name" attributes
-		name = maps.get(res.values, "registry_name", "")
-		if name is "" {
-			name = maps.get(res.values, "name", "")
-		}
-		# Also check that the policy is not empty
-		policy = maps.get(res.values, "policy", "")
-		if length(name) > 0 and length(policy) > 0 {
-			registry_names[name] = true
+		registry_name = strings.trim_space(maps.get(res.values, "registry_name", ""))
+		policy = strings.trim_space(maps.get(res.values, "policy", ""))
+		if length(registry_name) > 0 and length(policy) > 0 {
+			registry_names[registry_name] = true
 		}
 	}
 	return registry_names
@@ -53,29 +49,16 @@ policy_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_
 registries_with_policies = get_registries_with_policies(policy_resources)
 
 violations = collection.reject(registry_resources, func(res) {
-	# Try both "registry_name" and "name" attributes
-	registry_name = maps.get(res.values, "registry_name", "")
-	if length(registry_name) is 0 {
-		registry_name = maps.get(res.values, "name", "")
-	}
+	registry_name = strings.trim_space(maps.get(res.values, "name", ""))
 	if length(registry_name) is 0 {
 		return false
 	}
-	# Check if registry has a policy by looking up in the map
-	has_policy = false
-	if registry_name in keys(registries_with_policies) {
-		has_policy = true
-	}
-	return has_policy
+	return registry_name in keys(registries_with_policies)
 })
 
 # Helper function to get registry name from resource
 get_registry_name = func(res) {
-	reg_name = maps.get(res.values, "registry_name", "")
-	if length(reg_name) is 0 {
-		reg_name = maps.get(res.values, "name", "")
-	}
-	return reg_name
+	return strings.trim_space(maps.get(res.values, "name", ""))
 }
 
 summary = {

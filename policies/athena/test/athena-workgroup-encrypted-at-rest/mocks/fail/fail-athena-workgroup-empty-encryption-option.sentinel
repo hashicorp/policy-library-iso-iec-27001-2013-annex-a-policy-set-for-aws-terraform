@@ -17,9 +17,18 @@ planned_values = {
 			"type":           "aws_athena_workgroup",
 			"values": {
 				"name": "example-workgroup",
-				"encryption_configuration": [
+				"configuration": [
 					{
-						"encryption_option": "",
+						"result_configuration": [
+							{
+								"output_location": "s3://example-bucket/results/",
+								"encryption_configuration": [
+									{
+										"encryption_option": "",
+									},
+								],
+							},
+						],
 					},
 				],
 			},

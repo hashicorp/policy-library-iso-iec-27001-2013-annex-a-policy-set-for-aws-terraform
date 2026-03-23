@@ -16,13 +16,15 @@ planned_values = {
 			"tainted":        false,
 			"type":           "aws_ebs_volume",
 			"values": {
-				"availability_zone": "us-east-1a",
+				"arn":               "arn:aws:ec2:us-east-1:123456789012:volume/vol-23456789",
+				"availability_zone": "us-east-1b",
 				"encrypted":         true,
-				"size":              100,
-				"type":              "gp3",
+				"id":                "vol-23456789",
+				"size":              150,
 				"tags": {
-					"Name": "example-volume",
+					"Tier": "gold",
 				},
+				"type":              "gp3",
 			},
 		},
 		"aws_backup_plan.example": {
@@ -40,15 +42,11 @@ planned_values = {
 				"name": "example-backup-plan",
 				"rule": [
 					{
-						"rule_name":         "daily-backup",
-						"target_vault_name": "example-backup-vault",
-						"schedule":          "cron(0 2 * * ? *)",
-						"lifecycle": {
-							"delete_after": 30,
-						},
+						"rule_name":         "six-hour-backup",
+						"schedule":          "cron(0 */6 * * ? *)",
+						"target_vault_name": "Default",
 					},
 				],
-				"last_execution_date": "2024-01-15T02:00:00Z",
 			},
 		},
 		"aws_backup_selection.example": {
@@ -64,33 +62,9 @@ planned_values = {
 			"type":           "aws_backup_selection",
 			"values": {
 				"name":         "example-backup-selection",
-				"plan_id":      "backup-plan-id",
+				"plan_id":      "example-backup-plan",
 				"iam_role_arn": "arn:aws:iam::123456789012:role/service-role/AWSBackupDefaultServiceRole",
-				"resources":    ["arn:aws:ec2:us-east-1:123456789012:volume/vol-12345678"],
-			},
-		},
-		"aws_backup_vault.example": {
-			"address":        "aws_backup_vault.example",
-			"depends_on":     [],
-			"deposed_key":    "",
-			"index":          null,
-			"mode":           "managed",
-			"module_address": "",
-			"name":           "example",
-			"provider_name":  "aws",
-			"tainted":        false,
-			"type":           "aws_backup_vault",
-			"values": {
-				"name": "example-backup-vault",
-				"recovery_points": [
-					{
-						"recovery_point_arn": "arn:aws:backup:us-east-1:123456789012:recovery-point:12345678-1234-1234-1234-123456789012",
-						"resource_arn":       "arn:aws:ec2:us-east-1:123456789012:volume/vol-12345678",
-						"creation_date":      "2024-01-15T02:00:00Z",
-						"completion_date":    "2024-01-15T02:30:00Z",
-						"status":             "COMPLETED",
-					},
-				],
+				"resources":    ["arn:aws:ec2:us-east-1:123456789012:volume/vol-23456789"],
 			},
 		},
 	},

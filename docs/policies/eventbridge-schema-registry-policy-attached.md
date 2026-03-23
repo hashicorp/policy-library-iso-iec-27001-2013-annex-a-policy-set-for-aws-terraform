@@ -6,7 +6,7 @@
 
 ## Description
 
-This control checks if Amazon EventBridge schema registries have resource policies attached. This control fails if schema registries do not have resource-based policies configured.
+This control checks if custom Amazon EventBridge schema registries have a resource policy attached. This control fails when an `aws_schemas_registry` resource does not have a corresponding `aws_schemas_registry_policy` resource whose `registry_name` matches the registry `name` and whose `policy` content is non-blank.
 
 Resource policies for EventBridge schema registries control access to schemas and define who can discover, view, or modify schemas in the registry. Attaching resource policies ensures that access to schemas is properly controlled and follows the principle of least privilege. This is essential for protecting sensitive event schemas and maintaining secure event-driven architectures.
 
@@ -18,7 +18,7 @@ trace:
       Pass - eventbridge-schema-registry-policy-attached.sentinel
 
       Description:
-        This policy checks if 'aws_schemas_registry' have resource policies attached.
+        This policy checks if custom Amazon EventBridge schema registries have resource policies attached.
 
       Print messages:
 
@@ -28,7 +28,7 @@ trace:
 
       ✓ Found 0 resource violations
 
-      eventbridge-schema-registry-policy-attached.sentinel:47:1 - Rule "main"
+      eventbridge-schema-registry-policy-attached.sentinel:71:1 - Rule "main"
         Value:
           true
 ```
@@ -41,7 +41,7 @@ trace:
       Fail - eventbridge-schema-registry-policy-attached.sentinel
 
       Description:
-        This policy checks if 'aws_schemas_registry' have resource policies attached.
+        This policy checks if custom Amazon EventBridge schema registries have resource policies attached.
 
       Print messages:
 
@@ -54,12 +54,23 @@ trace:
       → Module name: root
         ↳ Resource Address: aws_schemas_registry.example
           | ✗ failed
-          | 'aws_schemas_registry' must have resource policies attached. Refer to https://docs.aws.amazon.com/eventbridge/latest/userguide/eb-schema-resource-based-policies.html for more details.
+          | Custom Amazon EventBridge schema registries must have a resource policy attached. Registry 'my-custom-registry' does not have a resource policy attached. Refer to https://docs.aws.amazon.com/config/latest/developerguide/custom-schema-registry-policy-attached.html for more details.
 
 
-      eventbridge-schema-registry-policy-attached.sentinel:47:1 - Rule "main"
+      eventbridge-schema-registry-policy-attached.sentinel:71:1 - Rule "main"
         Value:
           false
 ```
 
 ---
+
+## Terraform Resources
+
+- `aws_schemas_registry`
+- `aws_schemas_registry_policy`
+
+## Terraform Attributes
+
+- `aws_schemas_registry.name`
+- `aws_schemas_registry_policy.registry_name`
+- `aws_schemas_registry_policy.policy`

@@ -6,9 +6,9 @@
 
 ## Description
 
-This control checks if AWS CloudTrail trails follow security best practices. This control fails if CloudTrail is not configured with recommended security settings such as log file validation, encryption, and proper access controls.
+This control checks if at least one `aws_cloudtrail` trail follows the security settings enforced by this policy. It fails when no trail has logging enabled, records global service events, is multi-region, enables log file validation, uses a KMS key for encryption, and logs all management events for both reads and writes without exclusions.
 
-Following CloudTrail security best practices ensures the integrity and confidentiality of audit logs. This includes enabling log file validation to detect tampering, encrypting logs at rest, configuring proper S3 bucket policies, and enabling CloudWatch Logs integration. These measures are essential for maintaining a secure audit trail and meeting compliance requirements.
+Following these settings improves the integrity and confidentiality of audit logs. This policy validates fields on the `aws_cloudtrail` resource itself. It does not inspect related S3 bucket policies or CloudWatch Logs integration resources.
 
 This rule is covered by the [cloudtrail-security-best-practices](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/cloudtrail/cloudtrail-security-best-practices.sentinel) policy.
 
@@ -28,7 +28,7 @@ trace:
 
       ✓ Found 0 resource violations
 
-      cloudtrail-security-best-practices.sentinel:47:1 - Rule "main"
+      cloudtrail-security-best-practices.sentinel:128:1 - Rule "main"
         Value:
           true
 ```
@@ -52,12 +52,12 @@ trace:
       Found 1 resource violations
 
       → Module name: root
-        ↳ Resource Address: aws_cloudtrail.example
+        ↳ Resource Address: No compliant CloudTrail trail found
           | ✗ failed
-          | 'aws_cloudtrail' must follow security best practices. Refer to https://docs.aws.amazon.com/awscloudtrail/latest/userguide/best-practices-security.html for more details.
+          | No AWS CloudTrail trail found that meets all security best practices. At least one trail must: have logging enabled, record global service events, be multi-region, have log file validation enabled, be encrypted with a KMS key, and log all management events for both reads and writes without exclusions. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-security-trail-enabled.html for more details.
 
 
-      cloudtrail-security-best-practices.sentinel:47:1 - Rule "main"
+      cloudtrail-security-best-practices.sentinel:128:1 - Rule "main"
         Value:
           false
 ```

@@ -10,6 +10,13 @@ import "tfresources" as tf
 import "report" as report
 import "collection" as collection
 import "collection/maps" as maps
+import "strings"
+
+# Params
+# kmsKeyArns (Optional)
+# Type: CSV
+# Comma separated list of AWS KMS key ARNs allowed for encrypting Amazon DynamoDB Tables
+param kmsKeyArns default ""
 
 # Constants
 const = {
@@ -22,14 +29,76 @@ const = {
 }
 
 # Functions
+# Parse comma-separated list of allowed KMS key ARNs
+get_allowed_kms_keys = func() {
+	if kmsKeyArns is "" {
+		return []
+	}
+	
+	# Split by comma and trim whitespace
+	keys = strings.split(kmsKeyArns, ",")
+	trimmed_keys = []
+	for keys as key {
+		trimmed = strings.trim_space(key)
+		if trimmed is not "" {
+			trimmed_keys = trimmed_keys + [trimmed]
+		}
+	}
+	
+	return trimmed_keys
+}
+
+# Check if a KMS key ARN is in the allowed list
+is_kms_key_allowed = func(kms_key_arn) {
+	allowed_keys = get_allowed_kms_keys()
+	
+	# If no specific keys are required, any KMS key is allowed
+	if length(allowed_keys) is 0 {
+		return true
+	}
+	
+	# Check if the key is in the allowed list
+	for allowed_keys as allowed {
+		if kms_key_arn is allowed {
+			return true
+		}
+	}
+	
+	return false
+}
+
 generate_violation_message = func(violation) {
 	sse_blocks = maps.get(violation.values, const.server_side_encryption, [])
+	allowed_keys = get_allowed_kms_keys()
 
 	if length(sse_blocks) is 0 {
-		return "DynamoDB table must have 'server_side_encryption' block configured with KMS encryption enabled. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
+		if length(allowed_keys) > 0 {
+			keys_list = strings.join(allowed_keys, ", ")
+			return "DynamoDB table must have 'server_side_encryption.enabled' set to true and use one of the allowed KMS keys: " + keys_list + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
+		}
+		return "DynamoDB table must have 'server_side_encryption.enabled' set to true so the table uses AWS KMS encryption instead of the default AWS-owned key. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
 	}
 
-	return "DynamoDB table 'server_side_encryption' block must have 'enabled' set to true and 'kms_key_arn' specified for KMS encryption. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
+	sse = sse_blocks[0]
+	enabled_value = maps.get(sse, const.enabled, false)
+	kms_key_value = maps.get(sse, const.kms_key_arn, "")
+	if kms_key_value is null {
+		kms_key_value = ""
+	}
+
+	if enabled_value is false {
+		return "DynamoDB table must have 'server_side_encryption.enabled' set to true to use AWS KMS encryption. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
+	}
+	
+	if length(allowed_keys) > 0 {
+		keys_list = strings.join(allowed_keys, ", ")
+		if kms_key_value is "" {
+			return "DynamoDB table is encrypted with the default KMS-managed key, but the rule parameter 'kmsKeyArns' restricts encryption to these allowed keys: " + keys_list + ". Set 'kms_key_arn' to one of the allowed keys. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
+		}
+		return "DynamoDB table is using KMS key '" + kms_key_value + "' which is not in the allowed list. Allowed keys: " + keys_list + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
+	}
+
+	return "DynamoDB table must have 'server_side_encryption.enabled' set to true to use AWS KMS encryption. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
 }
 
 is_kms_encrypted = func(res) {
@@ -40,6 +109,10 @@ is_kms_encrypted = func(res) {
 	}
 
 	sse = sse_blocks[0]
+	enabled_value = maps.get(sse, const.enabled, false)
+	if enabled_value is false {
+		return false
+	}
 
 	# Get KMS key ARN - treat null as empty string
 	kms_key_value = maps.get(sse, const.kms_key_arn, "")
@@ -47,21 +120,19 @@ is_kms_encrypted = func(res) {
 		kms_key_value = ""
 	}
 
-	# KMS key must be present and not empty
+	# When no allowed list is supplied, enabled=true is sufficient. The provider
+	# uses the default KMS-managed DynamoDB key when kms_key_arn is omitted.
+	if length(get_allowed_kms_keys()) is 0 {
+		return true
+	}
+
+	# When an allowed list is supplied, the configured kms_key_arn must be present
+	# and must match one of the allowed keys.
 	if kms_key_value is "" {
 		return false
 	}
 
-	# Get enabled value - defaults to true if not specified when KMS key is present
-	enabled_value = maps.get(sse, const.enabled, null)
-
-	# If enabled is explicitly false, fail
-	if enabled_value is false {
-		return false
-	}
-
-	# If KMS key is present and enabled is not false, encryption is enabled
-	return true
+	return is_kms_key_allowed(kms_key_value)
 }
 
 # Variables

@@ -18,7 +18,7 @@ planned_values = {
 			"values": {
 				"family":                   "example-task",
 				"container_definitions":    "[{\"name\":\"app\",\"image\":\"nginx:latest\",\"user\":\"1000\",\"memory\":512,\"cpu\":256},{\"name\":\"sidecar\",\"image\":\"busybox:latest\",\"memory\":256,\"cpu\":128}]",
-				"requires_compatibilities": ["FARGATE"],
+				"requires_compatibilities": ["EC2"],
 				"network_mode":             "awsvpc",
 				"cpu":                      "512",
 				"memory":                   "768",

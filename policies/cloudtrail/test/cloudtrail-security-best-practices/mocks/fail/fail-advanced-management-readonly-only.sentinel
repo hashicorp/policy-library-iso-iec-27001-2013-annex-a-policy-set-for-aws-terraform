@@ -1,0 +1,44 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_cloudtrail.advanced_readonly_management_trail": {
+			"address":        "aws_cloudtrail.advanced_readonly_management_trail",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "advanced_readonly_management_trail",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_cloudtrail",
+			"values": {
+				"name":                          "advanced-readonly-management-trail",
+				"s3_bucket_name":                "my-cloudtrail-bucket",
+				"enable_logging":                true,
+				"include_global_service_events": true,
+				"is_multi_region_trail":         true,
+				"enable_log_file_validation":    true,
+				"kms_key_id":                    "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+				"advanced_event_selector": [
+					{
+						"name": "Log readonly management events only",
+						"field_selector": [
+							{
+								"field":  "eventCategory",
+								"equals": ["Management"],
+							},
+							{
+								"field":  "readOnly",
+								"equals": ["true"],
+							},
+						],
+					},
+				],
+			},
+		},
+	},
+}

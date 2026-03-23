@@ -74,7 +74,7 @@ planned_values = {
 			"type":           "aws_backup_selection",
 			"values": {
 				"name":      "multiple-backup-selection",
-				"plan_id":   "backup-plan-multiple-id",
+				"plan_id":   "aws_backup_plan.multiple",
 				"resources": ["arn:aws:dynamodb:us-east-1:123456789012:table/multiple-backups-table"],
 			},
 		},

@@ -6,7 +6,7 @@
 
 ## Description
 
-This control checks if Amazon Athena workgroups have encryption at rest configured for query results. This control fails if encryption is not enabled for the workgroup's result configuration.
+This control checks if Amazon Athena workgroups have encryption at rest configured for query results. This control fails if the workgroup does not configure valid query result encryption in its result configuration, or when KMS-based encryption is selected without the required KMS key attribute.
 
 Athena workgroups allow you to isolate queries for different teams, applications, or workloads. Encrypting query results at rest ensures that sensitive data returned by queries is protected from unauthorized access. This is a critical security measure for maintaining data confidentiality and meeting compliance requirements.
 

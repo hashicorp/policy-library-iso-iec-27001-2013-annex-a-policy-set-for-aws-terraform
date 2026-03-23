@@ -9,12 +9,21 @@ import "tfplan/v2" as tfplan
 import "tfresources" as tf
 import "report" as report
 import "collection/maps" as maps
+import "strings"
+
+# Params
+# S3BucketNames (Optional)
+# Type: String
+# Comma-separated list of S3 bucket names for which data events logging should be enabled.
+# Default behavior checks for all S3 buckets.
+param S3BucketNames default ""
 
 # Constants
 const = {
 	"policy_name":             "cloudtrail-s3-dataevents-enabled",
 	"message":                 "At least one AWS CloudTrail trail must be logging Amazon S3 data events for all S3 buckets. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-s3-dataevents-enabled.html for more details.",
 	"resource_aws_cloudtrail": "aws_cloudtrail",
+	"ends_with":               "ends_with",
 	"event_selector":          "event_selector",
 	"advanced_event_selector": "advanced_event_selector",
 	"data_resource":           "data_resource",
@@ -23,10 +32,33 @@ const = {
 	"values":                  "values",
 	"field":                   "field",
 	"equals":                  "equals",
+	"not_ends_with":           "not_ends_with",
+	"not_equals":              "not_equals",
+	"not_starts_with":         "not_starts_with",
 	"s3_resource_type":        "AWS::S3::Object",
+	"starts_with":             "starts_with",
 }
 
 # Functions
+# Parse comma-separated list of S3 bucket names
+get_target_bucket_names = func() {
+	if S3BucketNames is "" {
+		return []
+	}
+	
+	# Split by comma and trim whitespace
+	buckets = strings.split(S3BucketNames, ",")
+	trimmed_buckets = []
+	for buckets as bucket {
+		trimmed = strings.trim_space(bucket)
+		if trimmed is not "" {
+			trimmed_buckets = trimmed_buckets + [trimmed]
+		}
+	}
+	
+	return trimmed_buckets
+}
+
 # Check if a value pattern represents all S3 buckets
 is_all_s3_pattern = func(value) {
 	# Empty string or various ARN patterns that represent all S3 buckets
@@ -36,9 +68,94 @@ is_all_s3_pattern = func(value) {
 		value is "arn:aws:s3"
 }
 
-# Check if advanced event selectors are configured for all S3 data events
+# Extract bucket name from ARN pattern
+extract_bucket_name_from_arn = func(arn) {
+	# ARN format: arn:aws:s3:::bucket-name/* or arn:aws:s3:::bucket-name/prefix/*
+	if strings.has_prefix(arn, "arn:aws:s3:::") {
+		# Remove the prefix
+		remainder = strings.trim_prefix(arn, "arn:aws:s3:::")
+		# Split by / to get bucket name
+		parts = strings.split(remainder, "/")
+		if length(parts) > 0 {
+			return parts[0]
+		}
+	}
+	return ""
+}
+
+# Check if specific bucket names are covered by the resource values
+are_target_buckets_covered = func(resource_values, target_buckets) {
+	if length(target_buckets) == 0 {
+		# No specific buckets specified, check for all buckets
+		return false
+	}
+	
+	# Track which target buckets are covered
+	covered_buckets = {}
+	for target_buckets as bucket {
+		covered_buckets[bucket] = false
+	}
+	
+	# Check each resource value
+	for resource_values as value {
+		# Check if it's an all-buckets pattern
+		if is_all_s3_pattern(value) {
+			# All buckets covered
+			for target_buckets as bucket {
+				covered_buckets[bucket] = true
+			}
+			return true
+		}
+		
+		# Extract bucket name from ARN
+		bucket_name = extract_bucket_name_from_arn(value)
+		if bucket_name is not "" {
+			# Check if this bucket is in our target list
+			for target_buckets as target {
+				if bucket_name is target {
+					covered_buckets[target] = true
+				}
+			}
+		}
+	}
+	
+	# Check if all target buckets are covered
+	for covered_buckets as bucket, is_covered {
+		if not is_covered {
+			return false
+		}
+	}
+	
+	return true
+}
+
+are_target_buckets_excluded = func(resource_values, target_buckets) {
+	if length(resource_values) == 0 or length(target_buckets) == 0 {
+		return false
+	}
+
+	for resource_values as value {
+		if is_all_s3_pattern(value) {
+			return true
+		}
+
+		bucket_name = extract_bucket_name_from_arn(value)
+		if bucket_name is not "" {
+			for target_buckets as target {
+				if bucket_name is target {
+					return true
+				}
+			}
+		}
+	}
+
+	return false
+}
+
+# Check if advanced event selectors are configured for S3 data events
 check_advanced_event_selectors = func(res) {
 	advanced_selectors = maps.get(res.values, const.advanced_event_selector, [])
+	target_buckets = get_target_bucket_names()
 
 	if length(advanced_selectors) == 0 {
 		return false
@@ -51,11 +168,19 @@ check_advanced_event_selectors = func(res) {
 		has_data_category = false
 		has_s3_resource = false
 		has_event_name_filter = false
+		resource_arn_includes = []
+		resource_arn_excludes = []
+		has_resource_arn_filter = false
 
 		# Check field selectors for Data category and S3 resource type
 		for field_selectors as field_selector {
 			field_name = maps.get(field_selector, const.field, "")
 			equals_values = maps.get(field_selector, const.equals, [])
+			starts_with_values = maps.get(field_selector, const.starts_with, [])
+			ends_with_values = maps.get(field_selector, const.ends_with, [])
+			not_equals_values = maps.get(field_selector, const.not_equals, [])
+			not_starts_with_values = maps.get(field_selector, const.not_starts_with, [])
+			not_ends_with_values = maps.get(field_selector, const.not_ends_with, [])
 
 			# Check for eventCategory = Data
 			if field_name is "eventCategory" {
@@ -75,6 +200,19 @@ check_advanced_event_selectors = func(res) {
 				}
 			}
 
+			# Check for resources.ARN to get specific bucket inclusions/exclusions
+			if field_name is "resources.ARN" {
+				has_resource_arn_filter = length(equals_values) > 0 or
+					length(starts_with_values) > 0 or
+					length(ends_with_values) > 0 or
+					length(not_equals_values) > 0 or
+					length(not_starts_with_values) > 0 or
+					length(not_ends_with_values) > 0
+
+				resource_arn_includes = resource_arn_includes + equals_values + starts_with_values + ends_with_values
+				resource_arn_excludes = resource_arn_excludes + not_equals_values + not_starts_with_values + not_ends_with_values
+			}
+
 			# Check if eventName filter is present (restricts to specific operations)
 			if field_name is "eventName" {
 				has_event_name_filter = true
@@ -83,16 +221,53 @@ check_advanced_event_selectors = func(res) {
 
 		# Must have data category and S3 resource, but NOT have eventName filter
 		if has_data_category and has_s3_resource and not has_event_name_filter {
-			return true
+			# If no specific buckets requested, check for all buckets
+			if length(target_buckets) == 0 {
+				# Exclusion filters do not represent logging all S3 buckets.
+				if length(resource_arn_excludes) > 0 {
+					continue
+				}
+
+				# No explicit ARN filter means all S3 objects.
+				if not has_resource_arn_filter {
+					return true
+				}
+
+				for resource_arn_includes as arn {
+					if is_all_s3_pattern(arn) {
+						return true
+					}
+				}
+			} else {
+				# Check if specific target buckets are covered
+				if are_target_buckets_excluded(resource_arn_excludes, target_buckets) {
+					continue
+				}
+
+				if not has_resource_arn_filter {
+					# Empty means all buckets, so target buckets are covered
+					return true
+				}
+
+				# Only exclusion filters means all buckets except excluded targets.
+				if length(resource_arn_includes) == 0 and length(resource_arn_excludes) > 0 {
+					return true
+				}
+
+				if are_target_buckets_covered(resource_arn_includes, target_buckets) {
+					return true
+				}
+			}
 		}
 	}
 
 	return false
 }
 
-# Check if legacy event selectors are configured for all S3 data events
+# Check if legacy event selectors are configured for S3 data events
 check_legacy_event_selectors = func(res) {
 	event_selectors = maps.get(res.values, const.event_selector, [])
+	target_buckets = get_target_bucket_names()
 
 	if length(event_selectors) == 0 {
 		return false
@@ -115,14 +290,28 @@ check_legacy_event_selectors = func(res) {
 
 			# Check if this data resource is for S3 objects
 			if resource_type is const.s3_resource_type {
-				# Empty values array implies all resources
-				if length(resource_values) == 0 {
-					return true
-				}
+				# If no specific buckets requested, check for all buckets
+				if length(target_buckets) == 0 {
+					# Empty values array implies all resources
+					if length(resource_values) == 0 {
+						return true
+					}
 
-				# Check if any value pattern represents all S3 buckets
-				for resource_values as value {
-					if is_all_s3_pattern(value) {
+					# Check if any value pattern represents all S3 buckets
+					for resource_values as value {
+						if is_all_s3_pattern(value) {
+							return true
+						}
+					}
+				} else {
+					# Check if specific target buckets are covered
+					# Empty values array implies all resources
+					if length(resource_values) == 0 {
+						return true
+					}
+
+					# Check if target buckets are covered
+					if are_target_buckets_covered(resource_values, target_buckets) {
 						return true
 					}
 				}
@@ -151,7 +340,14 @@ is_trail_logging_all_s3_data_events = func(res) {
 }
 
 generate_violation_message = func() {
-	return "At least one AWS CloudTrail trail must be logging Amazon S3 data events for all S3 buckets. Configure event selectors with data resource type 'AWS::S3::Object' and values set to 'arn:aws:s3:::*/*' to capture object-level API operations across all buckets. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-s3-dataevents-enabled.html for more details."
+	target_buckets = get_target_bucket_names()
+	
+	if length(target_buckets) == 0 {
+		return "At least one AWS CloudTrail trail must be logging Amazon S3 data events for all S3 buckets. Configure event selectors with data resource type 'AWS::S3::Object' and values set to 'arn:aws:s3:::*/*' to capture object-level API operations across all buckets. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-s3-dataevents-enabled.html for more details."
+	}
+	
+	bucket_list = strings.join(target_buckets, ", ")
+	return "At least one AWS CloudTrail trail must be logging Amazon S3 data events for the specified S3 buckets: " + bucket_list + ". Configure event selectors with data resource type 'AWS::S3::Object' and appropriate bucket ARNs to capture object-level API operations. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-s3-dataevents-enabled.html for more details."
 }
 
 # Variables

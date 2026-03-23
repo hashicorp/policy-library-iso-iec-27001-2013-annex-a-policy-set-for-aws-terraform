@@ -10,25 +10,104 @@ import "tfresources" as tf
 import "report" as report
 import "collection" as collection
 import "collection/maps" as maps
+import "strings"
+import "json"
 
 # Params
 # backup_period_days refers to the maximum number of days since the last backup
 param backup_period_days default 1
 
+# resourceTags (Optional)
+# Type: String
+# Tags of the DynamoDB Tables for the rule to check, in JSON format {"tagkey" : "tagValue"}.
+param resourceTags default ""
+
+# resourceId (Optional)
+# Type: String
+# Name of DynamoDB Table for the rule to check.
+param resourceId default ""
+
+# recoveryPointAgeValue (Optional)
+# Type: int
+# Default: 1
+# Numerical value for maximum allowed age. No more than 744 for hours, 31 for days.
+param recoveryPointAgeValue default 1
+
+# recoveryPointAgeUnit (Optional)
+# Type: String
+# Default: days
+# Unit of time for maximum allowed age. Accepted values: 'hours', 'days'.
+param recoveryPointAgeUnit default "days"
+
 # Constants
 const = {
 	"policy_name":               "dynamo-db-recovery-point-created",
-	"message":                   "DynamoDB table must have point-in-time recovery enabled or be associated with an AWS Backup plan. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-last-backup-recovery-point-created.html for more details.",
+	"message":                   "DynamoDB tables must have point-in-time recovery enabled or be associated with a compliant AWS Backup plan that is scheduled within the required time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-last-backup-recovery-point-created.html for more details.",
 	"resource_dynamodb_table":   "aws_dynamodb_table",
 	"resource_backup_plan":      "aws_backup_plan",
 	"resource_backup_selection": "aws_backup_selection",
+	"name":                      "name",
+	"plan_id":                   "plan_id",
 	"point_in_time_recovery":    "point_in_time_recovery",
+	"resources":                 "resources",
+	"rule":                      "rule",
+	"schedule":                  "schedule",
+	"selection_tag":             "selection_tag",
 	"enabled":                   "enabled",
 }
 
 # Functions
+# Check if resource matches the specified resourceId filter
+matches_resource_id = func(res) {
+	if resourceId is "" {
+		return true
+	}
+	
+	table_name = maps.get(res.values, "name", "")
+	return table_name is resourceId
+}
+
+# Check if resource matches the specified resourceTags filter
+matches_resource_tags = func(res) {
+	if resourceTags is "" {
+		return true
+	}
+	
+	# Parse the resourceTags JSON string
+	filter_tags = json.unmarshal(resourceTags)
+	resource_tags = maps.get(res.values, "tags", {})
+	
+	# Check if all filter tags match
+	for filter_tags as tag_key, tag_value {
+		resource_tag_value = maps.get(resource_tags, tag_key, "")
+		if resource_tag_value is not tag_value {
+			return false
+		}
+	}
+	
+	return true
+}
+
+
+# Keep the legacy backup_period_days parameter effective unless the AWS Config
+# recovery point parameters are explicitly customized.
+get_required_hours = func() {
+	if recoveryPointAgeValue is not 1 or recoveryPointAgeUnit is not "days" {
+		if recoveryPointAgeUnit is "hours" {
+			return recoveryPointAgeValue
+		}
+
+		return recoveryPointAgeValue * 24
+	}
+
+	return backup_period_days * 24
+}
+
 generate_violation_message = func(violation) {
-	return "DynamoDB table '" + violation.address + "' does not have point-in-time recovery enabled or is not associated with an AWS Backup plan. Recovery points must be created within " + string(backup_period_days) + " day(s). Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-last-backup-recovery-point-created.html for more details."
+	required_hours = get_required_hours()
+	age_description = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
+	
+	return "DynamoDB table '" + violation.address + "' does not have point-in-time recovery enabled and is not associated with a compliant AWS Backup plan scheduled within " + string(required_hours) + " hour(s) (equivalent to " + age_description + "). Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-last-backup-recovery-point-created.html for more details."
 }
 
 # Check if point-in-time recovery is enabled for the DynamoDB table
@@ -48,21 +127,160 @@ is_pitr_enabled = func(res) {
 	return false
 }
 
-# Check if the table is part of a backup selection
-is_in_backup_plan = func(table_arn, backup_selections) {
-	for backup_selections as _, selection {
-		resources = maps.get(selection.values, "resources", [])
-		for resources as resource_arn {
-			# Check if the resource ARN matches or contains the table reference
-			if resource_arn is table_arn {
+
+get_backup_frequency_hours = func(schedule) {
+	if strings.has_prefix(schedule, "rate(") {
+		parts = strings.split(schedule, " ")
+		if length(parts) >= 2 {
+			numeric_part = strings.trim_prefix(parts[0], "rate(")
+			value = int(numeric_part)
+
+			if strings.has_prefix(parts[1], "hour") {
+				return value
+			}
+
+			if strings.has_prefix(parts[1], "day") {
+				return value * 24
+			}
+		}
+	}
+
+	if strings.has_prefix(schedule, "cron(") {
+		cron_expr = strings.trim_prefix(schedule, "cron(")
+		cron_expr = strings.trim_suffix(cron_expr, ")")
+		parts = strings.split(cron_expr, " ")
+
+		if length(parts) >= 3 {
+			minute = parts[0]
+			hour = parts[1]
+			day_of_month = parts[2]
+
+			if hour is "*" {
+				return 1
+			}
+
+			if hour matches ".*/[0-9]+" {
+				hour_parts = strings.split(hour, "/")
+				return int(hour_parts[length(hour_parts) - 1])
+			}
+
+			if minute is "*" or minute matches ".*/[0-9]+" {
+				return 1
+			}
+
+			if day_of_month is "*" or day_of_month is "?" {
+				return 24
+			}
+
+			if day_of_month matches "[0-9]+" {
+				return 720
+			}
+		}
+	}
+
+	return 720
+}
+
+
+is_backup_plan_compliant = func(plan_res) {
+	rules_list = maps.get(plan_res.values, const.rule, [])
+	if length(rules_list) is 0 {
+		return false
+	}
+
+	required_hours = get_required_hours()
+	for rules_list as _, backup_rule {
+		schedule = maps.get(backup_rule, const.schedule, "")
+		if schedule is not "" {
+			frequency = get_backup_frequency_hours(schedule)
+			if frequency <= required_hours {
 				return true
 			}
 		}
+	}
 
-		# Check if selection rules match the table
-		selection_tags = maps.get(selection.values, "selection_tag", [])
-		if length(selection_tags) > 0 {
-			# If selection tags exist, assume table could be included via tags
+	return false
+}
+
+selection_matches_table_tags = func(selection_res, table_res) {
+	selection_tags = maps.get(selection_res.values, const.selection_tag, [])
+	if length(selection_tags) is 0 {
+		return false
+	}
+
+	table_tags = maps.get(table_res.values, "tags", {})
+	if length(table_tags) is 0 {
+		return false
+	}
+
+	for selection_tags as _, selection_tag {
+		tag_key = maps.get(selection_tag, "key", "")
+		tag_value = maps.get(selection_tag, "value", "")
+		tag_type = maps.get(selection_tag, "type", "STRINGEQUALS")
+
+		if tag_type is not "STRINGEQUALS" {
+			return false
+		}
+
+		if maps.get(table_tags, tag_key, "") is not tag_value {
+			return false
+		}
+	}
+
+	return true
+}
+
+selection_references_table = func(selection_res, table_res) {
+	resources_list = maps.get(selection_res.values, const.resources, [])
+	table_address = table_res.address
+	table_name = table_res.name
+	table_identifier = maps.get(table_res.values, const.name, "")
+
+	for resources_list as _, resource_ref {
+		ref = string(resource_ref)
+		ref_lower = strings.to_lower(ref)
+
+		if ref is "*" {
+			return true
+		}
+
+		if ref matches ".*" + table_address + ".*" or ref matches ".*" + table_name + ".*" {
+			return true
+		}
+
+		if table_identifier is not "" {
+			if ref is table_identifier or strings.has_suffix(ref, ":table/" + table_identifier) {
+				return true
+			}
+
+			if ref_lower matches "arn:aws:dynamodb:.*:table/\\*" {
+				return true
+			}
+		}
+	}
+
+	return selection_matches_table_tags(selection_res, table_res)
+}
+
+selection_has_compliant_plan = func(selection_res, backup_plans) {
+	plan_id = maps.get(selection_res.values, const.plan_id, "")
+	if plan_id is not "" {
+		for backup_plans as _, plan_res {
+			plan_name = plan_res.name
+			plan_display_name = maps.get(plan_res.values, const.name, "")
+			if plan_id is plan_res.address or
+				plan_id is plan_name or
+				plan_id is plan_display_name or
+				strings.has_suffix(plan_id, "." + plan_name) {
+				return is_backup_plan_compliant(plan_res)
+			}
+		}
+
+		return false
+	}
+
+	for backup_plans as _, plan_res {
+		if is_backup_plan_compliant(plan_res) {
 			return true
 		}
 	}
@@ -70,38 +288,22 @@ is_in_backup_plan = func(table_arn, backup_selections) {
 	return false
 }
 
-# Check if table has backup protection
-is_backup_compliant = func(res, backup_plans, backup_selections) {
-	# Check if recovery points are expired via tags
-	tags = maps.get(res.values, "tags", {})
-	backup_status = maps.get(tags, "BackupStatus", "")
-	if backup_status is "expired" {
-		return false
+has_compliant_backup_plan = func(table_res, backup_selections, backup_plans) {
+	for backup_selections as _, selection_res {
+		if selection_references_table(selection_res, table_res) and selection_has_compliant_plan(selection_res, backup_plans) {
+			return true
+		}
 	}
 
-	# First check if PITR is enabled - this provides continuous backup
+	return false
+}
+
+is_backup_compliant = func(res, backup_plans, backup_selections) {
 	if is_pitr_enabled(res) {
 		return true
 	}
 
-	# If no backup plans exist, table is not compliant
-	if length(backup_plans) == 0 {
-		return false
-	}
-
-	# Build table ARN pattern for matching
-	table_name = maps.get(res.values, "name", "")
-	if table_name is "" {
-		return false
-	}
-
-	# If backup selections exist and plans exist, consider it potentially compliant
-	# This is a best-effort check given Terraform plan limitations
-	if length(backup_selections) > 0 and length(backup_plans) > 0 {
-		return true
-	}
-
-	return false
+	return has_compliant_backup_plan(res, backup_selections, backup_plans)
 }
 
 # Variables
@@ -109,7 +311,17 @@ dynamodb_tables = tf.plan(tfplan.planned_values.resources).type(const.resource_d
 backup_plans = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_plan).resources
 backup_selections = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_selection).resources
 
-violations = collection.reject(dynamodb_tables, func(res) {
+# Apply resourceId filter if specified
+filtered_by_id = filter dynamodb_tables as _, res {
+	matches_resource_id(res)
+}
+
+# Apply resourceTags filter if specified
+filtered_by_tags = filter filtered_by_id as _, res {
+	matches_resource_tags(res)
+}
+
+violations = collection.reject(filtered_by_tags, func(res) {
 	return is_backup_compliant(res, backup_plans, backup_selections)
 })
 

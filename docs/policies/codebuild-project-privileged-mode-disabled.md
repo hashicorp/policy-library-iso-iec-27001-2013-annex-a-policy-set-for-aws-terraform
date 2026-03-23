@@ -6,7 +6,7 @@
 
 ## Description
 
-This control checks if AWS CodeBuild projects have privileged mode disabled. This control fails if privileged mode is enabled for CodeBuild projects.
+This control checks whether `aws_codebuild_project` resources have `environment[*].privileged_mode` disabled. It fails when privileged mode is enabled, unless the project name is explicitly included in the optional `exemptedProjects` CSV parameter.
 
 Privileged mode grants elevated permissions to the Docker daemon running in the build environment, allowing containers to run with extended privileges. While this may be necessary for certain build operations like building Docker images, it poses security risks by potentially allowing container escape and unauthorized access to the host system. Disabling privileged mode when not required follows the principle of least privilege and reduces the attack surface.
 
@@ -28,7 +28,7 @@ trace:
 
       ✓ Found 0 resource violations
 
-      codebuild-project-privileged-mode-disabled.sentinel:47:1 - Rule "main"
+      codebuild-project-privileged-mode-disabled.sentinel:72:1 - Rule "main"
         Value:
           true
 ```
@@ -54,10 +54,10 @@ trace:
       → Module name: root
         ↳ Resource Address: aws_codebuild_project.example
           | ✗ failed
-          | 'aws_codebuild_project' must have privileged mode disabled. Refer to https://docs.aws.amazon.com/codebuild/latest/userguide/security-best-practices.html for more details.
+          | AWS CodeBuild project has privileged mode enabled. Privileged mode should be disabled unless required for specific use cases like Docker builds. Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-environment-privileged-check.html for more details.
 
 
-      codebuild-project-privileged-mode-disabled.sentinel:47:1 - Rule "main"
+      codebuild-project-privileged-mode-disabled.sentinel:72:1 - Rule "main"
         Value:
           false
 ```

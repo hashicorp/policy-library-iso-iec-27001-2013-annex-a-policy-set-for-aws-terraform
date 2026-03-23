@@ -19,11 +19,18 @@ const = {
 	"artifacts":                      "artifacts",
 	"secondary_artifacts":            "secondary_artifacts",
 	"encryption_disabled":            "encryption_disabled",
+	"type":                           "type",
+	"no_artifacts":                   "NO_ARTIFACTS",
 }
 
 # Functions
 # Check if a single artifact has encryption enabled
 is_artifact_encrypted = func(artifact) {
+	# Terraform ignores encryption_disabled when the artifact type is NO_ARTIFACTS.
+	if maps.get(artifact, const.type, "") is const.no_artifacts {
+		return true
+	}
+
 	# If encryption_disabled is not defined, encryption is enabled by default (returns true)
 	# If encryption_disabled is explicitly set to false, encryption is enabled (returns true)
 	# If encryption_disabled is set to true, encryption is disabled (returns false)

@@ -1,0 +1,67 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_ebs_volume.conditional": {
+			"address":        "aws_ebs_volume.conditional",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "conditional",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_ebs_volume",
+			"values": {
+				"arn":               "arn:aws:ec2:us-east-1:123456789012:volume/vol-conditional1",
+				"availability_zone": "us-east-1a",
+				"encrypted":         true,
+				"id":                "vol-conditional1",
+				"size":              90,
+				"tags": {
+					"Backup":      "true",
+					"Environment": "production",
+				},
+				"type":              "gp3",
+			},
+		},
+		"aws_backup_selection.conditional": {
+			"address":        "aws_backup_selection.conditional",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "conditional",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_selection",
+			"values": {
+				"name":         "conditional-backup",
+				"plan_id":      "backup-plan-id-7",
+				"iam_role_arn": "arn:aws:iam::123456789012:role/backup-role",
+				"resources":    ["*"],
+				"condition": [
+					{
+						"string_equals": [
+							{
+								"key":   "aws:ResourceTag/Backup",
+								"value": "true",
+							},
+						],
+						"string_like": [
+							{
+								"key":   "aws:ResourceTag/Environment",
+								"value": "prod*",
+							},
+						],
+					},
+				],
+				"not_resources": [],
+			},
+		},
+	},
+}

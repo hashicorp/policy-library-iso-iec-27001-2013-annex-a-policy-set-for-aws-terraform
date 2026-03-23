@@ -23,12 +23,6 @@ const = {
 
 # Functions
 has_multiple_instance_types = func(res) {
-	# Check if instance_types array is defined with multiple types
-	instance_types = maps.get(res.values, "instance_types", [])
-	if length(instance_types) > 1 {
-		return true
-	}
-
 	# Check if mixed_instances_policy is defined with multiple overrides
 	mixed_instances_policy = maps.get(res.values, const.mixed_instances_policy, [])
 
@@ -38,6 +32,15 @@ has_multiple_instance_types = func(res) {
 			launch_template = maps.get(mip, "launch_template", [])
 			for launch_template as lt {
 				override = maps.get(lt, "override", [])
+
+				# Attribute-based instance selection can resolve to multiple instance types.
+				for override as override_entry {
+					instance_requirements = maps.get(override_entry, "instance_requirements", [])
+					if length(instance_requirements) > 0 {
+						return true
+					}
+				}
+
 				# If there are multiple overrides, it uses multiple instance types
 				if length(override) > 1 {
 					return true

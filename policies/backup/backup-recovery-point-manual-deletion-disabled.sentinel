@@ -14,6 +14,13 @@ import "collection" as collection
 import "collection/maps" as maps
 import "strings"
 import "json"
+import "types"
+
+# Params
+# principalArnList (Optional)
+# Type: CSV
+# Comma-separated list of AWS Identity and Access Management (IAM) Amazon Resource Names (ARNs) for the rule to NOT check.
+param principalArnList default ""
 
 # Constants
 const = {
@@ -31,7 +38,76 @@ const = {
 }
 
 # Functions
+# Parse comma-separated list of principal ARNs
+get_excluded_principals = func() {
+	if principalArnList is "" {
+		return []
+	}
+	
+	# Split by comma and trim whitespace
+	principals = strings.split(principalArnList, ",")
+	trimmed_principals = []
+	for principals as principal {
+		trimmed = strings.trim_space(principal)
+		if trimmed is not "" {
+			trimmed_principals = trimmed_principals + [trimmed]
+		}
+	}
+	
+	return trimmed_principals
+}
+
+# Check if a principal ARN is in the exclusion list
+is_principal_excluded = func(principal_arn) {
+	excluded_principals = get_excluded_principals()
+	
+	for excluded_principals as excluded {
+		if principal_arn is excluded {
+			return true
+		}
+	}
+	
+	return false
+}
+
+get_statement_principals = func(statement) {
+	principal_raw = maps.get(statement, "Principal", "")
+	if principal_raw is "" {
+		return []
+	}
+
+	# Principal can be a string like "*". That is not an excludable ARN.
+	if types.type_of(principal_raw) is "string" {
+		return []
+	}
+
+	aws_principal = maps.get(principal_raw, "AWS", "")
+	if aws_principal is "" {
+		return []
+	}
+
+	# Handle a single ARN string.
+	if types.type_of(aws_principal) is "string" {
+		return [aws_principal]
+	}
+
+	# Otherwise assume it is already a list.
+	return aws_principal
+}
+
+get_statement_actions = func(statement) {
+	actions_raw = maps.get(statement, "Action", [])
+
+	# Handle a single action string.
+	if types.type_of(actions_raw) is "string" {
+		return [actions_raw]
+	}
+
+	return actions_raw
+}
+
 # Check if a policy document contains required Deny statements
+# Also checks if the principal is excluded from the rule
 has_required_deny_statements = func(policy_json) {
 	# Parse the policy JSON
 	policy_doc = json.unmarshal(policy_json)
@@ -46,18 +122,21 @@ has_required_deny_statements = func(policy_json) {
 			continue
 		}
 
-		# Get actions from the statement
-		actions_raw = maps.get(statement, "Action", [])
+		# Check if the principal in this statement is excluded
+		statement_principals = get_statement_principals(statement)
+		if length(statement_principals) > 0 {
+			excluded_principals = filter statement_principals as principal_arn {
+				is_principal_excluded(principal_arn)
+			}
 
-		# Convert single action to list if needed
-		# Check if it's a list by trying to iterate
-		actions = []
-		if length(actions_raw) else 0 is 0 {
-			# It's a string, convert to list
-			actions = [actions_raw]
-		} else {
-			actions = actions_raw
+			# If all explicit principals in this statement are excluded, skip the statement.
+			if length(excluded_principals) is length(statement_principals) {
+				continue
+			}
 		}
+
+		# Get actions from the statement
+		actions = get_statement_actions(statement)
 
 		# Check if all required actions are present
 		has_delete = false

@@ -43,7 +43,7 @@ planned_values = {
 			"type":           "aws_backup_selection",
 			"values": {
 				"name":      "example-backup-selection",
-				"plan_id":   "backup-plan-id",
+				"plan_id":   "aws_backup_plan.example",
 				"resources": ["arn:aws:dynamodb:us-east-1:123456789012:table/example-table"],
 			},
 		},

@@ -6,9 +6,9 @@
 
 ## Description
 
-This control checks if Amazon EC2 Auto Scaling groups have capacity rebalancing enabled. This control fails if capacity rebalancing is not configured for Auto Scaling groups using Spot Instances.
+This control checks if Capacity Rebalancing is enabled for Amazon EC2 Auto Scaling groups that use multiple instance types. In Terraform, the policy treats an Auto Scaling group as using multiple instance types when its `mixed_instances_policy.launch_template.override` list defines more than one explicit `instance_type`, or when any override uses `instance_requirements`, which allows Auto Scaling to select from multiple instance types dynamically.
 
-Capacity rebalancing helps maintain application availability by proactively replacing Spot Instances that are at elevated risk of interruption. When enabled, Auto Scaling attempts to launch new instances before terminating instances that are at risk, ensuring smooth transitions and minimizing disruptions. This is particularly important for applications running on Spot Instances to maintain high availability and resilience.
+This aligns with AWS Config rule `AUTOSCALING_CAPACITY_REBALANCING`, which focuses on Auto Scaling groups using multiple instance types rather than on all Spot-based groups generically.
 
 This rule is covered by the [ec2-autoscaling-capacity-rebalancing-enabled](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/ec2/ec2-autoscaling-capacity-rebalancing-enabled.sentinel) policy.
 
@@ -18,7 +18,7 @@ trace:
       Pass - ec2-autoscaling-capacity-rebalancing-enabled.sentinel
 
       Description:
-        This policy checks if 'aws_autoscaling_group' have capacity rebalancing enabled.
+        This policy checks if 'aws_autoscaling_group' that use multiple instance types have capacity rebalancing enabled.
 
       Print messages:
 
@@ -28,7 +28,7 @@ trace:
 
       ✓ Found 0 resource violations
 
-      ec2-autoscaling-capacity-rebalancing-enabled.sentinel:47:1 - Rule "main"
+      ec2-autoscaling-capacity-rebalancing-enabled.sentinel:1:1 - Rule "main"
         Value:
           true
 ```
@@ -41,7 +41,7 @@ trace:
       Fail - ec2-autoscaling-capacity-rebalancing-enabled.sentinel
 
       Description:
-        This policy checks if 'aws_autoscaling_group' have capacity rebalancing enabled.
+        This policy checks if 'aws_autoscaling_group' that use multiple instance types have capacity rebalancing enabled.
 
       Print messages:
 
@@ -54,12 +54,18 @@ trace:
       → Module name: root
         ↳ Resource Address: aws_autoscaling_group.example
           | ✗ failed
-          | 'aws_autoscaling_group' must have capacity rebalancing enabled. Refer to https://docs.aws.amazon.com/autoscaling/ec2/userguide/ec2-auto-scaling-capacity-rebalancing.html for more details.
+          | Capacity Rebalancing must be enabled (capacity_rebalance = true) for Auto Scaling groups that use multiple instance types. Refer to https://docs.aws.amazon.com/config/latest/developerguide/autoscaling-capacity-rebalancing.html for more details.
 
 
-      ec2-autoscaling-capacity-rebalancing-enabled.sentinel:47:1 - Rule "main"
+      ec2-autoscaling-capacity-rebalancing-enabled.sentinel:1:1 - Rule "main"
         Value:
           false
 ```
 
 ---
+
+## Notes
+
+- This policy depends only on `aws_autoscaling_group`.
+- Relevant Terraform attributes are `capacity_rebalance` and `mixed_instances_policy.launch_template.override`.
+- A single `override` with `instance_requirements` is treated as multiple-instance-type usage because Auto Scaling can launch any instance type matching those requirements.

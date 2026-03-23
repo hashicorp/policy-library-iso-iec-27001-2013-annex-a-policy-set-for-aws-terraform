@@ -6,9 +6,9 @@
 
 ## Description
 
-This control checks if Amazon CloudWatch log groups are encrypted using AWS Key Management Service (KMS). This control fails if CloudWatch log groups are not encrypted with a KMS key.
+This control checks whether `aws_cloudwatch_log_group` resources are encrypted using AWS Key Management Service (KMS). It fails when a log group does not set `kms_key_id`, or when an optional required key parameter is provided and the configured value does not match it.
 
-Encrypting CloudWatch log groups with KMS provides an additional layer of security for sensitive log data. KMS encryption ensures that log data is protected at rest and allows you to control access to encryption keys through IAM policies. This is essential for protecting sensitive information in logs and meeting compliance requirements for data encryption.
+Encrypting CloudWatch log groups with KMS provides an additional layer of security for sensitive log data. KMS encryption ensures that log data is protected at rest and allows you to control access to encryption keys through IAM policies. This policy validates the `kms_key_id` attribute exposed by the Terraform `aws_cloudwatch_log_group` resource.
 
 This rule is covered by the [cloudwatch-log-group-kms-encryption](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/cloudwatch/cloudwatch-log-group-kms-encryption.sentinel) policy.
 
@@ -28,7 +28,7 @@ trace:
 
       ✓ Found 0 resource violations
 
-      cloudwatch-log-group-kms-encryption.sentinel:47:1 - Rule "main"
+      cloudwatch-log-group-kms-encryption.sentinel:93:1 - Rule "main"
         Value:
           true
 ```
@@ -54,10 +54,10 @@ trace:
       → Module name: root
         ↳ Resource Address: aws_cloudwatch_log_group.example
           | ✗ failed
-          | 'aws_cloudwatch_log_group' must be encrypted with KMS. Refer to https://docs.aws.amazon.com/AmazonCloudWatch/latest/logs/encrypt-log-data-kms.html for more details.
+          | CloudWatch Log Group must be encrypted with an AWS KMS key. Attribute 'kms_key_id' is not set. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details.
 
 
-      cloudwatch-log-group-kms-encryption.sentinel:47:1 - Rule "main"
+      cloudwatch-log-group-kms-encryption.sentinel:93:1 - Rule "main"
         Value:
           false
 ```

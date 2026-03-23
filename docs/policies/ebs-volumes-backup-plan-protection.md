@@ -6,9 +6,9 @@
 
 ## Description
 
-This control checks if Amazon EBS volumes are protected by AWS Backup plans. This control fails if EBS volumes are not included in a backup plan through backup selections.
+This control checks if Amazon EBS volumes are included in AWS Backup plans. In Terraform, the policy treats a volume as compliant when an `aws_backup_selection` includes it directly by ARN or Terraform reference, through an EBS wildcard resource pattern, through `selection_tag`, or through a matching `condition` filter, and the same selection does not exclude the volume with `not_resources`.
 
-Backup plans define when and how to back up your EBS volumes, including backup frequency, retention periods, and lifecycle policies. Ensuring that EBS volumes are protected by backup plans provides automated, scheduled backups that help maintain business continuity and data protection. This is essential for disaster recovery and meeting compliance requirements for data retention.
+This aligns with AWS Config rule `EBS_IN_BACKUP_PLAN`, whose intent is to verify inclusion in AWS Backup plans rather than to validate backup frequency or recovery-point age.
 
 This rule is covered by the [ebs-volumes-backup-plan-protection](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/ec2/ebs-volumes-backup-plan-protection.sentinel) policy.
 
@@ -18,7 +18,7 @@ trace:
       Pass - ebs-volumes-backup-plan-protection.sentinel
 
       Description:
-        This policy checks if 'aws_ebs_volume' are protected by backup plans.
+        This policy checks if 'aws_ebs_volume' are included in AWS Backup plans.
 
       Print messages:
 
@@ -28,7 +28,7 @@ trace:
 
       ✓ Found 0 resource violations
 
-      ebs-volumes-backup-plan-protection.sentinel:47:1 - Rule "main"
+      ebs-volumes-backup-plan-protection.sentinel:1:1 - Rule "main"
         Value:
           true
 ```
@@ -41,7 +41,7 @@ trace:
       Fail - ebs-volumes-backup-plan-protection.sentinel
 
       Description:
-        This policy checks if 'aws_ebs_volume' are protected by backup plans.
+        This policy checks if 'aws_ebs_volume' are included in AWS Backup plans.
 
       Print messages:
 
@@ -54,12 +54,18 @@ trace:
       → Module name: root
         ↳ Resource Address: aws_ebs_volume.example
           | ✗ failed
-          | 'aws_ebs_volume' must be protected by backup plans. Refer to https://docs.aws.amazon.com/aws-backup/latest/devguide/creating-a-backup-plan.html for more details.
+          | EBS volume is not protected by any backup plan. Ensure all EBS volumes are included in AWS Backup plans. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-in-backup-plan.html for more details.
 
 
-      ebs-volumes-backup-plan-protection.sentinel:47:1 - Rule "main"
+      ebs-volumes-backup-plan-protection.sentinel:1:1 - Rule "main"
         Value:
           false
 ```
 
 ---
+
+## Notes
+
+- This policy depends on `aws_ebs_volume` and `aws_backup_selection`.
+- Relevant Terraform attributes are `aws_ebs_volume.arn`, `aws_ebs_volume.id`, `aws_ebs_volume.tags`, `aws_backup_selection.resources`, `aws_backup_selection.selection_tag`, `aws_backup_selection.condition`, and `aws_backup_selection.not_resources`.
+- `aws_backup_plan` is not required in the Terraform plan for this policy because `aws_backup_selection.plan_id` already represents inclusion in a backup plan.

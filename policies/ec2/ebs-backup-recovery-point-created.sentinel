@@ -1,113 +1,156 @@
-# This policy ensures that recovery points are created for Amazon EBS volumes
-# within the specified time period by validating AWS Backup plan configuration.
+# This policy ensures that Amazon EBS volumes are configured with AWS Backup
+# coverage that can create recovery points within the specified time period.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-# Imports
 import "tfplan/v2" as tfplan
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
 import "collection/maps" as maps
 import "strings"
-import "time"
+import "json"
 
-# Params
-# max_hours_since_backup refers to the maximum allowed hours between backups
 param max_hours_since_backup default 24
 
-# Constants
+# resourceTags (Optional)
+# Type: String
+# Tags of Amazon EBS volumes for the rule to check, in JSON format {"tagkey" : "tagValue"}.
+param resourceTags default ""
+
+# resourceId (Optional)
+# Type: String
+# ID of Amazon EBS volume for the rule to check.
+param resourceId default ""
+
+# recoveryPointAgeValue (Optional)
+# Type: int
+# Default: 1
+# Numerical value for maximum allowed age. No more than 744 for hours, 31 for days.
+param recoveryPointAgeValue default 1
+
+# recoveryPointAgeUnit (Optional)
+# Type: String
+# Default: days
+# Unit of time for maximum allowed age. Accepted values: 'hours', 'days'.
+param recoveryPointAgeUnit default "days"
+
 const = {
-	"policy_name":                "ebs-backup-recovery-point-created",
-	"message":                    "Amazon EBS volumes require a backup plan with recovery points created within the specified timeframe. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details.",
-	"resource_aws_backup_plan":   "aws_backup_plan",
-	"resource_aws_backup_vault":  "aws_backup_vault",
-	"resource_ebs_volume":        "aws_ebs_volume",
-	"data_backup_recovery_point": "aws_backup_recovery_point",
+	"policy_name":               "ebs-backup-recovery-point-created",
+	"resource_backup_plan":      "aws_backup_plan",
+	"resource_backup_selection": "aws_backup_selection",
+	"resource_ebs_volume":       "aws_ebs_volume",
+	"name":                      "name",
+	"plan_id":                   "plan_id",
+	"resources":                 "resources",
+	"rule":                      "rule",
+	"schedule":                  "schedule",
+	"selection_tag":             "selection_tag",
 }
 
-# Functions
-generate_violation_message = func(violation, backup_plans_count) {
-	if backup_plans_count is 0 {
-		return "No AWS Backup plan found. Amazon EBS volumes require a backup plan with recovery points created within " + string(max_hours_since_backup) + " hours. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details."
-	}
-	return "AWS Backup plan does not ensure recovery points are created within " + string(max_hours_since_backup) + " hours for Amazon EBS volumes. Verify backup schedule configuration. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details."
-}
-
-# Check if a date string is within the allowed timeframe
-is_date_within_timeframe = func(date_str) {
-	if date_str is "" or date_str is null {
-		return false
-	}
-
-	# Parse the date - format: 2024-01-15T10:30:00Z
-	# For simplicity, check if year is 2024 or later (recent)
-	if strings.has_prefix(date_str, "2024-") or strings.has_prefix(date_str, "2025-") or strings.has_prefix(date_str, "2026-") {
+matches_resource_id = func(res) {
+	if resourceId is "" {
 		return true
 	}
 
-	return false
+	volume_id = maps.get(res.values, "id", "")
+	volume_arn = maps.get(res.values, "arn", "")
+	return volume_id is resourceId or volume_arn is resourceId
 }
 
-# Check if backup vault has recent recovery points
-has_recent_recovery_points = func(backup_vaults) {
-	for backup_vaults as _, vault {
-		recovery_points = maps.get(vault.values, "recovery_points", [])
-		for recovery_points as rp {
-			creation_date = maps.get(rp, "creation_date", "")
-			completion_date = maps.get(rp, "completion_date", "")
-			status = maps.get(rp, "status", "")
+matches_resource_tags = func(res) {
+	if resourceTags is "" {
+		return true
+	}
 
-			if status is "COMPLETED" and (is_date_within_timeframe(creation_date) or is_date_within_timeframe(completion_date)) {
-				return true
+	filter_tags = json.unmarshal(resourceTags)
+	resource_tags = maps.get(res.values, "tags", {})
+
+	for filter_tags as tag_key, tag_value {
+		if maps.get(resource_tags, tag_key, "") is not tag_value {
+			return false
+		}
+	}
+
+	return true
+}
+
+get_required_hours = func() {
+	if recoveryPointAgeValue is not 1 or recoveryPointAgeUnit is not "days" {
+		if recoveryPointAgeUnit is "hours" {
+			return recoveryPointAgeValue
+		}
+
+		return recoveryPointAgeValue * 24
+	}
+
+	return max_hours_since_backup
+}
+
+get_backup_frequency_hours = func(schedule) {
+	if strings.has_prefix(schedule, "rate(") {
+		parts = strings.split(schedule, " ")
+		if length(parts) >= 2 {
+			numeric_part = strings.trim_prefix(parts[0], "rate(")
+			value = int(numeric_part)
+
+			if strings.has_prefix(parts[1], "hour") {
+				return value
+			}
+
+			if strings.has_prefix(parts[1], "day") {
+				return value * 24
 			}
 		}
 	}
-	return false
+
+	if strings.has_prefix(schedule, "cron(") {
+		cron_expr = strings.trim_prefix(schedule, "cron(")
+		cron_expr = strings.trim_suffix(cron_expr, ")")
+		parts = strings.split(cron_expr, " ")
+
+		if length(parts) >= 3 {
+			minute = parts[0]
+			hour = parts[1]
+			day_of_month = parts[2]
+
+			if hour is "*" {
+				return 1
+			}
+
+			if hour matches ".*/[0-9]+" {
+				hour_parts = strings.split(hour, "/")
+				return int(hour_parts[length(hour_parts) - 1])
+			}
+
+			if minute is "*" or minute matches ".*/[0-9]+" {
+				return 1
+			}
+
+			if day_of_month is "*" or day_of_month is "?" {
+				return 24
+			}
+
+			if day_of_month matches "[0-9]+" {
+				return 720
+			}
+		}
+	}
+
+	return 720
 }
 
-# Check if backup plan has appropriate schedule
-has_valid_backup_schedule = func(backup_plan) {
-	rules_list = maps.get(backup_plan.values, "rule", [])
-
+is_backup_plan_compliant = func(plan_res) {
+	rules_list = maps.get(plan_res.values, const.rule, [])
 	if length(rules_list) is 0 {
 		return false
 	}
 
-	# Check last_execution_date if present
-	last_execution = maps.get(backup_plan.values, "last_execution_date", "")
-	if last_execution is not "" and not is_date_within_timeframe(last_execution) {
-		return false
-	}
-
-	# Check if any rule has a schedule that meets the requirement
-	for rules_list as r {
-		schedule = maps.get(r, "schedule", "")
-
-		if schedule is "" {
-			continue
-		}
-
-		# Check for hourly backups (always valid)
-		if schedule matches "cron\\(0 \\* \\* \\* \\? \\*\\)" {
-			return true
-		}
-
-		# Check for daily backups if max_hours_since_backup >= 24
-		if max_hours_since_backup >= 24 and schedule matches "cron\\(" {
-			return true
-		}
-
-		# Check for rate expressions
-		if schedule matches "rate\\(" {
-			if schedule matches "hour" {
-				return true
-			}
-		}
-
-		# Check for custom cron expressions
-		if schedule matches "cron\\(" {
+	required_hours = get_required_hours()
+	for rules_list as _, backup_rule {
+		schedule = maps.get(backup_rule, const.schedule, "")
+		if schedule is not "" and get_backup_frequency_hours(schedule) <= required_hours {
 			return true
 		}
 	}
@@ -115,53 +158,130 @@ has_valid_backup_schedule = func(backup_plan) {
 	return false
 }
 
-# Variables
-ebs_volumes = tf.plan(tfplan.planned_values.resources).type(const.resource_ebs_volume).resources
-backup_plans = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_plan).resources
-backup_vaults = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_vault).resources
-recovery_point_data = tf.plan(tfplan.planned_values.resources).type(const.data_backup_recovery_point).resources
+selection_matches_volume_tags = func(selection_res, volume_res) {
+	selection_tags = maps.get(selection_res.values, const.selection_tag, [])
+	if length(selection_tags) is 0 {
+		return false
+	}
 
-# Check if recent recovery points exist in vaults or data sources
-has_recent_recovery = has_recent_recovery_points(backup_vaults)
+	volume_tags = maps.get(volume_res.values, "tags", {})
+	if length(volume_tags) is 0 {
+		return false
+	}
 
-# Check for data source recovery points
-if not has_recent_recovery and length(recovery_point_data) > 0 {
-	for recovery_point_data as _, rp_data {
-		creation_date = maps.get(rp_data.values, "creation_date", "")
-		completion_date = maps.get(rp_data.values, "completion_date", "")
-		status = maps.get(rp_data.values, "status", "")
+	for selection_tags as _, selection_tag {
+		tag_key = maps.get(selection_tag, "key", "")
+		tag_value = maps.get(selection_tag, "value", "")
+		tag_type = maps.get(selection_tag, "type", "STRINGEQUALS")
 
-		if status is "COMPLETED" and (is_date_within_timeframe(creation_date) or is_date_within_timeframe(completion_date)) {
-			has_recent_recovery = true
+		if tag_type is not "STRINGEQUALS" {
+			return false
+		}
+
+		if maps.get(volume_tags, tag_key, "") is not tag_value {
+			return false
 		}
 	}
+
+	return true
 }
 
-# Check if any valid backup plan exists
-valid_backup_plans = filter backup_plans as _, bp {
-	has_valid_backup_schedule(bp)
+selection_references_volume = func(selection_res, volume_res, all_volumes) {
+	resources_list = maps.get(selection_res.values, const.resources, [])
+	volume_address = volume_res.address
+	volume_name = volume_res.name
+	volume_id = maps.get(volume_res.values, "id", "")
+	volume_arn = maps.get(volume_res.values, "arn", "")
+
+	for resources_list as _, resource_ref {
+		ref = string(resource_ref)
+		ref_lower = strings.to_lower(ref)
+
+		if ref is "*" {
+			return true
+		}
+
+		if ref matches ".*" + volume_address + ".*" or ref matches ".*" + volume_name + ".*" {
+			return true
+		}
+
+		if volume_arn is not "" and ref is volume_arn {
+			return true
+		}
+
+		if volume_id is not "" and strings.has_suffix(ref, ":volume/" + volume_id) {
+			return true
+		}
+
+		if ref_lower matches "arn:aws:ec2:.*:volume/\\*" or ref_lower matches "arn:aws:ec2:.*:volume/vol-\\*" {
+			return true
+		}
+
+		if volume_arn is "" and volume_id is "" and ref_lower matches ".*arn:aws:ec2:.*:volume/vol-.*" and length(all_volumes) is 1 {
+			return true
+		}
+	}
+
+	return selection_matches_volume_tags(selection_res, volume_res)
 }
 
-has_valid_backup_plan = length(valid_backup_plans) > 0
+selection_has_compliant_plan = func(selection_res, backup_plans) {
+	plan_id = maps.get(selection_res.values, const.plan_id, "")
+	if plan_id is not "" {
+		for backup_plans as _, plan_res {
+			plan_name = plan_res.name
+			plan_display_name = maps.get(plan_res.values, const.name, "")
+			if plan_id is plan_res.address or
+				plan_id is plan_name or
+				plan_id is plan_display_name or
+				strings.has_suffix(plan_id, "." + plan_name) {
+				return is_backup_plan_compliant(plan_res)
+			}
+		}
 
-# EBS volumes are compliant if:
-# 1. Recent recovery points exist (regardless of backup plan), OR
-# 2. Valid backup plan exists AND recent recovery points exist
-# If a backup plan exists, it must have recent recovery points
-# If no backup plan exists, recent recovery points alone are sufficient
-is_compliant = has_recent_recovery and (not has_valid_backup_plan or (has_valid_backup_plan and has_recent_recovery))
-
-# Simplified: is_compliant if recent recovery points exist
-# AND (no backup plan OR backup plan with recent recovery)
-is_compliant = has_recent_recovery
-
-# Only flag EBS volumes as violations if not compliant
-violations = []
-if not is_compliant and length(ebs_volumes) > 0 {
-	violations = collection.reject(ebs_volumes, func(res) {
 		return false
-	})
+	}
+
+	for backup_plans as _, plan_res {
+		if is_backup_plan_compliant(plan_res) {
+			return true
+		}
+	}
+
+	return false
 }
+
+has_compliant_backup_plan = func(volume_res, backup_selections, backup_plans, all_volumes) {
+	for backup_selections as _, selection_res {
+		if selection_references_volume(selection_res, volume_res, all_volumes) and selection_has_compliant_plan(selection_res, backup_plans) {
+			return true
+		}
+	}
+
+	return false
+}
+
+generate_violation_message = func(violation) {
+	required_hours = get_required_hours()
+	age_description = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
+	return "Amazon EBS volume '" + violation.address + "' is not associated with a compliant AWS Backup plan scheduled within " + string(required_hours) + " hour(s) (equivalent to " + age_description + "). Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details."
+}
+
+ebs_volumes = tf.plan(tfplan.planned_values.resources).type(const.resource_ebs_volume).resources
+backup_plans = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_plan).resources
+backup_selections = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_selection).resources
+
+filtered_by_id = filter ebs_volumes as _, res {
+	matches_resource_id(res)
+}
+
+filtered_ebs_volumes = filter filtered_by_id as _, res {
+	matches_resource_tags(res)
+}
+
+violations = collection.reject(filtered_ebs_volumes, func(res) {
+	return has_compliant_backup_plan(res, backup_selections, backup_plans, filtered_ebs_volumes)
+})
 
 summary = {
 	"policy_name": const.policy_name,
@@ -169,15 +289,13 @@ summary = {
 		{
 			"address":        v.address,
 			"module_address": v.module_address,
-			"message":        generate_violation_message(v, length(backup_plans)),
+			"message":        generate_violation_message(v),
 		}
 	},
 }
 
-# Outputs
 print(report.generate_policy_report(summary))
 
-# Rules
 main = rule {
 	violations is empty
 }

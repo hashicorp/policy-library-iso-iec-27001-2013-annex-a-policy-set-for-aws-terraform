@@ -6,9 +6,9 @@
 
 ## Description
 
-This control checks if AWS CodeBuild project artifacts are encrypted. This control fails if artifact encryption is not enabled for CodeBuild projects.
+This control checks whether `aws_codebuild_project` artifacts keep output encryption enabled. It evaluates the `artifacts[*].encryption_disabled` and `secondary_artifacts[*].encryption_disabled` fields and treats omitted values as encrypted, which matches the Terraform provider default.
 
-CodeBuild artifacts contain build outputs that may include sensitive information such as compiled code, configuration files, or credentials. Encrypting artifacts ensures that this data is protected at rest in S3 or other storage locations. This is essential for maintaining the confidentiality of build outputs and meeting security compliance requirements.
+CodeBuild artifacts can contain build outputs such as compiled code, configuration files, or other sensitive content. Encrypting those artifacts protects the data at rest. For artifact blocks whose `type` is `NO_ARTIFACTS`, the provider ignores `encryption_disabled`, so those blocks are treated as compliant.
 
 This rule is covered by the [codebuild-project-artifact-encryption](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/codebuild/codebuild-project-artifact-encryption.sentinel) policy.
 
@@ -28,7 +28,7 @@ trace:
 
       ✓ Found 0 resource violations
 
-      codebuild-project-artifact-encryption.sentinel:47:1 - Rule "main"
+      codebuild-project-artifact-encryption.sentinel:56:1 - Rule "main"
         Value:
           true
 ```
@@ -54,10 +54,10 @@ trace:
       → Module name: root
         ↳ Resource Address: aws_codebuild_project.example
           | ✗ failed
-          | 'aws_codebuild_project' artifacts must be encrypted. Refer to https://docs.aws.amazon.com/codebuild/latest/userguide/security-encryption.html for more details.
+          | AWS CodeBuild project 'aws_codebuild_project.example' must have encryption enabled for all artifacts. Set 'encryption_disabled' to false or omit it to enable encryption. Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-artifact-encryption.html for more details.
 
 
-      codebuild-project-artifact-encryption.sentinel:47:1 - Rule "main"
+      codebuild-project-artifact-encryption.sentinel:56:1 - Rule "main"
         Value:
           false
 ```

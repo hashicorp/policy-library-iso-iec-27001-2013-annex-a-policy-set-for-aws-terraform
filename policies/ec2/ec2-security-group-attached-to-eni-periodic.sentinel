@@ -1,5 +1,5 @@
-# This policy ensures that non-default security groups are attached to elastic network interfaces.
-# It validates that ENIs have security groups configured and that none of them are default security groups.
+# This policy ensures that managed non-default security groups are attached to
+# elastic network interfaces.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -15,52 +15,85 @@ import "types"
 
 # Constants
 const = {
-	"policy_name":                    "ec2-security-group-attached-to-eni-periodic",
-	"resource_aws_network_interface": "aws_network_interface",
-	"security_groups":                "security_groups",
-	"message_no_sg":                  "Elastic network interface must have security groups attached. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-security-group-attached-to-eni-periodic.html for more details.",
-	"message_default_sg":             "Elastic network interface must not use default security groups. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-security-group-attached-to-eni-periodic.html for more details.",
+	"policy_name":                               "ec2-security-group-attached-to-eni-periodic",
+	"resource_aws_instance":                     "aws_instance",
+	"resource_aws_network_interface":            "aws_network_interface",
+	"resource_aws_network_interface_attachment": "aws_network_interface_sg_attachment",
+	"resource_aws_security_group":               "aws_security_group",
+	"security_group_id":                         "security_group_id",
+	"security_groups":                           "security_groups",
+	"vpc_security_group_ids":                    "vpc_security_group_ids",
+	"message":                                   "Non-default security groups must be attached to an elastic network interface. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-security-group-attached-to-eni-periodic.html for more details.",
 }
 
 # Functions
-# Check if a security group ID appears to be a default security group
-is_default_security_group = func(sg_id) {
-	# Convert to string and lowercase for comparison
-	sg_str = string(sg_id)
-	sg_lower = strings.to_lower(sg_str)
+append_reference = func(refs, value) {
+	if value is null {
+		return refs
+	}
 
-	# Check if the security group is exactly "default" or contains "default" in common patterns
-	# Match patterns like: "default", "aws_security_group.default", "aws_default_security_group", etc.
-	if sg_lower is "default" {
+	ref_string = string(value)
+	if ref_string is "" {
+		return refs
+	}
+
+	return refs + [ref_string]
+}
+
+get_attached_security_group_references = func(network_interfaces, sg_attachments, instances) {
+	refs = []
+
+	for network_interfaces as _, eni {
+		security_groups = maps.get(eni.values, const.security_groups, [])
+		for security_groups as _, security_group_ref {
+			refs = append_reference(refs, security_group_ref)
+		}
+	}
+
+	for sg_attachments as _, attachment {
+		refs = append_reference(refs, maps.get(attachment.values, const.security_group_id, ""))
+	}
+
+	for instances as _, instance {
+		security_groups = maps.get(instance.values, const.vpc_security_group_ids, [])
+		for security_groups as _, security_group_ref {
+			refs = append_reference(refs, security_group_ref)
+		}
+	}
+
+ 	return refs
+}
+
+matches_security_group_reference = func(security_group_res, security_group_ref) {
+	ref_string = string(security_group_ref)
+	security_group_address = ""
+	security_group_id = ""
+
+	if types.type_of(security_group_res) is "string" {
+		security_group_address = string(security_group_res)
+	} else {
+		security_group_address = security_group_res.address
+		security_group_id = maps.get(security_group_res.values, "id", "")
+	}
+
+	if ref_string is security_group_address or ref_string is security_group_address + ".id" {
 		return true
 	}
 
-	# Check if it starts with "default" (e.g., "default-sg")
-	if strings.has_prefix(sg_lower, "default") {
+	if ref_string matches ".*" + security_group_address + ".*" {
 		return true
 	}
 
-	# Check if it ends with "default" (e.g., "sg-default")
-	if strings.has_suffix(sg_lower, "default") {
+	if security_group_id is not "" and ref_string is security_group_id {
 		return true
 	}
 
-	# Check for common Terraform resource references
-	if strings.has_prefix(sg_lower, "aws_security_group.default") {
-		return true
-	}
+	return false
+}
 
-	if strings.has_prefix(sg_lower, "aws_default_security_group") {
-		return true
-	}
-
-	# Check if ".default" appears (e.g., "module.vpc.aws_security_group.default")
-	# We can check this by looking for the pattern after splitting
-	# Since we can't use contains, check if replacing works
-	if sg_lower is not sg_str {
-		# Already lowercase, now check for .default pattern
-		parts = strings.split(sg_lower, ".default")
-		if length(parts) > 1 {
+is_security_group_attached = func(security_group_res, attached_security_group_refs) {
+	for attached_security_group_refs as security_group_ref {
+		if matches_security_group_reference(security_group_res, security_group_ref) {
 			return true
 		}
 	}
@@ -68,42 +101,25 @@ is_default_security_group = func(sg_id) {
 	return false
 }
 
-# Check if the ENI has non-default security groups
-has_non_default_security_groups = func(res) {
-	security_groups = maps.get(res.values, const.security_groups, [])
-
-	# Must have at least one security group
-	if length(security_groups) is 0 {
-		return false
-	}
-
-	# Check that none of the security groups are default
-	for security_groups as sg {
-		if is_default_security_group(sg) {
-			return false
-		}
-	}
-
-	return true
+is_security_group_violation = func(security_group_res, attached_security_group_refs) {
+	return not is_security_group_attached(security_group_res, attached_security_group_refs)
 }
 
-# Generate violation message based on the specific issue
-generate_violation_message = func(res) {
-	security_groups = maps.get(res.values, const.security_groups, [])
-
-	if length(security_groups) is 0 {
-		return const.message_no_sg
-	}
-
-	return const.message_default_sg
+generate_violation_message = func(violation) {
+	return "Security group '" + violation.address + "' is not attached to any elastic network interface in this Terraform plan. " + const.message
 }
 
 # Variables
-resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_network_interface).resources
+security_groups = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_security_group).resources
+network_interfaces = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_network_interface).resources
+network_interface_sg_attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_network_interface_attachment).resources
+instances = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_instance).resources
 
-violations = collection.reject(resources, func(res) {
-	return has_non_default_security_groups(res)
-})
+attached_security_group_refs = get_attached_security_group_references(network_interfaces, network_interface_sg_attachments, instances)
+
+violations = filter security_groups as res {
+	is_security_group_violation(res, attached_security_group_refs)
+}
 
 summary = {
 	"policy_name": const.policy_name,

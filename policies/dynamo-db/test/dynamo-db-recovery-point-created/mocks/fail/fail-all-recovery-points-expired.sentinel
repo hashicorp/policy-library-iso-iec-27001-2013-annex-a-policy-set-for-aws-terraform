@@ -25,15 +25,52 @@ planned_values = {
 						"type": "S",
 					},
 				],
-				"point_in_time_recovery": [
+				"tags": {
+					"Name": "expired-table",
+				},
+			},
+		},
+		"aws_backup_plan.expired": {
+			"address":        "aws_backup_plan.expired",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "expired",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_plan",
+			"values": {
+				"name": "expired-backup-plan",
+				"rule": [
 					{
-						"enabled": true,
+						"rule_name": "monthly-backup",
+						"schedule":  "cron(0 2 1 * ? *)",
+						"lifecycle": [
+							{
+								"delete_after": 30,
+							},
+						],
 					},
 				],
-				"tags": {
-					"Name":         "expired-table",
-					"BackupStatus": "expired",
-				},
+			},
+		},
+		"aws_backup_selection.expired": {
+			"address":        "aws_backup_selection.expired",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "expired",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_selection",
+			"values": {
+				"name":      "expired-backup-selection",
+				"plan_id":   "aws_backup_plan.expired",
+				"resources": ["arn:aws:dynamodb:us-east-1:123456789012:table/expired-table"],
 			},
 		},
 	},

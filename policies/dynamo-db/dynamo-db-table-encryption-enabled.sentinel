@@ -25,7 +25,7 @@ generate_violation_message = func(violation) {
 	sse_blocks = maps.get(violation.values, const.server_side_encryption, [])
 
 	if length(sse_blocks) is 0 {
-		return "DynamoDB table '" + violation.address + "' must have server_side_encryption block configured to enable encryption at rest. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encryption-enabled.html for more details."
+		return "DynamoDB table '" + violation.address + "' relies on DynamoDB's default encryption at rest and is compliant. This message should not be emitted for compliant resources."
 	}
 
 	return "DynamoDB table '" + violation.address + "' must have encryption enabled. The 'enabled' attribute in the server_side_encryption block must be set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encryption-enabled.html for more details."
@@ -45,30 +45,9 @@ is_encryption_enabled = func(res) {
 	# Note: DynamoDB table typically has at most one server_side_encryption block
 	sse_config = sse_blocks[0]
 
-	# Check if enabled is explicitly set to false
-	enabled_value = maps.get(sse_config, const.enabled, null)
-	if enabled_value is false {
-		return false
-	}
-
-	# If enabled is true or not specified (null), check for KMS key
-	# If a KMS key is specified, encryption is implicitly enabled
-	kms_key_arn = maps.get(sse_config, "kms_key_arn", "")
-	if kms_key_arn is not "" {
-		return true
-	}
-
-	# If enabled is explicitly true, encryption is enabled
-	if enabled_value is true {
-		return true
-	}
-
-	# If enabled is not specified and no KMS key, default encryption is used
-	if enabled_value is null {
-		return true
-	}
-
-	return false
+	# Within the block, Terraform requires `enabled`; treat only explicit true as compliant.
+	enabled_value = maps.get(sse_config, const.enabled, false)
+	return enabled_value is true
 }
 
 # Variables

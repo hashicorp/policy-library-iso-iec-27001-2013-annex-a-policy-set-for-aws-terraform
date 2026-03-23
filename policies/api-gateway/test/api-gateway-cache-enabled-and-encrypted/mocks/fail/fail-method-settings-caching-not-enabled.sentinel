@@ -20,15 +20,48 @@ planned_values = {
 				"rest_api_id":           "abc123",
 				"deployment_id":         "def456",
 				"cache_cluster_enabled": true,
-				"cache_data_encrypted":  true,
-				"method_settings": [
+			},
+		},
+		"aws_api_gateway_method_settings.all": {
+			"address":        "aws_api_gateway_method_settings.all",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "all",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_api_gateway_method_settings",
+			"values": {
+				"rest_api_id": "abc123",
+				"stage_name":  "production",
+				"method_path": "*/*",
+				"settings": [
 					{
-						"method_path":          "*/*",
 						"caching_enabled":      true,
 						"cache_data_encrypted": true,
 					},
+				],
+			},
+		},
+		"aws_api_gateway_method_settings.orders_get": {
+			"address":        "aws_api_gateway_method_settings.orders_get",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "orders_get",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_api_gateway_method_settings",
+			"values": {
+				"rest_api_id": "abc123",
+				"stage_name":  "production",
+				"method_path": "orders/GET",
+				"settings": [
 					{
-						"method_path":          "orders/GET",
 						"caching_enabled":      false,
 						"cache_data_encrypted": true,
 					},

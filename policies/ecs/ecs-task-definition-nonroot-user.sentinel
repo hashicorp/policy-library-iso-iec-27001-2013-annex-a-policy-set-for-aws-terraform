@@ -11,67 +11,84 @@ import "tfresources" as tf
 import "report" as report
 import "collection" as collection
 import "collection/maps" as maps
+import "json"
 import "strings"
-import "types"
 
 # Constants
 const = {
 	"policy_name":                      "ecs-task-definition-nonroot-user",
-	"message":                          "ECS task definition must specify a non-root user for all container definitions. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details.",
+	"message":                          "ECS task definitions used for the EC2 launch type must specify a non-root user for all container definitions. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details.",
 	"resource_aws_ecs_task_definition": "aws_ecs_task_definition",
 	"container_definitions":            "container_definitions",
+	"requires_compatibilities":         "requires_compatibilities",
 	"user":                             "user",
+	"ec2_launch_type":                  "ec2",
 }
 
 # Functions
-check_container_definitions = func(res) {
+parse_container_definitions = func(res) {
 	container_defs = maps.get(res.values, const.container_definitions, "")
 
 	if container_defs is "" {
-		return false
+		return []
 	}
 
-	# If container_definitions is a string (JSON), check for user attribute
-	if types.type_of(container_defs) is "string" {
-		# Check if user is set to root values (various formats)
-		# Matches: "user":"root", "user":"0", "user":0, "user":"0:0", "user":"0:1000", etc.
-		has_root_user = container_defs matches ".*\"user\"\\s*:\\s*\"root\".*" or
-			container_defs matches ".*\"user\"\\s*:\\s*\"0\".*" or
-			container_defs matches ".*\"user\"\\s*:\\s*0[^0-9].*" or
-			container_defs matches ".*\"user\"\\s*:\\s*\"0:.*"
+	return json.unmarshal(container_defs)
+}
 
-		if has_root_user {
-			return false
-		}
+applies_to_ec2_launch_type = func(res) {
+	compatibilities = maps.get(res.values, const.requires_compatibilities, null)
 
-		# Check for containers missing user attribute
-		# Check if "name" appears without "user" before the next container or end
-		# Pattern: "name"...},{ where "user" doesn't appear before },{
-		has_name_without_user_before_next_container = container_defs matches ".*\"name\"[^\\}]*\\}\\s*,\\s*\\{.*" and
-			not (container_defs matches ".*\"name\"[^\\}]*\"user\"[^\\}]*\\}\\s*,\\s*\\{.*")
-
-		# Also check last container: "name"...}] where "user" doesn't appear
-		has_name_without_user_at_end = container_defs matches ".*\"name\"[^\\}]*\\}\\s*\\].*" and
-			not (container_defs matches ".*\"name\"[^\\}]*\"user\"[^\\}]*\\}\\s*\\].*")
-
-		if has_name_without_user_before_next_container or has_name_without_user_at_end {
-			return false
-		}
-
-		# Also check if "user" attribute exists at all
-		if not (container_defs matches ".*\"user\".*") {
-			return false
-		}
-
-		# If we reach here, all containers have user attribute and none are root
+	if compatibilities is null or compatibilities is empty {
 		return true
+	}
+
+	for compatibilities as _, compatibility {
+		compatibility_name = strings.to_lower(strings.trim_space(string(compatibility)))
+		if compatibility_name is const.ec2_launch_type {
+			return true
+		}
 	}
 
 	return false
 }
 
+has_non_root_user = func(container_definition) {
+	user_value = maps.get(container_definition, const.user, null)
+	if user_value is null {
+		return false
+	}
+
+	user_string = strings.to_lower(strings.trim_space(string(user_value)))
+	if user_string is "" {
+		return false
+	}
+
+	user_parts = strings.split(user_string, ":")
+	primary_user = user_parts[0]
+
+	return primary_user is not "" and primary_user is not "root" and primary_user is not "0"
+}
+
+check_container_definitions = func(res) {
+	if not applies_to_ec2_launch_type(res) {
+		return true
+	}
+
+	container_definitions = parse_container_definitions(res)
+	if container_definitions is empty {
+		return false
+	}
+
+	invalid_container_definitions = filter container_definitions as _, container_definition {
+		not has_non_root_user(container_definition)
+	}
+
+	return invalid_container_definitions is empty
+}
+
 generate_violation_message = func(violation) {
-	return "ECS task definition '" + violation.address + "' must specify a non-root user for all container definitions. Each container must have a 'user' attribute set to a non-root user (not '0' or 'root'). Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details."
+	return "ECS task definition '" + violation.address + "' must specify a non-root user for all EC2 launch type container definitions. Each applicable container must have a 'user' attribute set to a non-root user (not '0' or 'root'). Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details."
 }
 
 # Variables
