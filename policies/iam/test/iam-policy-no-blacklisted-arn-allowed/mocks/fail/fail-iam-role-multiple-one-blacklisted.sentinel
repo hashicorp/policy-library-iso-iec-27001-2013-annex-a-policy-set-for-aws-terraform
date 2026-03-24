@@ -1,0 +1,40 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_iam_role_policy_attachment.attachment1": {
+			"address":        "aws_iam_role_policy_attachment.attachment1",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "attachment1",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_iam_role_policy_attachment",
+			"values": {
+				"role":       "test-role",
+				"policy_arn": "arn:aws:iam::aws:policy/ReadOnlyAccess",
+			},
+		},
+		"aws_iam_role_policy_attachment.attachment2": {
+			"address":        "aws_iam_role_policy_attachment.attachment2",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "attachment2",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_iam_role_policy_attachment",
+			"values": {
+				"role":       "test-role",
+				"policy_arn": "arn:aws:iam::aws:policy/AdministratorAccess",
+			},
+		},
+	},
+}

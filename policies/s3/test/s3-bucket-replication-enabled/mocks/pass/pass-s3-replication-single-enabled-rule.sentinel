@@ -1,0 +1,103 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_s3_bucket.example": {
+			"address":        "aws_s3_bucket.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket",
+			"values": {
+				"bucket": "my-replicated-bucket",
+			},
+		},
+		"aws_s3_bucket.destination": {
+			"address":        "aws_s3_bucket.destination",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "destination",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket",
+			"values": {
+				"bucket": "destination-bucket",
+			},
+		},
+		"aws_s3_bucket_versioning.source": {
+			"address":        "aws_s3_bucket_versioning.source",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "source",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket_versioning",
+			"values": {
+				"bucket": "aws_s3_bucket.example",
+				"versioning_configuration": [
+					{
+						"status": "Enabled",
+					},
+				],
+			},
+		},
+		"aws_iam_role.replication": {
+			"address":        "aws_iam_role.replication",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "replication",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_iam_role",
+			"values": {
+				"arn":  "arn:aws:iam::123456789012:role/replication-role",
+				"name": "replication-role",
+			},
+		},
+		"aws_s3_bucket_replication_configuration.replication": {
+			"address":        "aws_s3_bucket_replication_configuration.replication",
+			"depends_on":     ["aws_s3_bucket_versioning.source"],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "replication",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket_replication_configuration",
+			"values": {
+				"bucket": "aws_s3_bucket.example",
+				"role":   "arn:aws:iam::123456789012:role/replication-role",
+				"rule": [
+					{
+						"id":       "rule1",
+						"status":   "Enabled",
+						"priority": 1,
+						"destination": [
+							{
+								"bucket":        "arn:aws:s3:::destination-bucket",
+								"storage_class": "STANDARD",
+							},
+						],
+					},
+				],
+			},
+		},
+	},
+}

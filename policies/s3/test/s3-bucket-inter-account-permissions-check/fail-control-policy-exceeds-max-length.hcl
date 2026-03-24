@@ -4,9 +4,9 @@
 # Test case: controlPolicy parameter exceeds 1024 characters
 # Expected: Policy should fail due to invalid parameter
 
-mock "tfplan/v2" {
+mock "tfconfig/v2" {
   module {
-    source = "./mocks/pass/pass-policy-matches-control-permissions.sentinel"
+    source = "./mocks/pass/pass-policy-matches-control-permissions-config.sentinel"
   }
 }
 

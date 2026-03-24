@@ -1,0 +1,62 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+import "strings"
+
+providers = {
+	"aws": {
+		"alias": "",
+		"config": {
+			"region": {
+				"constant_value": "us-east-1",
+			},
+		},
+		"full_name":           "registry.terraform.io/hashicorp/aws",
+		"module_address":      "",
+		"name":                "aws",
+		"provider_config_key": "aws",
+		"version_constraint":  "",
+	},
+}
+
+resources = {
+	"aws_internet_gateway.main": {
+		"address":             "aws_internet_gateway.main",
+		"mode":                "managed",
+		"type":                "aws_internet_gateway",
+		"name":                "main",
+		"provider_config_key": "aws",
+		"module_address":      "",
+		"config": {
+			"vpc_id": {
+				"constant_value": "vpc-authorized123",
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "main-igw",
+				},
+			},
+		},
+		"count":        {},
+		"depends_on":   [],
+		"for_each":     {},
+		"provisioners": [],
+	},
+}
+
+provisioners = {}
+
+variables = {}
+
+outputs = {}
+
+module_calls = {}
+
+strip_index = func(addr) {
+	s = strings.split(addr, ".")
+	for s as i, v {
+		s[i] = strings.split(v, "[")[0]
+	}
+
+	return strings.join(s, ".")
+}

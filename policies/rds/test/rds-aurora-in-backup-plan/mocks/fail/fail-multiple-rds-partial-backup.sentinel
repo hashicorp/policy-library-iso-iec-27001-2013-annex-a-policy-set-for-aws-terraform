@@ -1,0 +1,77 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_db_instance.protected": {
+			"address":        "aws_db_instance.protected",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "protected",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_db_instance",
+			"values": {
+				"identifier":     "protected-db",
+				"arn":            "arn:aws:rds:us-east-1:123456789012:db:protected-db",
+				"engine":         "aurora-mysql",
+				"instance_class": "db.t3.micro",
+			},
+		},
+		"aws_db_instance.unprotected": {
+			"address":        "aws_db_instance.unprotected",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "unprotected",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_db_instance",
+			"values": {
+				"identifier":     "unprotected-db",
+				"arn":            "arn:aws:rds:us-east-1:123456789012:db:unprotected-db",
+				"engine":         "aurora-postgresql",
+				"instance_class": "db.t3.small",
+			},
+		},
+		"aws_backup_plan.partial": {
+			"address":        "aws_backup_plan.partial",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "partial",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_backup_plan",
+			"values": {
+				"name": "partial-backup-plan",
+				"arn":  "arn:aws:backup:us-east-1:123456789012:backup-plan:partial-backup-plan",
+			},
+		},
+		"aws_backup_selection.partial": {
+			"address":        "aws_backup_selection.partial",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "partial",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_backup_selection",
+			"values": {
+				"name":      "partial-backup-selection",
+				"plan_id":   "arn:aws:backup:us-east-1:123456789012:backup-plan:partial-backup-plan",
+				"resources": ["arn:aws:rds:us-east-1:123456789012:db:protected-db"],
+			},
+		},
+	},
+}

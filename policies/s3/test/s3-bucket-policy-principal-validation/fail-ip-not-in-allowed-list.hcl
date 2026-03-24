@@ -1,9 +1,9 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-mock "tfplan/v2" {
+mock "tfconfig/v2" {
   module {
-    source = "./mocks/fail/fail-ip-not-in-allowed-list.sentinel"
+    source = "./mocks/fail/fail-ip-not-in-allowed-list-config.sentinel"
   }
 }
 

@@ -1,10 +1,9 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
-# Test CSV parsing with spaces in parameters
 
-mock "tfplan/v2" {
+mock "tfconfig/v2" {
   module {
-    source = "./mocks/pass/pass-multiple-params-with-spaces.sentinel"
+    source = "./mocks/pass/pass-multiple-params-with-spaces-config.sentinel"
   }
 }
 

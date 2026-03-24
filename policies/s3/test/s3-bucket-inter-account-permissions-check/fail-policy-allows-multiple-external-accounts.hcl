@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 
-mock "tfplan/v2" {
+mock "tfconfig/v2" {
   module {
-    source = "./mocks/fail/fail-policy-allows-multiple-external-accounts.sentinel"
+    source = "./mocks/fail/fail-policy-allows-multiple-external-accounts-config.sentinel"
   }
 }
 

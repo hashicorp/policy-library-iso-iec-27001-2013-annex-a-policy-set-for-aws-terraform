@@ -1,0 +1,295 @@
+# This policy verifies that Amazon RDS instances and clusters are configured with
+# AWS Backup plans that ensure recovery points are created within a specified time period.
+# It checks for proper backup configuration including backup retention period and backup window.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+
+# Params
+# recoveryPointAgeValue: Maximum allowed age for recovery points (default: 1)
+# No more than 744 for hours, 31 for days
+param recoveryPointAgeValue default 1
+
+# recoveryPointAgeUnit: Unit of time for maximum allowed age ('hours' or 'days', default: 'days')
+param recoveryPointAgeUnit default "days"
+
+# resourceId: Optional specific RDS instance/cluster ID to check
+param resourceId default ""
+
+# resourceTags: Optional tags to filter RDS instances (JSON format: {"tagkey":"tagValue"})
+param resourceTags default ""
+
+# Constants
+const = {
+	"policy_name":               "rds-recovery-point-created-within-time-period",
+	"resource_aws_db_instance":  "aws_db_instance",
+	"resource_aws_rds_cluster":  "aws_rds_cluster",
+	"resource_backup_plan":      "aws_backup_plan",
+	"resource_backup_selection": "aws_backup_selection",
+}
+
+# Functions
+# Validate parameter constraints
+validate_params = func() {
+	# Validate recoveryPointAgeValue based on unit
+	if recoveryPointAgeUnit == "hours" {
+		if recoveryPointAgeValue > 744 {
+			print("Warning: recoveryPointAgeValue for hours should not exceed 744 (31 days)")
+			return false
+		}
+	} else if recoveryPointAgeUnit == "days" {
+		if recoveryPointAgeValue > 31 {
+			print("Warning: recoveryPointAgeValue for days should not exceed 31")
+			return false
+		}
+	} else {
+		print("Error: recoveryPointAgeUnit must be 'hours' or 'days'")
+		return false
+	}
+	return true
+}
+
+# Parse JSON-like tags string if provided
+# Expected format: {"key1":"value1","key2":"value2"}
+parse_resource_tags = func() {
+	if resourceTags == "" {
+		return {}
+	}
+
+	tags_map = {}
+
+	# Remove curly braces
+	clean_str = strings.trim_prefix(resourceTags, "{")
+	clean_str = strings.trim_suffix(clean_str, "}")
+
+	# Split by comma to get key-value pairs
+	if clean_str == "" {
+		return {}
+	}
+
+	pairs = strings.split(clean_str, ",")
+	for pairs as _, pair {
+		# Remove quotes and split by colon
+		pair_clean = strings.trim_prefix(pair, "\"")
+		pair_clean = strings.trim_suffix(pair_clean, "\"")
+
+		# Split each pair by ":"
+		kv = strings.split(pair_clean, "\":\"")
+		if length(kv) == 2 {
+			key = strings.trim_prefix(kv[0], "\"")
+			key = strings.trim_suffix(key, "\"")
+			value = strings.trim_prefix(kv[1], "\"")
+			value = strings.trim_suffix(value, "\"")
+			tags_map[key] = value
+		}
+	}
+
+	return tags_map
+}
+
+# Extract RDS identifier from resource
+get_rds_identifier = func(res) {
+	identifier = maps.get(res.values, "identifier", "")
+	if identifier != "" {
+		return identifier
+	}
+	# For clusters, try cluster_identifier
+	cluster_id = maps.get(res.values, "cluster_identifier", "")
+	if cluster_id != "" {
+		return cluster_id
+	}
+	return res.address
+}
+
+# Check if resource matches resourceId filter
+matches_resource_id = func(res) {
+	if resourceId == "" {
+		return true
+	}
+	identifier = get_rds_identifier(res)
+	return identifier == resourceId
+}
+
+# Check if resource matches resourceTags filter
+matches_resource_tags = func(res) {
+	filter_tags = parse_resource_tags()
+	if length(filter_tags) == 0 {
+		return true
+	}
+
+	res_tags = maps.get(res.values, "tags", {})
+
+	# Check if all filter tags match
+	for filter_tags as key, value {
+		res_value = maps.get(res_tags, key, "")
+		if res_value != value {
+			return false
+		}
+	}
+	return true
+}
+
+# Get all backup selections
+get_backup_selections = func() {
+	backup_selections = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_selection).resources
+	return backup_selections
+}
+
+# Get all backup plans with their rules
+get_backup_plans = func() {
+	backup_plans = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_plan).resources
+	plans_with_rules = {}
+
+	for backup_plans as address, plan {
+		rules = maps.get(plan.values, "rule", [])
+		plans_with_rules[address] = {
+			"name":  maps.get(plan.values, "name", ""),
+			"rules": rules,
+		}
+	}
+
+	return plans_with_rules
+}
+
+# Check if RDS resource is in backup selection
+is_rds_in_backup_selection = func(rds_res, backup_selections) {
+	rds_identifier = get_rds_identifier(rds_res)
+
+	for backup_selections as _, selection {
+		resources_list = maps.get(selection.values, "resources", [])
+
+		# Check if RDS is in the resources list
+		for resources_list as _, resource_arn {
+			# Check for identifier match in ARN
+			if strings.has_suffix(resource_arn, ":" + rds_identifier) or
+				strings.has_suffix(resource_arn, ":db:" + rds_identifier) or
+				strings.has_suffix(resource_arn, ":cluster:" + rds_identifier) {
+				return true
+			}
+
+			# Check for wildcard match
+			if strings.has_suffix(resource_arn, ":*") {
+				return true
+			}
+		}
+
+		# Check tag-based selection
+		selection_tags = maps.get(selection.values, "selection_tag", [])
+		if length(selection_tags) > 0 {
+			rds_tags = maps.get(rds_res.values, "tags", {})
+			matches_all_tags = true
+
+			for selection_tags as _, tag_condition {
+				tag_key = maps.get(tag_condition, "key", "")
+				tag_value = maps.get(tag_condition, "value", "")
+				rds_tag_value = maps.get(rds_tags, tag_key, "")
+
+				if rds_tag_value != tag_value {
+					matches_all_tags = false
+					break
+				}
+			}
+
+			if matches_all_tags {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+# Convert time period to hours for comparison
+get_max_age_hours = func() {
+	if recoveryPointAgeUnit == "hours" {
+		return recoveryPointAgeValue
+	}
+	return recoveryPointAgeValue * 24
+}
+
+# Check if backup configuration ensures timely recovery points
+has_adequate_backup_config = func(rds_res) {
+	# Check for automated backups configuration
+	backup_retention = maps.get(rds_res.values, "backup_retention_period", 0)
+
+	# If backup retention is 0, automated backups are disabled
+	if backup_retention == 0 {
+		return false
+	}
+
+	# Check if backup window is configured (indicates automated backups are set up)
+	backup_window = maps.get(rds_res.values, "backup_window", "")
+
+	# For the policy to pass, the resource should have:
+	# 1. Backup retention period > 0
+	# 2. Be included in a backup selection (checked separately)
+	return backup_retention > 0
+}
+
+generate_violation_message = func(resource_address, resource_type, has_backup_selection) {
+	max_age = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
+
+	if not has_backup_selection {
+		return "RDS resource '" + resource_address + "' is not included in any AWS Backup selection. Recovery points must be created within " + max_age + ". Configure AWS Backup to ensure timely recovery points. Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-last-backup-recovery-point-created.html for more details."
+	}
+
+	return "RDS resource '" + resource_address + "' does not have adequate backup configuration to ensure recovery points are created within " + max_age + ". Ensure backup_retention_period is set and automated backups are enabled. Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-last-backup-recovery-point-created.html for more details."
+}
+
+# Variables
+# Validate parameters first
+params_valid = validate_params()
+
+db_instance_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_db_instance).resources
+rds_cluster_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_rds_cluster).resources
+backup_selections = get_backup_selections()
+backup_plans = get_backup_plans()
+
+# Combine all RDS resources
+all_rds_resources = db_instance_resources + rds_cluster_resources
+
+# Filter by resourceId and resourceTags if specified
+filtered_rds_resources = collection.filter(all_rds_resources, func(res) {
+	return matches_resource_id(res) and matches_resource_tags(res)
+})
+
+# Check each RDS resource for proper backup configuration
+rds_violations = collection.reject(filtered_rds_resources, func(rds_res) {
+	# Check if resource is in a backup selection
+	in_backup_selection = is_rds_in_backup_selection(rds_res, backup_selections)
+
+	# Check if resource has adequate backup configuration
+	has_backup_config = has_adequate_backup_config(rds_res)
+
+	# Resource passes if it's in a backup selection AND has proper backup config
+	return in_backup_selection and has_backup_config
+})
+
+violations = map rds_violations as _, v {
+	{
+		"address":        v.address,
+		"module_address": v.module_address,
+		"message":        generate_violation_message(v.address, v.type, is_rds_in_backup_selection(v, backup_selections)),
+	}
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations":  violations,
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

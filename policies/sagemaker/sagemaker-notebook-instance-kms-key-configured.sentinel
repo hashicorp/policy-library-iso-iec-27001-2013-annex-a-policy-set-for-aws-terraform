@@ -1,0 +1,165 @@
+# This policy requires that AWS SageMaker notebook instances have AWS KMS key configured for encryption.
+# It checks that the `kms_key_id` attribute is defined and not empty for `aws_sagemaker_notebook_instance` resources.
+# It also validates that the notebook instance properly references an IAM role in the config.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfconfig/v2" as tfconfig
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+
+# Parameters
+param kmsKeyArns default ""
+
+# Constants
+const = {
+	"policy_name":              "sagemaker-notebook-instance-kms-key-configured",
+	"resource_type":            "aws_sagemaker_notebook_instance",
+	"resource_iam_role":        "aws_iam_role",
+	"kms_key_id":               "kms_key_id",
+	"role_arn":                 "role_arn",
+}
+
+# Functions
+generate_violation_message = func(violation, allowed_arns) {
+	kms_key_config = maps.get(violation.config, const.kms_key_id, {})
+	kms_key_id = maps.get(kms_key_config, "constant_value", null)
+	
+	# Check if kms_key_id references another resource
+	kms_references = maps.get(kms_key_config, "references", [])
+	
+	if kms_key_id is null and length(kms_references) == 0 {
+		return "SageMaker notebook instance '" + violation.address + "' must have KMS key configured for encryption. The 'kms_key_id' attribute must be set. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-notebook-instance-kms-key-configured.html for more details."
+	}
+	if kms_key_id is "" {
+		return "SageMaker notebook instance '" + violation.address + "' must have a valid KMS key configured for encryption. The 'kms_key_id' attribute cannot be empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-notebook-instance-kms-key-configured.html for more details."
+	}
+	if length(allowed_arns) > 0 and kms_key_id is not null {
+		return "SageMaker notebook instance '" + violation.address + "' has KMS key '" + kms_key_id + "' which is not in the allowed list: [" + strings.join(allowed_arns, ", ") + "]. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-notebook-instance-kms-key-configured.html for more details."
+	}
+	return "SageMaker notebook instance '" + violation.address + "' must have a valid KMS key configured for encryption. The 'kms_key_id' attribute cannot be empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-notebook-instance-kms-key-configured.html for more details."
+}
+
+# has_role_reference_in_config checks if notebook instance properly references an IAM role in config
+has_role_reference_in_config = func(notebook_address, iam_role_config_resources) {
+	# Check if role_arn attribute has references
+	role_config = maps.get(notebook_address.config, const.role_arn, {})
+	references = maps.get(role_config, "references", [])
+	if length(references) > 0 {
+		for references as _, ref {
+			# Check if reference points to an aws_iam_role resource
+			if strings.has_prefix(ref, "aws_iam_role.") {
+				# Verify the IAM role resource exists
+				role_name = strings.split(ref, ".")[1]
+				for iam_role_config_resources as _, role_res {
+					if role_res.name is role_name {
+						return true
+					}
+				}
+			}
+		}
+	}
+	# If no references found, it might be using a constant value (role ARN string)
+	# which is also valid
+	constant_value = maps.get(role_config, "constant_value", "")
+	if constant_value is not "" {
+		return true
+	}
+	return false
+}
+
+is_kms_key_configured = func(res, allowed_arns, iam_role_config_resources) {
+	# Verify the notebook instance properly references an IAM role in config
+	if not has_role_reference_in_config(res, iam_role_config_resources) {
+		return false
+	}
+	
+	kms_key_config = maps.get(res.config, const.kms_key_id, {})
+	kms_key_id = maps.get(kms_key_config, "constant_value", null)
+	
+	# Check if kms_key_id references another resource (e.g., aws_kms_key)
+	kms_references = maps.get(kms_key_config, "references", [])
+	
+	# If kms_key_id is a reference to another resource, consider it valid
+	if length(kms_references) > 0 {
+		# If no allowed ARNs specified, any valid KMS key reference is acceptable
+		if length(allowed_arns) == 0 {
+			return true
+		}
+		# For references, we can't validate against allowed ARNs at config time
+		# This would need to be done at plan/apply time
+		return true
+	}
+
+	# Check if KMS key is configured as a constant value
+	if kms_key_id is null {
+		return false
+	}
+	if kms_key_id is "" {
+		return false
+	}
+
+	# If no allowed ARNs specified, any valid KMS key is acceptable
+	if length(allowed_arns) == 0 {
+		return true
+	}
+
+	# Check if the configured KMS key is in the allowed list
+	for allowed_arns as arn {
+		if kms_key_id == arn {
+			return true
+		}
+	}
+
+	return false
+}
+
+# Parse allowed KMS key ARNs from parameter
+parse_allowed_arns = func(arns_param) {
+	if arns_param is "" {
+		return []
+	}
+	# Split by comma and trim whitespace
+	arns = strings.split(arns_param, ",")
+	trimmed_arns = {}
+	for arns as arn {
+		trimmed = strings.trim_space(arn)
+		if trimmed != "" {
+			trimmed_arns[trimmed] = true
+		}
+	}
+	return keys(trimmed_arns)
+}
+
+# Variables
+allowed_kms_arns = parse_allowed_arns(kmsKeyArns)
+iam_role_config_resources = tf.config(tfconfig.resources).type(const.resource_iam_role).resources
+notebook_config_resources = tf.config(tfconfig.resources).type(const.resource_type).resources
+
+violations = collection.reject(notebook_config_resources, func(res) {
+	return is_kms_key_configured(res, allowed_kms_arns, iam_role_config_resources)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v, allowed_kms_arns),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

@@ -1,0 +1,62 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_kms_key.example": {
+			"address":        "aws_kms_key.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_kms_key",
+			"values": {
+				"description": "KMS key for S3 bucket encryption",
+			},
+		},
+		"aws_s3_bucket.bucket": {
+			"address":        "aws_s3_bucket.bucket",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "bucket",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket",
+			"values": {
+				"bucket": "your-bucket-name",
+			},
+		},
+		"aws_s3_bucket_server_side_encryption_configuration.example": {
+			"address":        "aws_s3_bucket_server_side_encryption_configuration.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket_server_side_encryption_configuration",
+			"values": {
+				"bucket": "aws_s3_bucket.bucket",
+				"rule": [
+					{
+						"apply_server_side_encryption_by_default": [
+							{
+								"sse_algorithm": "aws:kms",
+							},
+						],
+					},
+				],
+			},
+		},
+	},
+}

@@ -4,9 +4,9 @@
 # Test case: controlPolicy parameter is exactly 1024 characters (valid boundary test)
 # Expected: Policy should pass
 
-mock "tfplan/v2" {
+mock "tfconfig/v2" {
   module {
-    source = "./mocks/pass/pass-control-policy-at-max-length.sentinel"
+    source = "./mocks/pass/pass-control-policy-at-max-length-config.sentinel"
   }
 }
 

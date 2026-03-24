@@ -1,0 +1,251 @@
+# This policy verifies that EC2 instances belong to a virtual private cloud (VPC).
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfconfig/v2" as tfconfig
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+
+# Parameters
+param vpcId default ""
+
+# Constants
+const = {
+	"policy_name":                "ec2-belong-to-vpc",
+	"resource_type":              "aws_instance",
+	"resource_network_interface": "aws_network_interface",
+	"resource_subnet":            "aws_subnet",
+	"module_prefix":              "module.",
+}
+
+# Functions
+generate_violation_message = func(violation, reason) {
+	base_message = "EC2 instance must belong to a VPC. "
+	return base_message + reason + " Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instances-in-vpc.html for more details."
+}
+
+# Helper function to get referenced resource address from config
+get_referenced_resource_address = func(res, attr) {
+	references_list = maps.get(res, attr, [])
+	if references_list.references is empty {
+		return ""
+	}
+	referenced_address = references_list.references[0]
+	if strings.has_prefix(res.address, const.module_prefix) {
+		referenced_address = res.module_address + "." + referenced_address
+	}
+	return referenced_address
+}
+
+# Helper function to check if an attribute is defined in config
+is_attribute_defined = func(res_config, attr_path) {
+	attr_config = maps.get(res_config, attr_path, null)
+	if attr_config is null {
+		return false
+	}
+	
+	# Check if it has a constant value
+	constant_value = maps.get(attr_config, "constant_value", null)
+	if constant_value is not null and constant_value is not "" {
+		return true
+	}
+	
+	# Check if it has references (resource references)
+	references = maps.get(attr_config, "references", [])
+	if references is not empty {
+		return true
+	}
+	
+	return false
+}
+
+# Check if a network interface (from config) has a subnet_id reference
+check_network_interface_has_subnet = func(ni_config_resources, ni_address) {
+	if ni_address is "" {
+		return false
+	}
+	
+	# Look for the network interface resource in config
+	for ni_config_resources as _, ni_res {
+		if ni_res.address is ni_address {
+			# Check if subnet_id is configured
+			if is_attribute_defined(ni_res, "config.subnet_id") {
+				return true
+			}
+		}
+	}
+	
+	return false
+}
+
+# Check if primary_network_interface references a valid network interface with subnet
+is_primary_network_interface_valid = func(res_config, ni_config_resources) {
+	# Get the network_interface_id reference from primary_network_interface block
+	pni_ni_id_ref = get_referenced_resource_address(res_config, "config.primary_network_interface.0.network_interface_id")
+	
+	if pni_ni_id_ref is "" {
+		return false
+	}
+	
+	# Check if the referenced network interface has a subnet
+	return check_network_interface_has_subnet(ni_config_resources, pni_ni_id_ref)
+}
+
+# Check if network_interface_id references a valid network interface with subnet
+is_network_interface_id_valid = func(res_config, ni_config_resources) {
+	# Get the network_interface_id reference
+	ni_id_ref = get_referenced_resource_address(res_config, "config.network_interface_id")
+	
+	if ni_id_ref is "" {
+		return false
+	}
+	
+	# Check if the referenced network interface has a subnet
+	return check_network_interface_has_subnet(ni_config_resources, ni_id_ref)
+}
+
+# Helper function to check if a VPC ID matches the parameter
+matches_vpc_id_param = func(vpc_id, vpc_id_param) {
+	# If no vpcId parameter is specified, accept any VPC
+	if vpc_id_param is "" or vpc_id_param is null {
+		return true
+	}
+
+	# Direct match
+	if vpc_id is vpc_id_param {
+		return true
+	}
+
+	return false
+}
+
+# Check if subnet belongs to the specified VPC (using config references)
+check_subnet_vpc = func(subnet_config_resources, subnet_address, vpc_id_param) {
+	if vpc_id_param is "" or vpc_id_param is null {
+		return true
+	}
+	
+	if subnet_address is "" {
+		return true
+	}
+	
+	# Look for the subnet resource in config
+	for subnet_config_resources as _, subnet_res {
+		if subnet_res.address is subnet_address {
+			# Check vpc_id constant value
+			vpc_id_config = maps.get(subnet_res, "config.vpc_id", {})
+			vpc_id = maps.get(vpc_id_config, "constant_value", null)
+			if vpc_id is not null {
+				return matches_vpc_id_param(vpc_id, vpc_id_param)
+			}
+		}
+	}
+	
+	return true
+}
+
+is_instance_in_vpc = func(res_config, vpc_id_param, ni_config_resources, subnet_config_resources) {
+	# Check if subnet_id is defined in config (most common approach)
+	if is_attribute_defined(res_config, "config.subnet_id") {
+		# Get subnet reference from config to verify VPC if parameter is specified
+		subnet_ref = get_referenced_resource_address(res_config, "config.subnet_id")
+		if not check_subnet_vpc(subnet_config_resources, subnet_ref, vpc_id_param) {
+			return {
+				"compliant": false,
+				"reason":    "Instance subnet does not belong to the required VPC ID '" + vpc_id_param + "'.",
+			}
+		}
+		return {
+			"compliant": true,
+			"reason":    "",
+		}
+	}
+
+	# Check if vpc_security_group_ids is defined in config (indicates VPC membership)
+	if is_attribute_defined(res_config, "config.vpc_security_group_ids") {
+		return {
+			"compliant": true,
+			"reason":    "",
+		}
+	}
+
+	# Check if network_interface_id is defined in config (single ENI attachment)
+	if is_attribute_defined(res_config, "config.network_interface_id") {
+		# Check if the network interface has a subnet using config
+		if is_network_interface_id_valid(res_config, ni_config_resources) {
+			return {
+				"compliant": true,
+				"reason":    "",
+			}
+		}
+	}
+
+	# Check if primary_network_interface is defined in config (recommended approach for explicit ENI)
+	if is_attribute_defined(res_config, "config.primary_network_interface") {
+		# Check using config
+		if is_primary_network_interface_valid(res_config, ni_config_resources) {
+			return {
+				"compliant": true,
+				"reason":    "",
+			}
+		}
+	}
+
+	# Check if deprecated network_interface array is defined in config (for backward compatibility)
+	if is_attribute_defined(res_config, "config.network_interface") {
+		# If network_interface is present in config, consider it valid
+		# (deprecated but still indicates VPC intent)
+		return {
+			"compliant": true,
+			"reason":    "",
+		}
+	}
+
+	# Instance is not in VPC
+	return {
+		"compliant": false,
+		"reason":    "Instance does not have subnet_id, vpc_security_group_ids, network_interface_id, or primary_network_interface with valid network interface defined.",
+	}
+}
+
+# Variables
+config_resources = tf.config(tfconfig.resources).type(const.resource_type).resources
+ni_config_resources = tf.config(tfconfig.resources).type(const.resource_network_interface).resources
+subnet_config_resources = tf.config(tfconfig.resources).type(const.resource_subnet).resources
+
+# Check each resource and collect violations with detailed reasons
+violations = []
+for config_resources as _, res_config {
+	result = is_instance_in_vpc(res_config, vpcId, ni_config_resources, subnet_config_resources)
+	if not result.compliant {
+		violations += [{
+			"address":        res_config.address,
+			"module_address": res_config.module_address,
+			"reason":         result.reason,
+		}]
+	}
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v, v.reason),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

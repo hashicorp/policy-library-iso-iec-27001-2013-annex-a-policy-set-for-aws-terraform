@@ -1,7 +1,0 @@
-# Copyright IBM Corp. 2026
-# SPDX-License-Identifier: BUSL-1.1
-
-planned_values = {
-	"outputs":   {},
-	"resources": {},
-}

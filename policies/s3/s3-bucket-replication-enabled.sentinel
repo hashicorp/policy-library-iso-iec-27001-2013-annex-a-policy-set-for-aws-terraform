@@ -1,0 +1,169 @@
+# This policy verifies that AWS S3 buckets have replication rules enabled
+# by checking the aws_s3_bucket_replication_configuration resource.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Parameters
+# ReplicationType: Type of replication to check for
+# Accepted values: 'CROSS-REGION', 'SAME-REGION', or empty string (default - checks for any replication)
+param ReplicationType default ""
+
+# Constants
+const = {
+	"policy_name":                               "s3-bucket-replication-enabled",
+	"resource_aws_s3_bucket":                    "aws_s3_bucket",
+	"resource_aws_s3_bucket_replication_config": "aws_s3_bucket_replication_configuration",
+	"message":                                   "S3 bucket must have replication rules enabled with all rules in 'Enabled' status.",
+}
+
+# Functions
+generate_violation_message = func(bucket_address, reason) {
+	return "S3 bucket '" + bucket_address + "' does not meet replication requirements: " + reason + ". Configure aws_s3_bucket_replication_configuration with enabled rules to meet AWS Audit Manager compliance requirements. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-replication-enabled.html for more details."
+}
+
+# Check if replication configuration has valid rules with all enabled
+has_valid_replication_rules = func(replication_config_res) {
+	# Check if rule exists
+	rules = maps.get(replication_config_res.values, "rule", null)
+	if rules is null {
+		return {
+			"valid":  false,
+			"reason": "no rule found in replication configuration",
+		}
+	}
+
+	# rules is a list, check if it's not empty
+	if length(rules) == 0 {
+		return {
+			"valid":  false,
+			"reason": "rule array is empty",
+		}
+	}
+
+	# Check that ALL rules have status "Enabled" and match ReplicationType if specified
+	for rules as _, r {
+		status = maps.get(r, "status", "")
+		if status is not "Enabled" {
+			return {
+				"valid":  false,
+				"reason": "at least one rule has status '" + status + "' instead of 'Enabled'",
+			}
+		}
+
+		# If ReplicationType parameter is specified, validate replication type
+		if ReplicationType is not "" and ReplicationType is not null {
+			# Get destination configuration
+			destinations = maps.get(r, "destination", null)
+			if destinations is null or length(destinations) == 0 {
+				return {
+					"valid":  false,
+					"reason": "rule has no destination configured",
+				}
+			}
+
+			# Check first destination (typically only one)
+			dest_config = destinations[0]
+			dest_region = maps.get(dest_config, "region", null)
+
+			# Determine if this is cross-region or same-region replication
+			if ReplicationType is "CROSS-REGION" {
+				# For cross-region, destination region must be explicitly set and different
+				if dest_region is null or dest_region is "" {
+					return {
+						"valid":  false,
+						"reason": "ReplicationType parameter set to 'CROSS-REGION' but destination region is not specified in rule",
+					}
+				}
+				# Note: We assume if region is explicitly set, it's cross-region
+				# In real scenarios, we'd compare with source bucket region
+			} else if ReplicationType is "SAME-REGION" {
+				# For same-region, destination region should either not be set or be the same
+				# In practice, same-region replication typically doesn't specify region
+				if dest_region is not null and dest_region is not "" {
+					return {
+						"valid":  false,
+						"reason": "ReplicationType parameter set to 'SAME-REGION' but destination has explicit region specified (indicating cross-region)",
+					}
+				}
+			}
+		}
+	}
+
+	# All checks passed
+	return {
+		"valid":  true,
+		"reason": "",
+	}
+}
+
+# Variables
+s3_buckets = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_s3_bucket).resources
+replication_configs = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_s3_bucket_replication_config).resources
+
+# Build a map of bucket addresses to their replication configurations
+bucket_replication_map = {}
+for replication_configs as _, rc {
+	bucket_ref = maps.get(rc.values, "bucket", null)
+	if bucket_ref is not null {
+		bucket_replication_map[bucket_ref] = rc
+	}
+}
+
+# Check if bucket has valid replication
+bucket_has_valid_replication = func(bucket_res) {
+	# Check if this bucket has a replication configuration
+	replication_config = maps.get(bucket_replication_map, bucket_res.address, null)
+	
+	# If no replication configuration found, fail
+	if replication_config is null {
+		return false
+	}
+	
+	# Check if replication configuration has valid rules
+	result = has_valid_replication_rules(replication_config)
+	return result.valid
+}
+
+# Find violations
+violations = collection.reject(s3_buckets, bucket_has_valid_replication)
+
+# Build violations list with detailed messages
+# Generate summary directly from violations
+violation_list = []
+for violations as address, v {
+	replication_config = maps.get(bucket_replication_map, v.address, null)
+	
+	reason = "no replication configuration found"
+	if replication_config is not null {
+		result = has_valid_replication_rules(replication_config)
+		reason = result.reason
+	}
+	
+	violation_details = {
+		"address":        v.address,
+		"module_address": v.module_address,
+		"message":        generate_violation_message(v.address, reason),
+	}
+	violation_list = append(violation_list, violation_details)
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations":  violation_list,
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	length(violations) is 0
+}

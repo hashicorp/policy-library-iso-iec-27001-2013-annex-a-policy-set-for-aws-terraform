@@ -1,0 +1,43 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_s3_bucket.example": {
+			"address":        "aws_s3_bucket.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket",
+			"values": {
+				"bucket": "my-bucket-without-replication",
+			},
+		},
+		"aws_s3_bucket_versioning.source": {
+			"address":        "aws_s3_bucket_versioning.source",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "source",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_s3_bucket_versioning",
+			"values": {
+				"bucket": "aws_s3_bucket.example",
+				"versioning_configuration": [
+					{
+						"status": "Enabled",
+					},
+				],
+			},
+		},
+	},
+}
