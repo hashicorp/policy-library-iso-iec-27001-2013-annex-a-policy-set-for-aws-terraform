@@ -103,10 +103,10 @@ get_advanced_management_selector_coverage = func(selector) {
 
 	return {
 		"has_management_category": has_management_category,
-		"has_limiting_filters":   has_limiting_filters,
-		"read_only_present":      read_only_present,
-		"logs_read_only":         logs_read_only,
-		"logs_write_only":        logs_write_only,
+		"has_limiting_filters":    has_limiting_filters,
+		"read_only_present":       read_only_present,
+		"logs_read_only":          logs_read_only,
+		"logs_write_only":         logs_write_only,
 	}
 }
 

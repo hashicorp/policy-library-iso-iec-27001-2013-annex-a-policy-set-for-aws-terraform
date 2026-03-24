@@ -61,7 +61,7 @@ get_attached_security_group_references = func(network_interfaces, sg_attachments
 		}
 	}
 
- 	return refs
+	return refs
 }
 
 matches_security_group_reference = func(security_group_res, security_group_ref) {

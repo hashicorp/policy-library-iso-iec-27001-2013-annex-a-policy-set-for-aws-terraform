@@ -32,7 +32,7 @@ get_allowed_profile_arns = func() {
 	if IamInstanceProfileArnList is "" {
 		return []
 	}
-	
+
 	# Split by comma and trim whitespace
 	arns = strings.split(IamInstanceProfileArnList, ",")
 	trimmed_arns = []
@@ -42,7 +42,7 @@ get_allowed_profile_arns = func() {
 			trimmed_arns = trimmed_arns + [trimmed]
 		}
 	}
-	
+
 	return trimmed_arns
 }
 
@@ -68,12 +68,12 @@ extract_instance_profile_name = func(profile_identifier) {
 is_profile_allowed = func(profile_value) {
 	allowed_arns = get_allowed_profile_arns()
 	profile_name = extract_instance_profile_name(profile_value)
-	
+
 	# If no specific profiles are required, any profile is allowed
 	if length(allowed_arns) is 0 {
 		return true
 	}
-	
+
 	# Compare against both exact ARN values and profile names derived from the
 	# allowed ARNs, because aws_instance.iam_instance_profile is configured as the
 	# instance profile name in Terraform.
@@ -83,14 +83,14 @@ is_profile_allowed = func(profile_value) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
 generate_violation_message = func(violation) {
 	profile = maps.get(violation.values, const.iam_instance_profile, null)
 	allowed_arns = get_allowed_profile_arns()
-	
+
 	if profile is null {
 		if length(allowed_arns) > 0 {
 			arns_list = strings.join(allowed_arns, ", ")
@@ -98,7 +98,7 @@ generate_violation_message = func(violation) {
 		}
 		return "EC2 instance '" + violation.address + "' must have an IAM instance profile attached. The 'iam_instance_profile' attribute is required for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
 	}
-	
+
 	if profile is "" {
 		if length(allowed_arns) > 0 {
 			arns_list = strings.join(allowed_arns, ", ")
@@ -106,13 +106,13 @@ generate_violation_message = func(violation) {
 		}
 		return "EC2 instance '" + violation.address + "' has an empty 'iam_instance_profile' attribute. A valid IAM instance profile must be specified for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
 	}
-	
+
 	# Profile exists but not in allowed list
 	if length(allowed_arns) > 0 {
 		arns_list = strings.join(allowed_arns, ", ")
 		return "EC2 instance '" + violation.address + "' is using IAM instance profile '" + profile + "' which is not in the allowed list. Allowed profiles: " + arns_list + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
 	}
-	
+
 	return "EC2 instance '" + violation.address + "' IAM instance profile validation failed. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
 }
 
@@ -121,12 +121,12 @@ resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).r
 
 violations = collection.reject(resources, func(res) {
 	profile = maps.get(res.values, const.iam_instance_profile, null)
-	
+
 	# Profile must exist and not be empty
 	if profile is null or profile is "" {
 		return false
 	}
-	
+
 	# Profile must be in the allowed list (if specified)
 	return is_profile_allowed(profile)
 })

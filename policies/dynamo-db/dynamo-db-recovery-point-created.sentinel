@@ -46,14 +46,14 @@ const = {
 	"resource_dynamodb_table":   "aws_dynamodb_table",
 	"resource_backup_plan":      "aws_backup_plan",
 	"resource_backup_selection": "aws_backup_selection",
-	"name":                      "name",
-	"plan_id":                   "plan_id",
-	"point_in_time_recovery":    "point_in_time_recovery",
-	"resources":                 "resources",
-	"rule":                      "rule",
-	"schedule":                  "schedule",
-	"selection_tag":             "selection_tag",
-	"enabled":                   "enabled",
+	"name":                   "name",
+	"plan_id":                "plan_id",
+	"point_in_time_recovery": "point_in_time_recovery",
+	"resources":              "resources",
+	"rule":                   "rule",
+	"schedule":               "schedule",
+	"selection_tag":          "selection_tag",
+	"enabled":                "enabled",
 }
 
 # Functions
@@ -62,7 +62,7 @@ matches_resource_id = func(res) {
 	if resourceId is "" {
 		return true
 	}
-	
+
 	table_name = maps.get(res.values, "name", "")
 	return table_name is resourceId
 }
@@ -72,11 +72,11 @@ matches_resource_tags = func(res) {
 	if resourceTags is "" {
 		return true
 	}
-	
+
 	# Parse the resourceTags JSON string
 	filter_tags = json.unmarshal(resourceTags)
 	resource_tags = maps.get(res.values, "tags", {})
-	
+
 	# Check if all filter tags match
 	for filter_tags as tag_key, tag_value {
 		resource_tag_value = maps.get(resource_tags, tag_key, "")
@@ -84,10 +84,9 @@ matches_resource_tags = func(res) {
 			return false
 		}
 	}
-	
+
 	return true
 }
-
 
 # Keep the legacy backup_period_days parameter effective unless the AWS Config
 # recovery point parameters are explicitly customized.
@@ -106,7 +105,7 @@ get_required_hours = func() {
 generate_violation_message = func(violation) {
 	required_hours = get_required_hours()
 	age_description = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
-	
+
 	return "DynamoDB table '" + violation.address + "' does not have point-in-time recovery enabled and is not associated with a compliant AWS Backup plan scheduled within " + string(required_hours) + " hour(s) (equivalent to " + age_description + "). Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-last-backup-recovery-point-created.html for more details."
 }
 
@@ -126,7 +125,6 @@ is_pitr_enabled = func(res) {
 
 	return false
 }
-
 
 get_backup_frequency_hours = func(schedule) {
 	if strings.has_prefix(schedule, "rate(") {
@@ -180,7 +178,6 @@ get_backup_frequency_hours = func(schedule) {
 
 	return 720
 }
-
 
 is_backup_plan_compliant = func(plan_res) {
 	rules_list = maps.get(plan_res.values, const.rule, [])

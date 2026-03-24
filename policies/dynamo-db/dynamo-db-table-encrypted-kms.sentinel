@@ -34,7 +34,7 @@ get_allowed_kms_keys = func() {
 	if kmsKeyArns is "" {
 		return []
 	}
-	
+
 	# Split by comma and trim whitespace
 	keys = strings.split(kmsKeyArns, ",")
 	trimmed_keys = []
@@ -44,26 +44,26 @@ get_allowed_kms_keys = func() {
 			trimmed_keys = trimmed_keys + [trimmed]
 		}
 	}
-	
+
 	return trimmed_keys
 }
 
 # Check if a KMS key ARN is in the allowed list
 is_kms_key_allowed = func(kms_key_arn) {
 	allowed_keys = get_allowed_kms_keys()
-	
+
 	# If no specific keys are required, any KMS key is allowed
 	if length(allowed_keys) is 0 {
 		return true
 	}
-	
+
 	# Check if the key is in the allowed list
 	for allowed_keys as allowed {
 		if kms_key_arn is allowed {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -89,7 +89,7 @@ generate_violation_message = func(violation) {
 	if enabled_value is false {
 		return "DynamoDB table must have 'server_side_encryption.enabled' set to true to use AWS KMS encryption. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html for more details."
 	}
-	
+
 	if length(allowed_keys) > 0 {
 		keys_list = strings.join(allowed_keys, ", ")
 		if kms_key_value is "" {

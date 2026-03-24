@@ -62,7 +62,7 @@ matches_resource_id = func(res) {
 	if resourceId is "" {
 		return true
 	}
-	
+
 	cluster_id = maps.get(res.values, "cluster_identifier", "")
 	return cluster_id is resourceId
 }
@@ -72,11 +72,11 @@ matches_resource_tags = func(res) {
 	if resourceTags is "" {
 		return true
 	}
-	
+
 	# Parse the resourceTags JSON string
 	filter_tags = json.unmarshal(resourceTags)
 	resource_tags = maps.get(res.values, "tags", {})
-	
+
 	# Check if all filter tags match
 	for filter_tags as tag_key, tag_value {
 		resource_tag_value = maps.get(resource_tags, tag_key, "")
@@ -84,7 +84,7 @@ matches_resource_tags = func(res) {
 			return false
 		}
 	}
-	
+
 	return true
 }
 

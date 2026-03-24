@@ -73,7 +73,7 @@ matches_resource_id = func(res) {
 	if resourceId is "" {
 		return true
 	}
-	
+
 	volume_id = maps.get(res.values, "id", "")
 	volume_arn = maps.get(res.values, "arn", "")
 	return volume_id is resourceId or volume_arn is resourceId
@@ -84,17 +84,17 @@ matches_resource_tags = func(res) {
 	if resourceTags is "" {
 		return true
 	}
-	
+
 	filter_tags = json.unmarshal(resourceTags)
 	resource_tags = maps.get(res.values, "tags", {})
-	
+
 	for filter_tags as tag_key, tag_value {
 		resource_tag_value = maps.get(resource_tags, tag_key, "")
 		if resource_tag_value is not tag_value {
 			return false
 		}
 	}
-	
+
 	return true
 }
 
@@ -185,7 +185,6 @@ is_backup_plan_compliant = func(plan_res) {
 	return false
 }
 
-
 matches_volume_reference = func(volume_res, resource_ref, all_volumes) {
 	volume_address = volume_res.address
 	volume_arn = maps.get(volume_res.values, "arn", "")
@@ -225,7 +224,6 @@ matches_volume_reference = func(volume_res, resource_ref, all_volumes) {
 	return false
 }
 
-
 condition_key_to_tag = func(key) {
 	if strings.has_prefix(key, "aws:ResourceTag/") {
 		parts = strings.split(key, "/")
@@ -234,7 +232,6 @@ condition_key_to_tag = func(key) {
 
 	return key
 }
-
 
 wildcard_matches = func(value, pattern) {
 	if pattern is "*" {
@@ -262,7 +259,6 @@ wildcard_matches = func(value, pattern) {
 
 	return false
 }
-
 
 generic_condition_matches = func(condition_entry, volume_tags) {
 	test_name = strings.to_lower(maps.get(condition_entry, const.test_key, ""))

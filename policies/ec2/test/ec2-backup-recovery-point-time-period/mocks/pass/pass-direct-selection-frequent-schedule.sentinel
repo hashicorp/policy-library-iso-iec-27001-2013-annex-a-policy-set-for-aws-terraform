@@ -24,7 +24,7 @@ planned_values = {
 				"tags": {
 					"Name": "backup-volume",
 				},
-				"type":              "gp3",
+				"type": "gp3",
 			},
 		},
 		"aws_backup_selection.example": {

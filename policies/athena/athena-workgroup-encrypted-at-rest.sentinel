@@ -21,7 +21,7 @@ const = {
 	"kms_key_arn":                   "kms_key_arn",
 	"message":                       "Amazon Athena workgroup must have encryption enabled at rest. Refer to https://docs.aws.amazon.com/config/latest/developerguide/athena-workgroup-encrypted-at-rest.html for more details.",
 	"managed_query_results_configuration": "managed_query_results_configuration",
-	"result_configuration":               "result_configuration",
+	"result_configuration":                "result_configuration",
 }
 
 # Functions

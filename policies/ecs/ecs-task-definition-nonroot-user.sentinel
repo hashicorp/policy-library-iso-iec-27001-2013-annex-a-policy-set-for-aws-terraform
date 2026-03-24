@@ -21,8 +21,8 @@ const = {
 	"resource_aws_ecs_task_definition": "aws_ecs_task_definition",
 	"container_definitions":            "container_definitions",
 	"requires_compatibilities":         "requires_compatibilities",
-	"user":                             "user",
-	"ec2_launch_type":                  "ec2",
+	"user":            "user",
+	"ec2_launch_type": "ec2",
 }
 
 # Functions

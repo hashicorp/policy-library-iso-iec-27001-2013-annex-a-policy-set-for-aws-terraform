@@ -33,7 +33,7 @@ get_exempted_projects = func() {
 	if exemptedProjects is "" {
 		return []
 	}
-	
+
 	# Split by comma and trim whitespace
 	projects = strings.split(exemptedProjects, ",")
 	trimmed_projects = []
@@ -43,20 +43,20 @@ get_exempted_projects = func() {
 			trimmed_projects = trimmed_projects + [trimmed]
 		}
 	}
-	
+
 	return trimmed_projects
 }
 
 # Check if a project name is in the exemption list
 is_project_exempted = func(project_name) {
 	exempted_list = get_exempted_projects()
-	
+
 	for exempted_list as exempted {
 		if project_name is exempted {
 			return true
 		}
 	}
-	
+
 	return false
 }
 
@@ -77,7 +77,7 @@ is_privileged_mode_disabled = func(res) {
 	if project_name is not "" and is_project_exempted(project_name) {
 		return true
 	}
-	
+
 	environment_blocks = maps.get(res.values, const.environment, [])
 
 	# If environment is not defined or empty, consider it compliant (no privileged mode)

@@ -43,7 +43,7 @@ get_excluded_principals = func() {
 	if principalArnList is "" {
 		return []
 	}
-	
+
 	# Split by comma and trim whitespace
 	principals = strings.split(principalArnList, ",")
 	trimmed_principals = []
@@ -53,20 +53,20 @@ get_excluded_principals = func() {
 			trimmed_principals = trimmed_principals + [trimmed]
 		}
 	}
-	
+
 	return trimmed_principals
 }
 
 # Check if a principal ARN is in the exclusion list
 is_principal_excluded = func(principal_arn) {
 	excluded_principals = get_excluded_principals()
-	
+
 	for excluded_principals as excluded {
 		if principal_arn is excluded {
 			return true
 		}
 	}
-	
+
 	return false
 }
 

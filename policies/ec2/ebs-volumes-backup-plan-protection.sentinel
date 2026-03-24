@@ -44,7 +44,6 @@ matches_ebs_volume_pattern = func(resource_ref) {
 	return false
 }
 
-
 matches_volume_reference = func(volume_res, resource_ref, all_ebs_volumes) {
 	volume_address = volume_res.address
 	volume_arn = maps.get(volume_res.values, "arn", "")

@@ -25,7 +25,7 @@ planned_values = {
 					"Backup":      "true",
 					"Environment": "prod-app",
 				},
-				"type":              "gp3",
+				"type": "gp3",
 			},
 		},
 		"aws_backup_selection.example": {

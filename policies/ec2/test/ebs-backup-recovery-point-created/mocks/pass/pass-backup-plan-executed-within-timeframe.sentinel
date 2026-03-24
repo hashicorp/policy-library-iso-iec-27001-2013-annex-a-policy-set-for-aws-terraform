@@ -24,7 +24,7 @@ planned_values = {
 				"tags": {
 					"Tier": "gold",
 				},
-				"type":              "gp3",
+				"type": "gp3",
 			},
 		},
 		"aws_backup_plan.example": {

@@ -23,7 +23,7 @@ planned_values = {
 				"tags": {
 					"Backup": "enabled",
 				},
-				"skip_final_snapshot":     true,
+				"skip_final_snapshot": true,
 			},
 		},
 		"aws_backup_plan.aurora_backup": {

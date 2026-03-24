@@ -62,7 +62,6 @@ get_attached_security_group_references = func(network_interfaces, sg_attachments
 	return refs
 }
 
-
 matches_security_group_reference = func(security_group_res, security_group_ref) {
 	ref_string = string(security_group_ref)
 	security_group_address = ""
