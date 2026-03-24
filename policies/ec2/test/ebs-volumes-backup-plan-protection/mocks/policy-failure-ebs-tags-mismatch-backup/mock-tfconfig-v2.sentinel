@@ -16,9 +16,9 @@ resources = {
 			},
 			"tags": {
 				"constant_value": {
-					"Name": "mismatched-volume",
+					"Name":        "mismatched-volume",
 					"Environment": "development",
-					"Backup": "false",
+					"Backup":      "false",
 				},
 			},
 			"type": {

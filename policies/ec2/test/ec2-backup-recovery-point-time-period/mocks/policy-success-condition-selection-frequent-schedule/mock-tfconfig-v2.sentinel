@@ -22,7 +22,7 @@ resources = {
 			},
 			"tags": {
 				"constant_value": {
-					"Backup": "true",
+					"Backup":      "true",
 					"Environment": "prod-app",
 				},
 			},

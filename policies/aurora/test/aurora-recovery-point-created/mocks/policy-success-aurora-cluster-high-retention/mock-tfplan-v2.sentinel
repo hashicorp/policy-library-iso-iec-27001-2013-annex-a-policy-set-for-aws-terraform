@@ -2,6 +2,6 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 planned_values = {
-	"outputs": {},
+	"outputs":   {},
 	"resources": {},
 }

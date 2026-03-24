@@ -19,7 +19,7 @@ resources = {
 			},
 			"tags": {
 				"constant_value": {
-					"Name": "example-efs",
+					"Name":        "example-efs",
 					"Environment": "prod",
 				},
 			},

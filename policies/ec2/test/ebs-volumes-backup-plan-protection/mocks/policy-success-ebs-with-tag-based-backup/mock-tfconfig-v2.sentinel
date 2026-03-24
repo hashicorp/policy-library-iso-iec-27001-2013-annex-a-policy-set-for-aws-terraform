@@ -16,9 +16,9 @@ resources = {
 			},
 			"tags": {
 				"constant_value": {
-					"Name": "tagged-volume",
+					"Name":        "tagged-volume",
 					"Environment": "production",
-					"Backup": "true",
+					"Backup":      "true",
 				},
 			},
 			"type": {

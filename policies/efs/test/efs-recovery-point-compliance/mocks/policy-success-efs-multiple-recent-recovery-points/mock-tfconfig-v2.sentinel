@@ -19,7 +19,7 @@ resources = {
 			},
 			"tags": {
 				"constant_value": {
-					"Name": "first-efs",
+					"Name":        "first-efs",
 					"Environment": "prod",
 				},
 			},
@@ -51,7 +51,7 @@ resources = {
 			},
 			"tags": {
 				"constant_value": {
-					"Name": "second-efs",
+					"Name":        "second-efs",
 					"Environment": "prod",
 				},
 			},
