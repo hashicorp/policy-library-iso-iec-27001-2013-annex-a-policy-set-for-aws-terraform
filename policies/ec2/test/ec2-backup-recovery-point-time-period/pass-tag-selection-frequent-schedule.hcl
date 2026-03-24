@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-tag-selection-frequent-schedule.sentinel"
+    source = "./mocks/policy-success-tag-selection-frequent-schedule/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-tag-selection-frequent-schedule/mock-tfconfig-v2.sentinel"
   }
 }
 

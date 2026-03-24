@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-multiple-trails-one-compliant.sentinel"
+    source = "./mocks/policy-success-multiple-trails-one-compliant/mock-tfplan-v2.sentinel"
   }
 }
 

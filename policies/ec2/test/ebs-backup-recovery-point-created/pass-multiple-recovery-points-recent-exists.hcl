@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-multiple-recovery-points-recent-exists.sentinel"
+    source = "./mocks/policy-success-multiple-recovery-points-recent-exists/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-multiple-recovery-points-recent-exists/mock-tfconfig-v2.sentinel"
   }
 }
 

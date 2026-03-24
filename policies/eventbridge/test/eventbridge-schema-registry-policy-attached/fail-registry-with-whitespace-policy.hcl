@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-registry-with-whitespace-policy.sentinel"
+    source = "./mocks/policy-failure-registry-with-whitespace-policy/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-registry-with-whitespace-policy/mock-tfconfig-v2.sentinel"
   }
 }
 

@@ -1,0 +1,112 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_ebs_volume.example": {
+		"address": "aws_ebs_volume.example",
+		"config": {
+			"arn": {
+				"constant_value": "arn:aws:ec2:us-east-1:123456789012:volume/vol-34567890",
+			},
+			"availability_zone": {
+				"constant_value": "us-east-1c",
+			},
+			"encrypted": {
+				"constant_value": true,
+			},
+			"id": {
+				"constant_value": "vol-34567890",
+			},
+			"size": {
+				"constant_value": 200,
+			},
+			"tags": {
+				"constant_value": {
+					"Backup": "true",
+					"Environment": "prod",
+				},
+			},
+			"type": {
+				"constant_value": "gp3",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_ebs_volume",
+	},
+	"aws_backup_plan.example": {
+		"address": "aws_backup_plan.example",
+		"config": {
+			"name": {
+				"constant_value": "example-backup-plan",
+			},
+			"rule": [
+				{
+					"rule_name": {
+						"constant_value": "daily-backup",
+					},
+					"schedule": {
+						"constant_value": "cron(0 3 * * ? *)",
+					},
+					"target_vault_name": {
+						"constant_value": "Default",
+					},
+				},
+			],
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_plan",
+	},
+	"aws_backup_selection.example": {
+		"address": "aws_backup_selection.example",
+		"config": {
+			"iam_role_arn": {
+				"constant_value": "arn:aws:iam::123456789012:role/service-role/AWSBackupDefaultServiceRole",
+			},
+			"name": {
+				"constant_value": "example-backup-selection",
+			},
+			"plan_id": {
+				"references": [
+					"aws_backup_plan.example.id",
+					"aws_backup_plan.example",
+				],
+			},
+			"selection_tag": [
+				{
+					"key": {
+						"constant_value": "Backup",
+					},
+					"type": {
+						"constant_value": "STRINGEQUALS",
+					},
+					"value": {
+						"constant_value": "true",
+					},
+				},
+			],
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+}

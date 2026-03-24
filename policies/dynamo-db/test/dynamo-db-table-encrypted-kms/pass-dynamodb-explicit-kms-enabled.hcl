@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-dynamodb-explicit-kms-enabled.sentinel"
+    source = "./mocks/policy-success-dynamodb-explicit-kms-enabled/mock-tfplan-v2.sentinel"
   }
 }
 

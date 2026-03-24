@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-default-security-group-ignored.sentinel"
+    source = "./mocks/policy-success-default-security-group-ignored/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-default-security-group-ignored/mock-tfconfig-v2.sentinel"
   }
 }
 

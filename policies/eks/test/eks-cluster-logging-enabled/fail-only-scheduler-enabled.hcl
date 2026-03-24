@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-only-scheduler-enabled.sentinel"
+    source = "./mocks/policy-failure-only-scheduler-enabled/mock-tfplan-v2.sentinel"
   }
 }
 

@@ -6,6 +6,7 @@
 
 # Imports
 import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
@@ -36,10 +37,12 @@ const = {
 	"resource_aws_backup_plan":      "aws_backup_plan",
 	"resource_aws_backup_selection": "aws_backup_selection",
 	"resource_aws_efs_file_system":  "aws_efs_file_system",
+	"constant_value":                "constant_value",
 	"condition":                     "condition",
 	"not_resources":                 "not_resources",
 	"name":                          "name",
 	"plan_id_key":                   "plan_id",
+	"references":                    "references",
 	"resources_key":                 "resources",
 	"rule_key":                      "rule",
 	"schedule_key":                  "schedule",
@@ -57,6 +60,23 @@ const = {
 }
 
 # Functions
+get_config_attribute = func(res, attr) {
+	return maps.get(res, "config." + attr, {})
+}
+
+get_constant_value = func(attr, fallback) {
+	return maps.get(attr, const.constant_value, fallback)
+}
+
+get_list_values = func(attr) {
+	refs = maps.get(attr, const.references, [])
+	if length(refs) > 0 {
+		return refs
+	}
+
+	return maps.get(attr, const.constant_value, [])
+}
+
 get_required_hours = func() {
 	if recoveryPointAgeValue is not 1 or recoveryPointAgeUnit is not "days" {
 		if recoveryPointAgeUnit is "hours" {
@@ -74,8 +94,8 @@ matches_resource_id = func(res) {
 		return true
 	}
 
-	efs_id = maps.get(res.values, "id", "")
-	efs_arn = maps.get(res.values, "arn", "")
+	efs_id = maps.get(res, "config.id.constant_value", "")
+	efs_arn = maps.get(res, "config.arn.constant_value", "")
 	return efs_id is resourceId or efs_arn is resourceId
 }
 
@@ -85,7 +105,7 @@ matches_resource_tags = func(res) {
 	}
 
 	filter_tags = json.unmarshal(resourceTags)
-	resource_tags = maps.get(res.values, "tags", {})
+	resource_tags = maps.get(res, "config.tags.constant_value", {})
 
 	for filter_tags as tag_key, tag_value {
 		if maps.get(resource_tags, tag_key, "") is not tag_value {
@@ -150,14 +170,14 @@ get_backup_frequency_hours = func(schedule) {
 }
 
 is_backup_plan_compliant = func(plan_res) {
-	rules_list = maps.get(plan_res.values, const.rule_key, [])
+	rules_list = maps.get(plan_res, "config." + const.rule_key, [])
 	if length(rules_list) is 0 {
 		return false
 	}
 
 	required_hours = get_required_hours()
 	for rules_list as _, backup_rule {
-		schedule = maps.get(backup_rule, const.schedule_key, "")
+		schedule = maps.get(backup_rule, const.schedule_key + "." + const.constant_value, "")
 		if schedule is not "" {
 			frequency = get_backup_frequency_hours(schedule)
 			if frequency <= required_hours {
@@ -171,8 +191,8 @@ is_backup_plan_compliant = func(plan_res) {
 
 matches_efs_reference = func(efs_res, resource_ref, all_efs_resources) {
 	efs_address = efs_res.address
-	efs_arn = maps.get(efs_res.values, "arn", "")
-	efs_id = maps.get(efs_res.values, "id", "")
+	efs_arn = maps.get(efs_res, "config.arn.constant_value", "")
+	efs_id = maps.get(efs_res, "config.id.constant_value", "")
 	efs_name = efs_res.name
 	ref_str = string(resource_ref)
 	ref_lower = strings.to_lower(ref_str)
@@ -241,9 +261,9 @@ wildcard_matches = func(value, pattern) {
 }
 
 generic_condition_matches = func(condition_entry, efs_tags) {
-	test_name = strings.to_lower(maps.get(condition_entry, const.test_key, ""))
-	tag_key = condition_key_to_tag(maps.get(condition_entry, const.variable_key, ""))
-	values = maps.get(condition_entry, const.values_key, [])
+	test_name = strings.to_lower(maps.get(condition_entry, const.test_key + "." + const.constant_value, ""))
+	tag_key = condition_key_to_tag(maps.get(condition_entry, const.variable_key + "." + const.constant_value, ""))
+	values = maps.get(condition_entry, const.values_key + "." + const.constant_value, [])
 	actual_value = maps.get(efs_tags, tag_key, "")
 
 	if length(values) is 0 {
@@ -275,8 +295,8 @@ generic_condition_matches = func(condition_entry, efs_tags) {
 
 condition_entries_match = func(entries, efs_tags, operator) {
 	for entries as _, entry {
-		tag_key = condition_key_to_tag(maps.get(entry, const.key_key, ""))
-		expected_value = maps.get(entry, const.value_key, "")
+		tag_key = condition_key_to_tag(maps.get(entry, const.key_key + "." + const.constant_value, ""))
+		expected_value = maps.get(entry, const.value_key + "." + const.constant_value, "")
 		actual_value = maps.get(efs_tags, tag_key, "")
 
 		if operator is const.string_equals and actual_value is not expected_value {
@@ -300,12 +320,12 @@ condition_entries_match = func(entries, efs_tags, operator) {
 }
 
 selection_conditions_match = func(selection_res, efs_res) {
-	conditions = maps.get(selection_res.values, const.condition, [])
+	conditions = maps.get(selection_res, "config." + const.condition, [])
 	if length(conditions) is 0 {
 		return true
 	}
 
-	efs_tags = maps.get(efs_res.values, "tags", {})
+	efs_tags = maps.get(efs_res, "config.tags.constant_value", {})
 	if length(efs_tags) is 0 {
 		return false
 	}
@@ -340,20 +360,20 @@ selection_conditions_match = func(selection_res, efs_res) {
 }
 
 selection_matches_efs_tags = func(selection_res, efs_res) {
-	selection_tags = maps.get(selection_res.values, const.selection_tag_key, [])
+	selection_tags = maps.get(selection_res, "config." + const.selection_tag_key, [])
 	if length(selection_tags) is 0 {
 		return false
 	}
 
-	efs_tags = maps.get(efs_res.values, "tags", {})
+	efs_tags = maps.get(efs_res, "config.tags.constant_value", {})
 	if length(efs_tags) is 0 {
 		return false
 	}
 
 	for selection_tags as _, selection_tag {
-		tag_key = maps.get(selection_tag, const.key_key, "")
-		tag_value = maps.get(selection_tag, const.value_key, "")
-		tag_type = maps.get(selection_tag, const.type_key, "STRINGEQUALS")
+		tag_key = maps.get(selection_tag, const.key_key + "." + const.constant_value, "")
+		tag_value = maps.get(selection_tag, const.value_key + "." + const.constant_value, "")
+		tag_type = maps.get(selection_tag, const.type_key + "." + const.constant_value, "STRINGEQUALS")
 
 		if tag_type is not "STRINGEQUALS" {
 			return false
@@ -368,7 +388,7 @@ selection_matches_efs_tags = func(selection_res, efs_res) {
 }
 
 selection_excludes_efs = func(efs_res, selection_res, all_efs_resources) {
-	not_resources = maps.get(selection_res.values, const.not_resources, [])
+	not_resources = get_list_values(get_config_attribute(selection_res, const.not_resources))
 	for not_resources as _, resource_ref {
 		if matches_efs_reference(efs_res, resource_ref, all_efs_resources) {
 			return true
@@ -383,10 +403,10 @@ selection_covers_efs = func(efs_res, selection_res, all_efs_resources) {
 		return false
 	}
 
-	resources_list = maps.get(selection_res.values, const.resources_key, [])
+	resources_list = get_list_values(get_config_attribute(selection_res, const.resources_key))
 	selection_has_resources = length(resources_list) > 0
-	selection_has_tags = length(maps.get(selection_res.values, const.selection_tag_key, [])) > 0
-	selection_has_conditions = length(maps.get(selection_res.values, const.condition, [])) > 0
+	selection_has_tags = length(maps.get(selection_res, "config." + const.selection_tag_key, [])) > 0
+	selection_has_conditions = length(maps.get(selection_res, "config." + const.condition, [])) > 0
 
 	if not selection_has_resources and not selection_has_tags and not selection_has_conditions {
 		return false
@@ -413,11 +433,29 @@ selection_covers_efs = func(efs_res, selection_res, all_efs_resources) {
 }
 
 selection_has_compliant_plan = func(selection_res, backup_plans) {
-	plan_id = maps.get(selection_res.values, const.plan_id_key, "")
+	plan_refs = maps.get(selection_res, "config." + const.plan_id_key + "." + const.references, [])
+	plan_id = maps.get(selection_res, "config." + const.plan_id_key + "." + const.constant_value, "")
+	if length(plan_refs) > 0 {
+		for backup_plans as _, plan_res {
+			plan_name = plan_res.name
+			if collection.find(plan_refs, func(ref) {
+				ref_str = string(ref)
+				return ref_str is plan_res.address or
+					ref_str is plan_res.address + ".id" or
+					ref_str is plan_name or
+					strings.has_suffix(ref_str, "." + plan_name)
+			}) is defined {
+				return is_backup_plan_compliant(plan_res)
+			}
+		}
+
+		return false
+	}
+
 	if plan_id is not "" {
 		for backup_plans as _, plan_res {
 			plan_name = plan_res.name
-			plan_display_name = maps.get(plan_res.values, const.name, "")
+			plan_display_name = maps.get(plan_res, "config." + const.name + "." + const.constant_value, "")
 			if plan_id is plan_res.address or
 				plan_id is plan_name or
 				plan_id is plan_display_name or
@@ -455,9 +493,12 @@ generate_violation_message = func(violation) {
 }
 
 # Variables
-efs_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_efs_file_system).resources
-backup_plans = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_plan).resources
-backup_selections = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_selection).resources
+planned_resources = tf.plan(tfplan.planned_values.resources)
+config_resources = tf.config(tfconfig.resources)
+
+efs_resources = config_resources.type(const.resource_aws_efs_file_system).resources
+backup_plans = config_resources.type(const.resource_aws_backup_plan).resources
+backup_selections = config_resources.type(const.resource_aws_backup_selection).resources
 
 filtered_by_id = filter efs_resources as _, res {
 	matches_resource_id(res)

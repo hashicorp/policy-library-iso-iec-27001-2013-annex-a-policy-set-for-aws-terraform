@@ -1,0 +1,102 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_dynamodb_table.multiple_backups": {
+		"address": "aws_dynamodb_table.multiple_backups",
+		"config": {
+			"billing_mode": {
+				"constant_value": "PAY_PER_REQUEST",
+			},
+			"hash_key": {
+				"constant_value": "id",
+			},
+			"name": {
+				"constant_value": "multiple-backups-table",
+			},
+			"point_in_time_recovery": [
+				{
+					"enabled": {
+						"constant_value": true,
+					},
+				},
+			],
+			"tags": {
+				"constant_value": {
+					"Name": "multiple-backups-table",
+				},
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "multiple_backups",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_dynamodb_table",
+	},
+	"aws_backup_plan.multiple": {
+		"address": "aws_backup_plan.multiple",
+		"config": {
+			"name": {
+				"constant_value": "multiple-backup-plan",
+			},
+			"rule": [
+				{
+					"lifecycle": [
+						{
+							"delete_after": {
+								"constant_value": 7,
+							},
+						},
+					],
+					"rule_name": {
+						"constant_value": "hourly-backup",
+					},
+					"schedule": {
+						"constant_value": "cron(0 * * * ? *)",
+					},
+				},
+			],
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "multiple",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_plan",
+	},
+	"aws_backup_selection.multiple": {
+		"address": "aws_backup_selection.multiple",
+		"config": {
+			"name": {
+				"constant_value": "multiple-backup-selection",
+			},
+			"plan_id": {
+				"references": [
+					"aws_backup_plan.multiple.id",
+					"aws_backup_plan.multiple",
+				],
+			},
+			"resources": {
+				"constant_value": [
+					"arn:aws:dynamodb:us-east-1:123456789012:table/multiple-backups-table",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "multiple",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+}

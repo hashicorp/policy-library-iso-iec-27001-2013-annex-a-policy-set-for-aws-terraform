@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-cache-with-cluster-size-encrypted.sentinel"
+    source = "./mocks/policy-success-cache-with-cluster-size-encrypted/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-cache-with-cluster-size-encrypted/mock-tfconfig-v2.sentinel"
   }
 }
 

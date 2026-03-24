@@ -8,6 +8,7 @@
 
 # Imports
 import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
@@ -25,6 +26,8 @@ param principalArnList default ""
 # Constants
 const = {
 	"policy_name":                  "backup-recovery-point-manual-deletion-disabled",
+	"constant_value":               "constant_value",
+	"references":                   "references",
 	"resource_backup_vault":        "aws_backup_vault",
 	"resource_backup_vault_policy": "aws_backup_vault_policy",
 	"required_actions": [
@@ -38,6 +41,14 @@ const = {
 }
 
 # Functions
+get_config_attribute = func(res, attr) {
+	return maps.get(res, "config." + attr, {})
+}
+
+get_constant_value = func(attr, fallback) {
+	return maps.get(attr, const.constant_value, fallback)
+}
+
 # Parse comma-separated list of principal ARNs
 get_excluded_principals = func() {
 	if principalArnList is "" {
@@ -166,13 +177,26 @@ has_required_deny_statements = func(policy_json) {
 }
 
 # Check if backup vault has compliant policy
-vault_has_compliant_policy = func(vault_name, vault_policies) {
+policy_matches_vault = func(policy, vault) {
+	policy_vault_name = maps.get(policy, "config.backup_vault_name.constant_value", "")
+	vault_name = maps.get(vault, "config.name.constant_value", "")
+
+	if policy_vault_name is not "" and policy_vault_name is vault_name {
+		return true
+	}
+
+	policy_references = maps.get(policy, "config.backup_vault_name.references", [])
+	return vault.address in policy_references or
+		(vault.address + ".name") in policy_references or
+		vault.name in policy_references
+}
+
+vault_has_compliant_policy = func(vault, vault_policies) {
 	# Find policy for this vault
 	for vault_policies as _, policy {
-		policy_vault_name = maps.get(policy.values, "backup_vault_name", "")
-		if policy_vault_name is vault_name {
+		if policy_matches_vault(policy, vault) {
 			# Found policy for this vault, check if it has required Deny statements
-			policy_json = maps.get(policy.values, "policy", "")
+			policy_json = maps.get(policy, "config.policy.constant_value", "")
 			if policy_json is "" {
 				return false
 			}
@@ -185,16 +209,17 @@ vault_has_compliant_policy = func(vault_name, vault_policies) {
 }
 
 # Variables
-backup_vaults = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_vault).resources
-vault_policies = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_vault_policy).resources
+planned_resources = tf.plan(tfplan.planned_values.resources)
+config_resources = tf.config(tfconfig.resources)
+backup_vaults = config_resources.type(const.resource_backup_vault).resources
+vault_policies = config_resources.type(const.resource_backup_vault_policy).resources
 
 violations = collection.reject(backup_vaults, func(vault) {
-	vault_name = maps.get(vault.values, "name", "")
-	return vault_has_compliant_policy(vault_name, vault_policies)
+	return vault_has_compliant_policy(vault, vault_policies)
 })
 
 generate_violation_message = func(vault) {
-	vault_name = maps.get(vault.values, "name", "")
+	vault_name = maps.get(vault, "config.name.constant_value", "")
 	return "Backup vault '" + vault.address + "' (name: " + vault_name + ") does not have a compliant resource-based policy. " +
 		"Backup vault must have a resource-based policy with Deny statements for backup:DeleteRecoveryPoint, " +
 		"backup:UpdateRecoveryPointLifecycle, and backup:PutBackupVaultAccessPolicy to prevent manual deletion of recovery points. " +

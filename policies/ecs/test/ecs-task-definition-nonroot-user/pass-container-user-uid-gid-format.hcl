@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-container-user-uid-gid-format.sentinel"
+    source = "./mocks/policy-success-container-user-uid-gid-format/mock-tfplan-v2.sentinel"
   }
 }
 

@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-secondary-artifacts-one-disabled.sentinel"
+    source = "./mocks/policy-failure-secondary-artifacts-one-disabled/mock-tfplan-v2.sentinel"
   }
 }
 

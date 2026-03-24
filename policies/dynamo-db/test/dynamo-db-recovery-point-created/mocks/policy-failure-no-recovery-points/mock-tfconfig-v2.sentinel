@@ -1,0 +1,40 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_dynamodb_table.no_backup": {
+		"address": "aws_dynamodb_table.no_backup",
+		"config": {
+			"billing_mode": {
+				"constant_value": "PAY_PER_REQUEST",
+			},
+			"hash_key": {
+				"constant_value": "id",
+			},
+			"name": {
+				"constant_value": "no-backup-table",
+			},
+			"point_in_time_recovery": [
+				{
+					"enabled": {
+						"constant_value": false,
+					},
+				},
+			],
+			"tags": {
+				"constant_value": {
+					"Name": "no-backup-table",
+				},
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "no_backup",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_dynamodb_table",
+	},
+}

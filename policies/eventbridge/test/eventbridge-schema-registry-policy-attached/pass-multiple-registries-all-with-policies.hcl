@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-multiple-registries-all-with-policies.sentinel"
+    source = "./mocks/policy-success-multiple-registries-all-with-policies/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-multiple-registries-all-with-policies/mock-tfconfig-v2.sentinel"
   }
 }
 

@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-advanced-event-selectors-all-s3.sentinel"
+    source = "./mocks/policy-success-advanced-event-selectors-all-s3/mock-tfplan-v2.sentinel"
   }
 }
 

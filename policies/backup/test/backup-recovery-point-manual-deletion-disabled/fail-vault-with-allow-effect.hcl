@@ -3,7 +3,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-vault-with-allow-effect.sentinel"
+    source = "./mocks/policy-failure-vault-with-allow-effect/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-vault-with-allow-effect/mock-tfconfig-v2.sentinel"
   }
 }
 

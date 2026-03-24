@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-efs-tag-based-backup-selection.sentinel"
+    source = "./mocks/policy-success-efs-tag-based-backup-selection/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-efs-tag-based-backup-selection/mock-tfconfig-v2.sentinel"
   }
 }
 

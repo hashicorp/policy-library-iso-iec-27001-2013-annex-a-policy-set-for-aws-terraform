@@ -3,7 +3,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-vault-missing-delete-action.sentinel"
+    source = "./mocks/policy-failure-vault-missing-delete-action/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-vault-missing-delete-action/mock-tfconfig-v2.sentinel"
   }
 }
 

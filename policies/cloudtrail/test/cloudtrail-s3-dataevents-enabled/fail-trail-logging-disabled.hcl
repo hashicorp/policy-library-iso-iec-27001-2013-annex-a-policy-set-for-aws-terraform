@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-trail-logging-disabled.sentinel"
+    source = "./mocks/policy-failure-trail-logging-disabled/mock-tfplan-v2.sentinel"
   }
 }
 

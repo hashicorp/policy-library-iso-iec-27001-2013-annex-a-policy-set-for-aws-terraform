@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-instance-requirements-rebalance-enabled.sentinel"
+    source = "./mocks/policy-success-instance-requirements-rebalance-enabled/mock-tfplan-v2.sentinel"
   }
 }
 

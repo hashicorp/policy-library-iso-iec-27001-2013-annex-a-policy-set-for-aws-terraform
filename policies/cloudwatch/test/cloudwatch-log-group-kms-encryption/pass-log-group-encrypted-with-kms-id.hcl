@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-log-group-encrypted-with-kms-id.sentinel"
+    source = "./mocks/policy-success-log-group-encrypted-with-kms-id/mock-tfplan-v2.sentinel"
   }
 }
 

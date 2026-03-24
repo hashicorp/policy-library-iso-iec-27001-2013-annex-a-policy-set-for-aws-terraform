@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-unattached-security-group.sentinel"
+    source = "./mocks/policy-failure-unattached-security-group/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-unattached-security-group/mock-tfconfig-v2.sentinel"
   }
 }
 

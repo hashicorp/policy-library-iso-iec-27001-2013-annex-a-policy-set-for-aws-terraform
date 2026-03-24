@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-exempted-privileged-project.sentinel"
+    source = "./mocks/policy-success-exempted-privileged-project/mock-tfplan-v2.sentinel"
   }
 }
 

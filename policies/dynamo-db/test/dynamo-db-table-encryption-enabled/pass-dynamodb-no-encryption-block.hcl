@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-dynamodb-no-encryption-block.sentinel"
+    source = "./mocks/policy-success-dynamodb-no-encryption-block/mock-tfplan-v2.sentinel"
   }
 }
 

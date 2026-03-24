@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-dynamodb-sse-disabled.sentinel"
+    source = "./mocks/policy-failure-dynamodb-sse-disabled/mock-tfplan-v2.sentinel"
   }
 }
 

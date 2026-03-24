@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-all-artifacts-and-secondary-encrypted.sentinel"
+    source = "./mocks/policy-success-all-artifacts-and-secondary-encrypted/mock-tfplan-v2.sentinel"
   }
 }
 

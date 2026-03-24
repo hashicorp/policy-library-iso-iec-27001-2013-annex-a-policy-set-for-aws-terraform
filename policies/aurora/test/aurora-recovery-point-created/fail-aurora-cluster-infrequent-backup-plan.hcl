@@ -3,7 +3,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-aurora-cluster-infrequent-backup-plan.sentinel"
+    source = "./mocks/policy-failure-aurora-cluster-infrequent-backup-plan/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-aurora-cluster-infrequent-backup-plan/mock-tfconfig-v2.sentinel"
   }
 }
 

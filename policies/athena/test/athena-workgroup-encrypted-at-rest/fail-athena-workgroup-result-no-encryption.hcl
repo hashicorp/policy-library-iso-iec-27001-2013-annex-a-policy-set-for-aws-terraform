@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-athena-workgroup-result-no-encryption.sentinel"
+    source = "./mocks/policy-fail-athena-workgroup-result-no-encryption/mock-tfplan-v2.sentinel"
   }
 }
 

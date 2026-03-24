@@ -1,0 +1,50 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_backup_vault.example": {
+		"address": "aws_backup_vault.example",
+		"config": {
+			"kms_key_arn": {
+				"constant_value": "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+			},
+			"name": {
+				"constant_value": "example-backup-vault",
+			},
+			"tags": {
+				"constant_value": {
+					"Environment": "production",
+				},
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_vault",
+	},
+	"aws_backup_vault_policy.example": {
+		"address": "aws_backup_vault_policy.example",
+		"config": {
+			"backup_vault_name": {
+				"constant_value": "example-backup-vault",
+			},
+			"policy": {
+				"constant_value": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"PreventManualDeletion\",\"Effect\":\"Deny\",\"Principal\":\"*\",\"Action\":[\"backup:DeleteRecoveryPoint\",\"backup:UpdateRecoveryPointLifecycle\",\"backup:PutBackupVaultAccessPolicy\"],\"Resource\":\"*\"}]}",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_vault_policy",
+	},
+}

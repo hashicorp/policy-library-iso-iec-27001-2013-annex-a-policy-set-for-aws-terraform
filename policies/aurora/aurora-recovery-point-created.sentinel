@@ -6,6 +6,7 @@
 
 # Imports
 import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
@@ -48,8 +49,10 @@ const = {
 	"resource_aws_rds_cluster":      "aws_rds_cluster",
 	"backup_retention_period":       "backup_retention_period",
 	"cluster_identifier":            "cluster_identifier",
+	"constant_value":                "constant_value",
 	"engine":                        "engine",
 	"plan_id":                       "plan_id",
+	"references":                    "references",
 	"resources":                     "resources",
 	"rule":                          "rule",
 	"schedule":                      "schedule",
@@ -57,13 +60,30 @@ const = {
 }
 
 # Functions
+get_config_attribute = func(res, attr) {
+	return maps.get(res, "config." + attr, {})
+}
+
+get_constant_value = func(attr, fallback) {
+	return maps.get(attr, const.constant_value, fallback)
+}
+
+get_references = func(attr) {
+	refs = maps.get(attr, const.references, [])
+	if length(refs) > 0 {
+		return refs
+	}
+
+	return maps.get(attr, const.constant_value, [])
+}
+
 # Check if resource matches the specified resourceId filter
 matches_resource_id = func(res) {
 	if resourceId is "" {
 		return true
 	}
 
-	cluster_id = maps.get(res.values, "cluster_identifier", "")
+	cluster_id = maps.get(res, "config.cluster_identifier.constant_value", "")
 	return cluster_id is resourceId
 }
 
@@ -75,7 +95,7 @@ matches_resource_tags = func(res) {
 
 	# Parse the resourceTags JSON string
 	filter_tags = json.unmarshal(resourceTags)
-	resource_tags = maps.get(res.values, "tags", {})
+	resource_tags = maps.get(res, "config.tags.constant_value", {})
 
 	# Check if all filter tags match
 	for filter_tags as tag_key, tag_value {
@@ -89,7 +109,7 @@ matches_resource_tags = func(res) {
 }
 
 is_aurora_cluster = func(res) {
-	engine = maps.get(res.values, const.engine, "")
+	engine = maps.get(res, "config." + const.engine + "." + const.constant_value, "")
 	return strings.has_prefix(engine, "aurora")
 }
 
@@ -151,20 +171,20 @@ get_backup_frequency_hours = func(schedule) {
 }
 
 has_backup_enabled = func(res) {
-	backup_retention = maps.get(res.values, const.backup_retention_period, 0)
+	backup_retention = maps.get(res, "config." + const.backup_retention_period + "." + const.constant_value, 0)
 	required_retention = get_required_retention_days()
 	return backup_retention >= required_retention
 }
 
 is_backup_plan_compliant = func(plan_res) {
-	rules_list = maps.get(plan_res.values, const.rule, [])
+	rules_list = maps.get(plan_res, "config." + const.rule, [])
 	if length(rules_list) is 0 {
 		return false
 	}
 
 	required_hours = get_required_hours()
 	for rules_list as _, backup_rule {
-		schedule = maps.get(backup_rule, const.schedule, "")
+		schedule = maps.get(backup_rule, const.schedule + "." + const.constant_value, "")
 		if schedule is not "" {
 			frequency = get_backup_frequency_hours(schedule)
 			if frequency <= required_hours {
@@ -177,20 +197,20 @@ is_backup_plan_compliant = func(plan_res) {
 }
 
 selection_matches_cluster_tags = func(selection_res, cluster_res) {
-	selection_tags = maps.get(selection_res.values, const.selection_tag, [])
+	selection_tags = maps.get(selection_res, "config." + const.selection_tag, [])
 	if length(selection_tags) is 0 {
 		return false
 	}
 
-	cluster_tags = maps.get(cluster_res.values, "tags", {})
+	cluster_tags = maps.get(cluster_res, "config.tags.constant_value", {})
 	if length(cluster_tags) is 0 {
 		return false
 	}
 
 	for selection_tags as _, selection_tag {
-		tag_key = maps.get(selection_tag, "key", "")
-		tag_value = maps.get(selection_tag, "value", "")
-		tag_type = maps.get(selection_tag, "type", "STRINGEQUALS")
+		tag_key = maps.get(selection_tag, "key." + const.constant_value, "")
+		tag_value = maps.get(selection_tag, "value." + const.constant_value, "")
+		tag_type = maps.get(selection_tag, "type." + const.constant_value, "STRINGEQUALS")
 
 		if tag_type is not "STRINGEQUALS" {
 			return false
@@ -205,10 +225,10 @@ selection_matches_cluster_tags = func(selection_res, cluster_res) {
 }
 
 selection_references_cluster = func(selection_res, cluster_res) {
-	resources_list = maps.get(selection_res.values, const.resources, [])
+	resources_list = get_references(get_config_attribute(selection_res, const.resources))
 	cluster_address = cluster_res.address
 	cluster_name = cluster_res.name
-	cluster_identifier = maps.get(cluster_res.values, const.cluster_identifier, "")
+	cluster_identifier = maps.get(cluster_res, "config." + const.cluster_identifier + "." + const.constant_value, "")
 
 	for resources_list as _, resource_ref {
 		ref = string(resource_ref)
@@ -237,11 +257,21 @@ selection_references_cluster = func(selection_res, cluster_res) {
 }
 
 selection_has_compliant_plan = func(selection_res, backup_plans) {
-	plan_id = maps.get(selection_res.values, const.plan_id, "")
-	if plan_id is not "" {
+	plan_id_attr = get_config_attribute(selection_res, const.plan_id)
+	plan_id = get_constant_value(plan_id_attr, "")
+	plan_references = get_references(plan_id_attr)
+
+	if plan_id is not "" or length(plan_references) > 0 {
 		for backup_plans as _, plan_res {
 			plan_name = plan_res.name
-			if plan_id is plan_res.address or plan_id is plan_name or strings.has_suffix(plan_id, "." + plan_name) {
+			plan_display_name = maps.get(plan_res, "config.name.constant_value", "")
+
+			if plan_id is plan_res.address or
+				plan_id is plan_name or
+				plan_id is plan_display_name or
+				strings.has_suffix(plan_id, "." + plan_name) or
+				plan_res.address in plan_references or
+				(plan_res.address + ".id") in plan_references {
 				return is_backup_plan_compliant(plan_res)
 			}
 		}
@@ -273,7 +303,7 @@ is_cluster_compliant = func(cluster_res, backup_selections, backup_plans) {
 }
 
 generate_violation_message = func(violation) {
-	backup_retention = maps.get(violation.values, const.backup_retention_period, 0)
+	backup_retention = maps.get(violation, "config." + const.backup_retention_period + "." + const.constant_value, 0)
 	required_retention = get_required_retention_days()
 	age_description = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
 
@@ -285,9 +315,11 @@ generate_violation_message = func(violation) {
 }
 
 # Variables
-rds_clusters = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_rds_cluster).resources
-backup_plans = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_plan).resources
-backup_selections = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_selection).resources
+planned_resources = tf.plan(tfplan.planned_values.resources)
+config_resources = tf.config(tfconfig.resources)
+rds_clusters = config_resources.type(const.resource_aws_rds_cluster).resources
+backup_plans = config_resources.type(const.resource_aws_backup_plan).resources
+backup_selections = config_resources.type(const.resource_aws_backup_selection).resources
 
 # Filter Aurora clusters
 aurora_clusters = filter rds_clusters as _, res {

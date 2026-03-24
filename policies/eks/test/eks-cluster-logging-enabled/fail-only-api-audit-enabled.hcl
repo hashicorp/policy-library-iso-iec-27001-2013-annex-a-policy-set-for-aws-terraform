@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-only-api-audit-enabled.sentinel"
+    source = "./mocks/policy-failure-only-api-audit-enabled/mock-tfplan-v2.sentinel"
   }
 }
 

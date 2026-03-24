@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-management-events-not-included.sentinel"
+    source = "./mocks/policy-failure-management-events-not-included/mock-tfplan-v2.sentinel"
   }
 }
 

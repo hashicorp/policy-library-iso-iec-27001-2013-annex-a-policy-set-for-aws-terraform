@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-advanced-excludes-target-bucket.sentinel"
+    source = "./mocks/policy-failure-advanced-excludes-target-bucket/mock-tfplan-v2.sentinel"
   }
 }
 

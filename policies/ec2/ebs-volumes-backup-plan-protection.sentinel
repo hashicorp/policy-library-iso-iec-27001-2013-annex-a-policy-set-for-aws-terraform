@@ -6,6 +6,7 @@
 
 # Imports
 import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
@@ -18,10 +19,29 @@ const = {
 	"resource_aws_ebs_volume":       "aws_ebs_volume",
 	"resource_aws_backup_selection": "aws_backup_selection",
 	"message_no_backup":             "EBS volume is not protected by any backup plan. Ensure all EBS volumes are included in AWS Backup plans. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-in-backup-plan.html for more details.",
+	"constant_value":                "constant_value",
 	"condition":                     "condition",
 	"not_resources":                 "not_resources",
+	"references":                    "references",
 	"resources":                     "resources",
 	"selection_tag":                 "selection_tag",
+}
+
+get_config_attribute = func(res, attr) {
+	return maps.get(res, "config." + attr, {})
+}
+
+get_constant_value = func(attr, fallback) {
+	return maps.get(attr, const.constant_value, fallback)
+}
+
+get_list_values = func(attr) {
+	refs = maps.get(attr, const.references, [])
+	if length(refs) > 0 {
+		return refs
+	}
+
+	return maps.get(attr, const.constant_value, [])
 }
 
 # Functions
@@ -46,8 +66,8 @@ matches_ebs_volume_pattern = func(resource_ref) {
 
 matches_volume_reference = func(volume_res, resource_ref, all_ebs_volumes) {
 	volume_address = volume_res.address
-	volume_arn = maps.get(volume_res.values, "arn", "")
-	volume_id = maps.get(volume_res.values, "id", "")
+	volume_arn = maps.get(volume_res, "config.arn.constant_value", "")
+	volume_id = maps.get(volume_res, "config.id.constant_value", "")
 	volume_name = volume_res.name
 	ref_str = string(resource_ref)
 	ref_lower = strings.to_lower(ref_str)
@@ -127,9 +147,9 @@ wildcard_matches = func(value, pattern) {
 }
 
 generic_condition_matches = func(condition_entry, volume_tags) {
-	test_name = strings.to_lower(maps.get(condition_entry, "test", ""))
-	tag_key = condition_key_to_tag(maps.get(condition_entry, "variable", ""))
-	values = maps.get(condition_entry, "values", [])
+	test_name = strings.to_lower(maps.get(condition_entry, "test.constant_value", ""))
+	tag_key = condition_key_to_tag(maps.get(condition_entry, "variable.constant_value", ""))
+	values = maps.get(condition_entry, "values.constant_value", [])
 	actual_value = maps.get(volume_tags, tag_key, "")
 
 	if length(values) is 0 {
@@ -161,8 +181,8 @@ generic_condition_matches = func(condition_entry, volume_tags) {
 
 condition_entries_match = func(entries, volume_tags, operator) {
 	for entries as _, entry {
-		tag_key = condition_key_to_tag(maps.get(entry, "key", ""))
-		expected_value = maps.get(entry, "value", "")
+		tag_key = condition_key_to_tag(maps.get(entry, "key.constant_value", ""))
+		expected_value = maps.get(entry, "value.constant_value", "")
 		actual_value = maps.get(volume_tags, tag_key, "")
 
 		if operator is "string_equals" and actual_value is not expected_value {
@@ -186,12 +206,12 @@ condition_entries_match = func(entries, volume_tags, operator) {
 }
 
 selection_conditions_match = func(selection_res, volume_res) {
-	conditions = maps.get(selection_res.values, const.condition, [])
+	conditions = maps.get(selection_res, "config." + const.condition, [])
 	if length(conditions) is 0 {
 		return true
 	}
 
-	volume_tags = maps.get(volume_res.values, "tags", {})
+	volume_tags = maps.get(volume_res, "config.tags.constant_value", {})
 	if length(volume_tags) is 0 {
 		return false
 	}
@@ -227,7 +247,7 @@ selection_conditions_match = func(selection_res, volume_res) {
 
 # Check if EBS volume tags match backup selection tag criteria
 is_volume_protected_by_tags = func(volume_res, backup_selections) {
-	volume_tags = maps.get(volume_res.values, "tags", {})
+	volume_tags = maps.get(volume_res, "config.tags.constant_value", {})
 
 	if length(volume_tags) == 0 {
 		return false
@@ -235,16 +255,16 @@ is_volume_protected_by_tags = func(volume_res, backup_selections) {
 
 	# Check if any backup selection uses tag-based selection that matches this volume
 	for backup_selections as _, backup_res {
-		selection_tags = maps.get(backup_res.values, "selection_tag", [])
+		selection_tags = maps.get(backup_res, "config." + const.selection_tag, [])
 
 		if length(selection_tags) > 0 {
 			# Check if all selection tags match the volume tags
 			all_tags_match = true
 
 			for selection_tags as _, sel_tag {
-				tag_key = maps.get(sel_tag, "key", "")
-				tag_value = maps.get(sel_tag, "value", "")
-				tag_type = maps.get(sel_tag, "type", "STRINGEQUALS")
+				tag_key = maps.get(sel_tag, "key.constant_value", "")
+				tag_value = maps.get(sel_tag, "value.constant_value", "")
+				tag_type = maps.get(sel_tag, "type.constant_value", "STRINGEQUALS")
 
 				# Get the volume's tag value for this key
 				volume_tag_value = maps.get(volume_tags, tag_key, "")
@@ -269,7 +289,8 @@ is_volume_protected_by_tags = func(volume_res, backup_selections) {
 }
 
 selection_excludes_volume = func(volume_res, selection_res, all_ebs_volumes) {
-	not_resources = maps.get(selection_res.values, const.not_resources, [])
+	not_resources_attr = get_config_attribute(selection_res, const.not_resources)
+	not_resources = get_list_values(not_resources_attr)
 	for not_resources as _, resource_ref {
 		if matches_volume_reference(volume_res, resource_ref, all_ebs_volumes) {
 			return true
@@ -284,10 +305,11 @@ selection_covers_volume = func(volume_res, selection_res, all_ebs_volumes, backu
 		return false
 	}
 
-	resources_list = maps.get(selection_res.values, const.resources, [])
+	resources_attr = get_config_attribute(selection_res, const.resources)
+	resources_list = get_list_values(resources_attr)
 	selection_has_resources = length(resources_list) > 0
-	selection_has_tags = length(maps.get(selection_res.values, const.selection_tag, [])) > 0
-	selection_has_conditions = length(maps.get(selection_res.values, const.condition, [])) > 0
+	selection_has_tags = length(maps.get(selection_res, "config." + const.selection_tag, [])) > 0
+	selection_has_conditions = length(maps.get(selection_res, "config." + const.condition, [])) > 0
 
 	if not selection_has_resources and not selection_has_tags and not selection_has_conditions {
 		return false
@@ -324,8 +346,10 @@ volume_has_backup_selection = func(volume_res, backup_selection_resources, all_e
 }
 
 # Variables
-ebs_volume_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_ebs_volume).resources
-backup_selection_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_backup_selection).resources
+planned_resources = tf.plan(tfplan.planned_values.resources)
+config_resources = tf.config(tfconfig.resources)
+ebs_volume_resources = config_resources.type(const.resource_aws_ebs_volume).resources
+backup_selection_resources = config_resources.type(const.resource_aws_backup_selection).resources
 
 # Identify violations: EBS volumes not protected by any backup plan
 violations = filter ebs_volume_resources as _, volume_res {

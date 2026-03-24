@@ -1,0 +1,33 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_dynamodb_table.example": {
+		"address": "aws_dynamodb_table.example",
+		"config": {
+			"billing_mode": {
+				"constant_value": "PAY_PER_REQUEST",
+			},
+			"hash_key": {
+				"constant_value": "id",
+			},
+			"name": {
+				"constant_value": "example-table",
+			},
+			"tags": {
+				"constant_value": {
+					"Environment": "production",
+				},
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_dynamodb_table",
+	},
+}

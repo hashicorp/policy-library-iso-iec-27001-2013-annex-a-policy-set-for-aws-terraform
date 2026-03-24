@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-multiple-containers-all-nonroot.sentinel"
+    source = "./mocks/policy-success-multiple-containers-all-nonroot/mock-tfplan-v2.sentinel"
   }
 }
 

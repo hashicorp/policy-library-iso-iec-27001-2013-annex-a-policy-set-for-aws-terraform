@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-athena-workgroup-result-config-sse-s3.sentinel"
+    source = "./mocks/policy-pass-athena-workgroup-result-config-sse-s3/mock-tfplan-v2.sentinel"
   }
 }
 

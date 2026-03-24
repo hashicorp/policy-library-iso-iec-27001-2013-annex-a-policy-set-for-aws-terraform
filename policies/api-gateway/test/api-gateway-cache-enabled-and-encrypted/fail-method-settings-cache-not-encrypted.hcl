@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-method-settings-cache-not-encrypted.sentinel"
+    source = "./mocks/policy-failure-method-settings-cache-not-encrypted/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-method-settings-cache-not-encrypted/mock-tfconfig-v2.sentinel"
   }
 }
 

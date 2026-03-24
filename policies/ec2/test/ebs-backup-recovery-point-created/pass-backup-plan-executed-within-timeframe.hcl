@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-backup-plan-executed-within-timeframe.sentinel"
+    source = "./mocks/policy-success-backup-plan-executed-within-timeframe/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-backup-plan-executed-within-timeframe/mock-tfconfig-v2.sentinel"
   }
 }
 

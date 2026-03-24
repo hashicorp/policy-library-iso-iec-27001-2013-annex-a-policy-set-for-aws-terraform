@@ -1,0 +1,31 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_default_security_group.default": {
+		"address": "aws_default_security_group.default",
+		"config": {
+			"description": {
+				"constant_value": "Default security group",
+			},
+			"id": {
+				"constant_value": "sg-default123456",
+			},
+			"name": {
+				"constant_value": "default",
+			},
+			"vpc_id": {
+				"constant_value": "vpc-12345678",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "default",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_default_security_group",
+	},
+}

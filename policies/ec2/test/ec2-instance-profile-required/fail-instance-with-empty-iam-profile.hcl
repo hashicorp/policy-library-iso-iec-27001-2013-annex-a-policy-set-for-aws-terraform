@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-instance-with-empty-iam-profile.sentinel"
+    source = "./mocks/policy-failure-instance-with-empty-iam-profile/mock-tfplan-v2.sentinel"
   }
 }
 

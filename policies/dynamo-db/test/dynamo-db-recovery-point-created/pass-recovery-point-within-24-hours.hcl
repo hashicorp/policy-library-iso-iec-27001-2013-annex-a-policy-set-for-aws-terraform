@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-recovery-point-within-24-hours.sentinel"
+    source = "./mocks/policy-success-recovery-point-within-24-hours/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-recovery-point-within-24-hours/mock-tfconfig-v2.sentinel"
   }
 }
 

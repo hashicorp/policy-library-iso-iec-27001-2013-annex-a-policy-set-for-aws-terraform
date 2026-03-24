@@ -1,0 +1,64 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_ebs_volume.example": {
+		"address": "aws_ebs_volume.example",
+		"config": {
+			"availability_zone": {
+				"constant_value": "us-east-1a",
+			},
+			"encrypted": {
+				"constant_value": true,
+			},
+			"size": {
+				"constant_value": 100,
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "example-volume",
+				},
+			},
+			"type": {
+				"constant_value": "gp3",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_ebs_volume",
+	},
+	"aws_backup_selection.example": {
+		"address": "aws_backup_selection.example",
+		"config": {
+			"iam_role_arn": {
+				"constant_value": "arn:aws:iam::123456789012:role/backup-role",
+			},
+			"name": {
+				"constant_value": "example-backup-selection",
+			},
+			"plan_id": {
+				"constant_value": "backup-plan-id",
+			},
+			"resources": {
+				"constant_value": [
+					"arn:aws:ec2:us-east-1:123456789012:volume/vol-12345678",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+}

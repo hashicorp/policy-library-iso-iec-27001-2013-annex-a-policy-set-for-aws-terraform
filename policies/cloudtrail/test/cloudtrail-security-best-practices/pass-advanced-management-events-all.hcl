@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-advanced-management-events-all.sentinel"
+    source = "./mocks/policy-success-advanced-management-events-all/mock-tfplan-v2.sentinel"
   }
 }
 

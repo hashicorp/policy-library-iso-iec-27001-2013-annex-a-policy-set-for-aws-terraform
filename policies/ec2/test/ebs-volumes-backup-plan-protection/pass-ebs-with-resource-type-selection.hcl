@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-ebs-with-resource-type-selection.sentinel"
+    source = "./mocks/policy-success-ebs-with-resource-type-selection/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-ebs-with-resource-type-selection/mock-tfconfig-v2.sentinel"
   }
 }
 

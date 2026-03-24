@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-log-group-without-kms-key.sentinel"
+    source = "./mocks/policy-failure-log-group-without-kms-key/mock-tfplan-v2.sentinel"
   }
 }
 

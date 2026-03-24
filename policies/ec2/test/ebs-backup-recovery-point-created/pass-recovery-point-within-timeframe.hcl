@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-recovery-point-within-timeframe.sentinel"
+    source = "./mocks/policy-success-recovery-point-within-timeframe/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-recovery-point-within-timeframe/mock-tfconfig-v2.sentinel"
   }
 }
 

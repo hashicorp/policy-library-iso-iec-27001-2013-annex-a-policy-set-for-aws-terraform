@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-no-backup-selection.sentinel"
+    source = "./mocks/policy-failure-no-backup-selection/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-no-backup-selection/mock-tfconfig-v2.sentinel"
   }
 }
 

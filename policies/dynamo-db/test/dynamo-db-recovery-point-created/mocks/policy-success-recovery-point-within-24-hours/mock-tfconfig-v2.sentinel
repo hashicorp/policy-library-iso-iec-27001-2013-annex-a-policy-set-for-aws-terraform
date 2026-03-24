@@ -1,0 +1,95 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_dynamodb_table.example": {
+		"address": "aws_dynamodb_table.example",
+		"config": {
+			"billing_mode": {
+				"constant_value": "PAY_PER_REQUEST",
+			},
+			"hash_key": {
+				"constant_value": "id",
+			},
+			"name": {
+				"constant_value": "example-table",
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "example-table",
+				},
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_dynamodb_table",
+	},
+	"aws_backup_plan.example": {
+		"address": "aws_backup_plan.example",
+		"config": {
+			"name": {
+				"constant_value": "example-backup-plan",
+			},
+			"rule": [
+				{
+					"lifecycle": [
+						{
+							"delete_after": {
+								"constant_value": 30,
+							},
+						},
+					],
+					"rule_name": {
+						"constant_value": "daily-backup",
+					},
+					"schedule": {
+						"constant_value": "cron(0 12 * * ? *)",
+					},
+				},
+			],
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_plan",
+	},
+	"aws_backup_selection.example": {
+		"address": "aws_backup_selection.example",
+		"config": {
+			"name": {
+				"constant_value": "example-backup-selection",
+			},
+			"plan_id": {
+				"references": [
+					"aws_backup_plan.example.id",
+					"aws_backup_plan.example",
+				],
+			},
+			"resources": {
+				"constant_value": [
+					"arn:aws:dynamodb:us-east-1:123456789012:table/example-table",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+}

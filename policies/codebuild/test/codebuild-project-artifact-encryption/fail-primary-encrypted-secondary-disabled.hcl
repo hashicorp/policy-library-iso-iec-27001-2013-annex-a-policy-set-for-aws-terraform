@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-primary-encrypted-secondary-disabled.sentinel"
+    source = "./mocks/policy-failure-primary-encrypted-secondary-disabled/mock-tfplan-v2.sentinel"
   }
 }
 

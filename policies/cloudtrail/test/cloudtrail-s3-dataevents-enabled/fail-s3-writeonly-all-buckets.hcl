@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-s3-writeonly-all-buckets.sentinel"
+    source = "./mocks/policy-failure-s3-writeonly-all-buckets/mock-tfplan-v2.sentinel"
   }
 }
 

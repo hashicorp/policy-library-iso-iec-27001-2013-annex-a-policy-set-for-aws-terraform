@@ -3,7 +3,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-aurora-cluster-high-retention.sentinel"
+    source = "./mocks/policy-success-aurora-cluster-high-retention/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-aurora-cluster-high-retention/mock-tfconfig-v2.sentinel"
   }
 }
 

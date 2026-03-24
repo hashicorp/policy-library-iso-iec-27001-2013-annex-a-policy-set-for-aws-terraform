@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-instance-with-profile-name.sentinel"
+    source = "./mocks/policy-success-instance-with-profile-name/mock-tfplan-v2.sentinel"
   }
 }
 

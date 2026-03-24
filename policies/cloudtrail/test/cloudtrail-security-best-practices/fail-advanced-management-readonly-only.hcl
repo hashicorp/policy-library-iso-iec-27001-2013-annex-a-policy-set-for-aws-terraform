@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-advanced-management-readonly-only.sentinel"
+    source = "./mocks/policy-failure-advanced-management-readonly-only/mock-tfplan-v2.sentinel"
   }
 }
 

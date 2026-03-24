@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-split-read-write-selectors.sentinel"
+    source = "./mocks/policy-success-split-read-write-selectors/mock-tfplan-v2.sentinel"
   }
 }
 

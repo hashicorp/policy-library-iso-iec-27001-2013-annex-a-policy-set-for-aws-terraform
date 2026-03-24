@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-single-instance-type-rebalance-disabled.sentinel"
+    source = "./mocks/policy-success-single-instance-type-rebalance-disabled/mock-tfplan-v2.sentinel"
   }
 }
 

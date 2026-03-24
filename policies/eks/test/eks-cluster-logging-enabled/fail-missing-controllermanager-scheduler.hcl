@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-missing-controllermanager-scheduler.sentinel"
+    source = "./mocks/policy-failure-missing-controllermanager-scheduler/mock-tfplan-v2.sentinel"
   }
 }
 

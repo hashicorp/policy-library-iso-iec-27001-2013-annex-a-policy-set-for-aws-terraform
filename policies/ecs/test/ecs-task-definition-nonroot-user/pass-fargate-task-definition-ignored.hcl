@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-fargate-task-definition-ignored.sentinel"
+    source = "./mocks/policy-success-fargate-task-definition-ignored/mock-tfplan-v2.sentinel"
   }
 }
 

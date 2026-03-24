@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-athena-workgroup-managed-query-results-kms.sentinel"
+    source = "./mocks/policy-pass-athena-workgroup-managed-query-results-kms/mock-tfplan-v2.sentinel"
   }
 }
 

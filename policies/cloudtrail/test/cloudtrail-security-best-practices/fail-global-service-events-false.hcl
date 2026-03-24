@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-global-service-events-false.sentinel"
+    source = "./mocks/policy-failure-global-service-events-false/mock-tfplan-v2.sentinel"
   }
 }
 

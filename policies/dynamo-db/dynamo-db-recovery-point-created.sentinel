@@ -6,6 +6,7 @@
 
 # Imports
 import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
@@ -46,24 +47,43 @@ const = {
 	"resource_dynamodb_table":   "aws_dynamodb_table",
 	"resource_backup_plan":      "aws_backup_plan",
 	"resource_backup_selection": "aws_backup_selection",
-	"name":                   "name",
-	"plan_id":                "plan_id",
-	"point_in_time_recovery": "point_in_time_recovery",
-	"resources":              "resources",
-	"rule":                   "rule",
-	"schedule":               "schedule",
-	"selection_tag":          "selection_tag",
-	"enabled":                "enabled",
+	"constant_value":          "constant_value",
+	"enabled":                 "enabled",
+	"name":                    "name",
+	"plan_id":                 "plan_id",
+	"point_in_time_recovery":  "point_in_time_recovery",
+	"references":              "references",
+	"resources":               "resources",
+	"rule":                    "rule",
+	"schedule":                "schedule",
+	"selection_tag":           "selection_tag",
 }
 
 # Functions
+get_config_attribute = func(res, attr) {
+	return maps.get(res, "config." + attr, {})
+}
+
+get_constant_value = func(attr, fallback) {
+	return maps.get(attr, const.constant_value, fallback)
+}
+
+get_list_values = func(attr) {
+	refs = maps.get(attr, const.references, [])
+	if length(refs) > 0 {
+		return refs
+	}
+
+	return maps.get(attr, const.constant_value, [])
+}
+
 # Check if resource matches the specified resourceId filter
 matches_resource_id = func(res) {
 	if resourceId is "" {
 		return true
 	}
 
-	table_name = maps.get(res.values, "name", "")
+	table_name = maps.get(res, "config.name.constant_value", "")
 	return table_name is resourceId
 }
 
@@ -75,7 +95,7 @@ matches_resource_tags = func(res) {
 
 	# Parse the resourceTags JSON string
 	filter_tags = json.unmarshal(resourceTags)
-	resource_tags = maps.get(res.values, "tags", {})
+	resource_tags = maps.get(res, "config.tags.constant_value", {})
 
 	# Check if all filter tags match
 	for filter_tags as tag_key, tag_value {
@@ -111,14 +131,14 @@ generate_violation_message = func(violation) {
 
 # Check if point-in-time recovery is enabled for the DynamoDB table
 is_pitr_enabled = func(res) {
-	pitr_blocks = maps.get(res.values, const.point_in_time_recovery, [])
+	pitr_blocks = maps.get(res, "config." + const.point_in_time_recovery, [])
 	if length(pitr_blocks) == 0 {
 		return false
 	}
 
 	# Check if any PITR block has enabled set to true
 	for pitr_blocks as pitr_block {
-		if maps.get(pitr_block, const.enabled, false) is true {
+		if maps.get(pitr_block, const.enabled + "." + const.constant_value, false) is true {
 			return true
 		}
 	}
@@ -180,14 +200,14 @@ get_backup_frequency_hours = func(schedule) {
 }
 
 is_backup_plan_compliant = func(plan_res) {
-	rules_list = maps.get(plan_res.values, const.rule, [])
+	rules_list = maps.get(plan_res, "config." + const.rule, [])
 	if length(rules_list) is 0 {
 		return false
 	}
 
 	required_hours = get_required_hours()
 	for rules_list as _, backup_rule {
-		schedule = maps.get(backup_rule, const.schedule, "")
+		schedule = maps.get(backup_rule, const.schedule + "." + const.constant_value, "")
 		if schedule is not "" {
 			frequency = get_backup_frequency_hours(schedule)
 			if frequency <= required_hours {
@@ -200,20 +220,20 @@ is_backup_plan_compliant = func(plan_res) {
 }
 
 selection_matches_table_tags = func(selection_res, table_res) {
-	selection_tags = maps.get(selection_res.values, const.selection_tag, [])
+	selection_tags = maps.get(selection_res, "config." + const.selection_tag, [])
 	if length(selection_tags) is 0 {
 		return false
 	}
 
-	table_tags = maps.get(table_res.values, "tags", {})
+	table_tags = maps.get(table_res, "config.tags.constant_value", {})
 	if length(table_tags) is 0 {
 		return false
 	}
 
 	for selection_tags as _, selection_tag {
-		tag_key = maps.get(selection_tag, "key", "")
-		tag_value = maps.get(selection_tag, "value", "")
-		tag_type = maps.get(selection_tag, "type", "STRINGEQUALS")
+		tag_key = maps.get(selection_tag, "key." + const.constant_value, "")
+		tag_value = maps.get(selection_tag, "value." + const.constant_value, "")
+		tag_type = maps.get(selection_tag, "type." + const.constant_value, "STRINGEQUALS")
 
 		if tag_type is not "STRINGEQUALS" {
 			return false
@@ -228,10 +248,11 @@ selection_matches_table_tags = func(selection_res, table_res) {
 }
 
 selection_references_table = func(selection_res, table_res) {
-	resources_list = maps.get(selection_res.values, const.resources, [])
+	resources_attr = get_config_attribute(selection_res, const.resources)
+	resources_list = get_list_values(resources_attr)
 	table_address = table_res.address
 	table_name = table_res.name
-	table_identifier = maps.get(table_res.values, const.name, "")
+	table_identifier = maps.get(table_res, "config." + const.name + "." + const.constant_value, "")
 
 	for resources_list as _, resource_ref {
 		ref = string(resource_ref)
@@ -260,15 +281,19 @@ selection_references_table = func(selection_res, table_res) {
 }
 
 selection_has_compliant_plan = func(selection_res, backup_plans) {
-	plan_id = maps.get(selection_res.values, const.plan_id, "")
+	plan_id_attr = get_config_attribute(selection_res, const.plan_id)
+	plan_id = get_constant_value(plan_id_attr, "")
+	plan_references = maps.get(plan_id_attr, const.references, [])
 	if plan_id is not "" {
 		for backup_plans as _, plan_res {
 			plan_name = plan_res.name
-			plan_display_name = maps.get(plan_res.values, const.name, "")
+			plan_display_name = maps.get(plan_res, "config." + const.name + "." + const.constant_value, "")
 			if plan_id is plan_res.address or
 				plan_id is plan_name or
 				plan_id is plan_display_name or
-				strings.has_suffix(plan_id, "." + plan_name) {
+				strings.has_suffix(plan_id, "." + plan_name) or
+				plan_res.address in plan_references or
+				(plan_res.address + ".id") in plan_references {
 				return is_backup_plan_compliant(plan_res)
 			}
 		}
@@ -304,9 +329,11 @@ is_backup_compliant = func(res, backup_plans, backup_selections) {
 }
 
 # Variables
-dynamodb_tables = tf.plan(tfplan.planned_values.resources).type(const.resource_dynamodb_table).resources
-backup_plans = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_plan).resources
-backup_selections = tf.plan(tfplan.planned_values.resources).type(const.resource_backup_selection).resources
+planned_resources = tf.plan(tfplan.planned_values.resources)
+config_resources = tf.config(tfconfig.resources)
+dynamodb_tables = config_resources.type(const.resource_dynamodb_table).resources
+backup_plans = config_resources.type(const.resource_backup_plan).resources
+backup_selections = config_resources.type(const.resource_backup_selection).resources
 
 # Apply resourceId filter if specified
 filtered_by_id = filter dynamodb_tables as _, res {

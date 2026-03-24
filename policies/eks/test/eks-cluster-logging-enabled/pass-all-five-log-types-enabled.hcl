@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-all-five-log-types-enabled.sentinel"
+    source = "./mocks/policy-success-all-five-log-types-enabled/mock-tfplan-v2.sentinel"
   }
 }
 

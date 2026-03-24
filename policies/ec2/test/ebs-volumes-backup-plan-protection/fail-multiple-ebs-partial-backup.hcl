@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-multiple-ebs-partial-backup.sentinel"
+    source = "./mocks/policy-failure-multiple-ebs-partial-backup/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-multiple-ebs-partial-backup/mock-tfconfig-v2.sentinel"
   }
 }
 

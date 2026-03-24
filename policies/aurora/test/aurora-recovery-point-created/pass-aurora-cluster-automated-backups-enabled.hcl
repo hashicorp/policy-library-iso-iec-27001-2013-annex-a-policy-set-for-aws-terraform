@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-aurora-cluster-automated-backups-enabled.sentinel"
+    source = "./mocks/policy-success-aurora-cluster-automated-backups-enabled/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-aurora-cluster-automated-backups-enabled/mock-tfconfig-v2.sentinel"
   }
 }
 

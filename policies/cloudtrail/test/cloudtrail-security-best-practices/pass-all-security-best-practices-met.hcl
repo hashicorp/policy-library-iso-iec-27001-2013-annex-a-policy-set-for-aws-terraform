@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-all-security-best-practices-met.sentinel"
+    source = "./mocks/policy-success-all-security-best-practices-met/mock-tfplan-v2.sentinel"
   }
 }
 

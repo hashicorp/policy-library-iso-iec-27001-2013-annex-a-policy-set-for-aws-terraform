@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-registry-with-valid-json-policy.sentinel"
+    source = "./mocks/policy-success-registry-with-valid-json-policy/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-registry-with-valid-json-policy/mock-tfconfig-v2.sentinel"
   }
 }
 

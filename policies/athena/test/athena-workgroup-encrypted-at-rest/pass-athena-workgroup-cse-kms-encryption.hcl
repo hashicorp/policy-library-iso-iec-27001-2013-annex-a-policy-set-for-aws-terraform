@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-athena-workgroup-cse-kms-encryption.sentinel"
+    source = "./mocks/policy-pass-athena-workgroup-cse-kms-encryption/mock-tfplan-v2.sentinel"
   }
 }
 

@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-method-settings-all-cached-encrypted.sentinel"
+    source = "./mocks/policy-success-method-settings-all-cached-encrypted/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-method-settings-all-cached-encrypted/mock-tfconfig-v2.sentinel"
   }
 }
 

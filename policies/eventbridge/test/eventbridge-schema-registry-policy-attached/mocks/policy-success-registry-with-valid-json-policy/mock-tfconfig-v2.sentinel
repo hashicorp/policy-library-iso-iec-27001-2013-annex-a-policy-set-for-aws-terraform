@@ -1,0 +1,45 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_schemas_registry.custom": {
+		"address": "aws_schemas_registry.custom",
+		"config": {
+			"description": {
+				"constant_value": "Custom EventBridge schema registry",
+			},
+			"name": {
+				"constant_value": "custom-event-registry",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "custom",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_schemas_registry",
+	},
+	"aws_schemas_registry_policy.custom": {
+		"address": "aws_schemas_registry_policy.custom",
+		"config": {
+			"policy": {
+				"constant_value": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Sid\":\"AllowAccessToRegistry\",\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::123456789012:user/admin\"},\"Action\":[\"schemas:DescribeRegistry\",\"schemas:ListSchemas\"],\"Resource\":\"arn:aws:schemas:us-east-1:123456789012:registry/custom-event-registry\"}]}",
+			},
+			"registry_name": {
+				"constant_value": "custom-event-registry",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "custom",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_schemas_registry_policy",
+	},
+}

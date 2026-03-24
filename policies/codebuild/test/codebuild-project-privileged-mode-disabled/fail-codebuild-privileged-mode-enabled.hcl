@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-codebuild-privileged-mode-enabled.sentinel"
+    source = "./mocks/policy-failure-codebuild-privileged-mode-enabled/mock-tfplan-v2.sentinel"
   }
 }
 

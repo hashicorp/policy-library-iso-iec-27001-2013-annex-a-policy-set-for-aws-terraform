@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-multiple-containers-one-root.sentinel"
+    source = "./mocks/policy-failure-multiple-containers-one-root/mock-tfplan-v2.sentinel"
   }
 }
 

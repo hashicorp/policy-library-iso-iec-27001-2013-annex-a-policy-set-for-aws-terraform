@@ -1,0 +1,97 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_efs_file_system.example": {
+		"address": "aws_efs_file_system.example",
+		"config": {
+			"arn": {
+				"constant_value": "arn:aws:elasticfilesystem:us-east-1:123456789012:file-system/fs-12345678",
+			},
+			"creation_token": {
+				"constant_value": "my-efs",
+			},
+			"encrypted": {
+				"constant_value": true,
+			},
+			"id": {
+				"constant_value": "fs-12345678",
+			},
+			"kms_key_id": {
+				"constant_value": "arn:aws:kms:us-east-1:123456789012:key/12345678-1234-1234-1234-123456789012",
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "example-efs",
+				},
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_efs_file_system",
+	},
+	"aws_backup_selection.example": {
+		"address": "aws_backup_selection.example",
+		"config": {
+			"name": {
+				"constant_value": "efs-backup-selection",
+			},
+			"plan_id": {
+				"references": [
+					"aws_backup_plan.example.id",
+					"aws_backup_plan.example",
+				],
+			},
+			"resources": {
+				"constant_value": [
+					"arn:aws:elasticfilesystem:us-east-1:123456789012:file-system/fs-12345678",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+	"aws_backup_plan.example": {
+		"address": "aws_backup_plan.example",
+		"config": {
+			"name": {
+				"constant_value": "efs-backup-plan",
+			},
+			"rule": [
+				{
+					"rule_name": {
+						"constant_value": "daily-backup",
+					},
+					"schedule": {
+						"constant_value": "cron(0 2 * * ? *)",
+					},
+					"target_vault_name": {
+						"constant_value": "Default",
+					},
+				},
+			],
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_plan",
+	},
+}

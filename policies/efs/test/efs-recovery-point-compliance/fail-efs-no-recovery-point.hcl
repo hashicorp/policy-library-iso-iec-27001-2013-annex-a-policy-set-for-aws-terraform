@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-efs-no-recovery-point.sentinel"
+    source = "./mocks/policy-failure-efs-no-recovery-point/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-efs-no-recovery-point/mock-tfconfig-v2.sentinel"
   }
 }
 

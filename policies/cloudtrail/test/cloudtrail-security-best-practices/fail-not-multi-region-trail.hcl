@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-not-multi-region-trail.sentinel"
+    source = "./mocks/policy-failure-not-multi-region-trail/mock-tfplan-v2.sentinel"
   }
 }
 

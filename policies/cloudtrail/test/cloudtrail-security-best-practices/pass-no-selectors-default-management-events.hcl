@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-no-selectors-default-management-events.sentinel"
+    source = "./mocks/policy-success-no-selectors-default-management-events/mock-tfplan-v2.sentinel"
   }
 }
 

@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-no-artifacts-ignores-encryption-flag.sentinel"
+    source = "./mocks/policy-success-no-artifacts-ignores-encryption-flag/mock-tfplan-v2.sentinel"
   }
 }
 

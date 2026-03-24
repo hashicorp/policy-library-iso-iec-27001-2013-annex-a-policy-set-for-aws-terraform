@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-empty-resource-list-implies-all.sentinel"
+    source = "./mocks/policy-success-empty-resource-list-implies-all/mock-tfplan-v2.sentinel"
   }
 }
 

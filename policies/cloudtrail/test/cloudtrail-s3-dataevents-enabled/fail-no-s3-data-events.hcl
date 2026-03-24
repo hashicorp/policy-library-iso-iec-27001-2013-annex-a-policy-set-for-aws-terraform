@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-no-s3-data-events.sentinel"
+    source = "./mocks/policy-failure-no-s3-data-events/mock-tfplan-v2.sentinel"
   }
 }
 

@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-instance-with-allowed-profile-arn-param.sentinel"
+    source = "./mocks/policy-success-instance-with-allowed-profile-arn-param/mock-tfplan-v2.sentinel"
   }
 }
 

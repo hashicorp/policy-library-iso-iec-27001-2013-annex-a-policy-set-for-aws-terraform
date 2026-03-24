@@ -4,7 +4,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-no-kms-key-id.sentinel"
+    source = "./mocks/policy-failure-no-kms-key-id/mock-tfplan-v2.sentinel"
   }
 }
 

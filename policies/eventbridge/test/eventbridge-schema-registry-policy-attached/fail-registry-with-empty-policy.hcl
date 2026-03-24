@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-registry-with-empty-policy.sentinel"
+    source = "./mocks/policy-failure-registry-with-empty-policy/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-registry-with-empty-policy/mock-tfconfig-v2.sentinel"
   }
 }
 

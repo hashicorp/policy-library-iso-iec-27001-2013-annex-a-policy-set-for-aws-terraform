@@ -3,7 +3,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-vault-with-complete-deny-policy.sentinel"
+    source = "./mocks/policy-success-vault-with-complete-deny-policy/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-vault-with-complete-deny-policy/mock-tfconfig-v2.sentinel"
   }
 }
 

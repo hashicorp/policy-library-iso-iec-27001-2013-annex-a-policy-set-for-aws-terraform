@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-excluded-by-not-resources.sentinel"
+    source = "./mocks/policy-failure-excluded-by-not-resources/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-excluded-by-not-resources/mock-tfconfig-v2.sentinel"
   }
 }
 

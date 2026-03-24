@@ -4,7 +4,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/pass/pass-ebs-with-condition-based-backup.sentinel"
+    source = "./mocks/policy-success-ebs-with-condition-based-backup/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-success-ebs-with-condition-based-backup/mock-tfconfig-v2.sentinel"
   }
 }
 

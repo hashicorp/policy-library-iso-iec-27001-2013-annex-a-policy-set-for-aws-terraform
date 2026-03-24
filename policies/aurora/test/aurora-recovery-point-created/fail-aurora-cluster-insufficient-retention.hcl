@@ -3,7 +3,13 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/fail/fail-aurora-cluster-insufficient-retention.sentinel"
+    source = "./mocks/policy-failure-aurora-cluster-insufficient-retention/mock-tfplan-v2.sentinel"
+  }
+}
+
+mock "tfconfig/v2" {
+  module {
+    source = "./mocks/policy-failure-aurora-cluster-insufficient-retention/mock-tfconfig-v2.sentinel"
   }
 }
 
