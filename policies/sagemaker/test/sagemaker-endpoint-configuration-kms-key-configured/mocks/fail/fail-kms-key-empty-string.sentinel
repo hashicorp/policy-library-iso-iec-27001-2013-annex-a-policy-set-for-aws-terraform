@@ -16,8 +16,8 @@ planned_values = {
 			"tainted":        false,
 			"type":           "aws_sagemaker_endpoint_configuration",
 			"values": {
-				"name":       "example-endpoint-config",
-				"kms_key_id": "",
+				"name":        "example-endpoint-config",
+				"kms_key_arn": "",
 				"production_variants": [
 					{
 						"variant_name":           "variant-1",

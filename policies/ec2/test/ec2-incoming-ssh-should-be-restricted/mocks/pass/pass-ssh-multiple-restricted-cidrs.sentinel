@@ -1,37 +1,49 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
+# Note: aws_vpc_security_group_ingress_rule only supports single CIDR per rule
+# This mock represents multiple rules with restricted CIDRs
 planned_values = {
 	"outputs": {},
 	"resources": {
-		"aws_security_group.example": {
-			"address":        "aws_security_group.example",
+		"aws_vpc_security_group_ingress_rule.ssh_restricted_1": {
+			"address":        "aws_vpc_security_group_ingress_rule.ssh_restricted_1",
 			"depends_on":     [],
 			"deposed_key":    "",
 			"index":          null,
 			"mode":           "managed",
 			"module_address": "",
-			"name":           "example",
+			"name":           "ssh_restricted_1",
 			"provider_name":  "registry.terraform.io/hashicorp/aws",
 			"tainted":        false,
-			"type":           "aws_security_group",
+			"type":           "aws_vpc_security_group_ingress_rule",
 			"values": {
-				"description": "Security group with SSH from multiple restricted CIDRs",
-				"ingress": [
-					{
-						"cidr_blocks":      ["10.0.0.0/16", "172.16.0.0/12"],
-						"description":      "SSH from restricted networks",
-						"from_port":        22,
-						"ipv6_cidr_blocks": [],
-						"prefix_list_ids":  [],
-						"protocol":         "tcp",
-						"security_groups":  [],
-						"self":             false,
-						"to_port":          22,
-					},
-				],
-				"name":   "allow-ssh-private-networks",
-				"vpc_id": "vpc-12345678",
+				"cidr_ipv4":         "10.0.0.0/16",
+				"description":       "SSH from VPC CIDR 1",
+				"from_port":         22,
+				"ip_protocol":       "tcp",
+				"security_group_id": "sg-12345678",
+				"to_port":           22,
+			},
+		},
+		"aws_vpc_security_group_ingress_rule.ssh_restricted_2": {
+			"address":        "aws_vpc_security_group_ingress_rule.ssh_restricted_2",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "ssh_restricted_2",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_vpc_security_group_ingress_rule",
+			"values": {
+				"cidr_ipv4":         "192.168.0.0/16",
+				"description":       "SSH from VPC CIDR 2",
+				"from_port":         22,
+				"ip_protocol":       "tcp",
+				"security_group_id": "sg-12345678",
+				"to_port":           22,
 			},
 		},
 	},

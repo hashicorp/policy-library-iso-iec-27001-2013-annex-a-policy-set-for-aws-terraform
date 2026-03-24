@@ -7,13 +7,11 @@
 import "tfplan/v2" as tfplan
 import "tfresources" as tf
 import "report" as report
-import "collection" as collection
 import "collection/maps" as maps
 
 # Constants
 const = {
 	"policy_name":                  "ec2-incoming-ssh-should-be-restricted",
-	"resource_security_group":      "aws_security_group",
 	"resource_vpc_sg_ingress_rule": "aws_vpc_security_group_ingress_rule",
 	"ssh_port":                     22,
 	"unrestricted_ipv4":            "0.0.0.0/0",
@@ -28,60 +26,6 @@ generate_violation_message = func(resource_type) {
 # Check if a CIDR block is unrestricted
 is_unrestricted_cidr = func(cidr) {
 	return cidr is const.unrestricted_ipv4 or cidr is const.unrestricted_ipv6
-}
-
-# Check if an ingress rule allows SSH from unrestricted sources
-has_unrestricted_ssh = func(from_port, to_port, protocol, cidr_blocks, ipv6_cidr_blocks) {
-	# Check if protocol is TCP or all protocols
-	protocol_is_tcp = protocol is "tcp"
-	protocol_is_all = protocol is "-1" or protocol is "all"
-
-	# For TCP protocol, check if the port range includes SSH port (22)
-	# For all protocols (-1 or "all"), any port range covers SSH since it covers all protocols/ports
-	ssh_port_covered = false
-	if protocol_is_tcp {
-		ssh_port_covered = from_port <= const.ssh_port and to_port >= const.ssh_port
-	} else if protocol_is_all {
-		# Protocol "-1" or "all" means all protocols and all ports, so SSH is always covered
-		ssh_port_covered = true
-	}
-
-	if ssh_port_covered {
-		# Check for unrestricted IPv4 CIDR blocks
-		for cidr_blocks as cidr {
-			if is_unrestricted_cidr(cidr) {
-				return true
-			}
-		}
-
-		# Check for unrestricted IPv6 CIDR blocks
-		for ipv6_cidr_blocks as cidr {
-			if is_unrestricted_cidr(cidr) {
-				return true
-			}
-		}
-	}
-
-	return false
-}
-
-# Check aws_security_group resources for unrestricted SSH ingress
-is_security_group_compliant = func(sg_res) {
-	ingress_rules = maps.get(sg_res.values, "ingress", [])
-
-	for ingress_rules as ingress {
-		from_port = maps.get(ingress, "from_port", 0)
-		to_port = maps.get(ingress, "to_port", 0)
-		protocol = maps.get(ingress, "protocol", "")
-		cidr_blocks = maps.get(ingress, "cidr_blocks", [])
-		ipv6_cidr_blocks = maps.get(ingress, "ipv6_cidr_blocks", [])
-
-		if has_unrestricted_ssh(from_port, to_port, protocol, cidr_blocks, ipv6_cidr_blocks) {
-			return false
-		}
-	}
-
-	return true
 }
 
 # Check aws_vpc_security_group_ingress_rule resources for unrestricted SSH ingress
@@ -120,35 +64,20 @@ is_vpc_sg_ingress_rule_compliant = func(rule_res) {
 }
 
 # Variables
-security_group_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_security_group).resources
 vpc_sg_ingress_rule_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_vpc_sg_ingress_rule).resources
 
-sg_violations = filter security_group_resources as _, res {
-	is_security_group_compliant(res) is false
-}
-
-vpc_sgr_violations = filter vpc_sg_ingress_rule_resources as _, res {
+violations = filter vpc_sg_ingress_rule_resources as _, res {
 	is_vpc_sg_ingress_rule_compliant(res) is false
 }
 
 all_violations = []
-for sg_violations as _, v {
-	all_violations += [{
-		"address":        v.address,
-		"module_address": v.module_address,
-		"message":        generate_violation_message(const.resource_security_group),
-	}]
-}
-
-for vpc_sgr_violations as _, v {
+for violations as _, v {
 	all_violations += [{
 		"address":        v.address,
 		"module_address": v.module_address,
 		"message":        generate_violation_message(const.resource_vpc_sg_ingress_rule),
 	}]
 }
-
-violations = sg_violations + vpc_sgr_violations
 
 summary = {
 	"policy_name": const.policy_name,
