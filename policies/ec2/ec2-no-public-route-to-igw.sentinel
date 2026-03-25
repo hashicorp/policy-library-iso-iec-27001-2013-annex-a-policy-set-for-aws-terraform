@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports
-import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
@@ -66,21 +66,44 @@ is_route_table_allowed = func(route_table_id, allowed_ids) {
 	return false
 }
 
+get_route_blocks = func(route_table_res) {
+	route_cfg = maps.get(route_table_res, "config.route", null)
+	if route_cfg is null {
+		return []
+	}
+
+	route_const = maps.get(route_table_res, "config.route.constant_value", null)
+	if route_const is not null {
+		return route_const
+	}
+
+	return route_cfg
+}
+
+get_route_attr = func(route, key) {
+	attr = maps.get(route, key, "")
+	attr_const = maps.get(route, key + ".constant_value", null)
+	if attr_const is not null {
+		return attr_const
+	}
+	return attr
+}
+
 check_route_table_routes = func(route_table_res, allowed_ids) {
-	# Get the route table ID if available
-	route_table_id = maps.get(route_table_res.values, "id", "")
+	# Get the route table ID from config if available; fallback to address.
+	route_table_id = maps.get(route_table_res, "config.id.constant_value", route_table_res.address)
 
 	# If this route table is in the allowed list, skip validation
 	if is_route_table_allowed(route_table_id, allowed_ids) {
 		return false
 	}
 
-	routes = maps.get(route_table_res.values, "route", [])
+	routes = get_route_blocks(route_table_res)
 
 	for routes as route {
-		gateway_id = maps.get(route, const.gateway_id, "")
-		cidr = maps.get(route, const.cidr_block, "")
-		ipv6_cidr = maps.get(route, const.ipv6_cidr_block, "")
+		gateway_id = get_route_attr(route, const.gateway_id)
+		cidr = get_route_attr(route, const.cidr_block)
+		ipv6_cidr = get_route_attr(route, const.ipv6_cidr_block)
 
 		if is_internet_gateway(gateway_id) and (cidr is const.unrestricted_ipv4 or ipv6_cidr is const.unrestricted_ipv6) {
 			return true
@@ -91,13 +114,13 @@ check_route_table_routes = func(route_table_res, allowed_ids) {
 }
 
 generate_route_table_violation_message = func(violation) {
-	route_table_id = maps.get(violation.values, "id", "unknown")
+	route_table_id = maps.get(violation, "config.id.constant_value", violation.address)
 	return "Route table '" + route_table_id + "' contains routes with unrestricted access (0.0.0.0/0 or ::/0) to an Internet Gateway. This creates public routes with unrestricted access. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
 }
 
 # Variables
 allowed_route_table_ids = parse_allowed_route_table_ids()
-route_table_resources = tf.plan(tfplan.planned_values.resources).type(const.route_table_type).resources
+route_table_resources = tf.config(tfconfig.resources).type(const.route_table_type).resources
 
 # Check aws_route_table resources with inline route blocks
 route_table_violations = filter route_table_resources as _, res {

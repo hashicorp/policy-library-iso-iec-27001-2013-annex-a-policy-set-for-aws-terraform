@@ -5,11 +5,12 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports
-import "tfplan/v2" as tfplan
+import "tfconfig/v2" as config
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
 import "collection/maps" as maps
+import "strings"
 
 # Parameters
 # ReplicationType: Type of replication to check for
@@ -21,6 +22,7 @@ const = {
 	"policy_name":                               "s3-bucket-replication-enabled",
 	"resource_aws_s3_bucket":                    "aws_s3_bucket",
 	"resource_aws_s3_bucket_replication_config": "aws_s3_bucket_replication_configuration",
+	"module_prefix":                             "module.",
 	"message":                                   "S3 bucket must have replication rules enabled with all rules in 'Enabled' status.",
 }
 
@@ -29,10 +31,102 @@ generate_violation_message = func(bucket_address, reason) {
 	return "S3 bucket '" + bucket_address + "' does not meet replication requirements: " + reason + ". Configure aws_s3_bucket_replication_configuration with enabled rules to meet AWS Audit Manager compliance requirements. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-replication-enabled.html for more details."
 }
 
+# Prefixes the referenced s3 bucket's address with
+# the module address when needed.
+sanitize_referenced_s3_bucket_address = func(replication_res) {
+	bucket_cfg = maps.get(replication_res.config, "bucket", {})
+	bucket_refs = maps.get(bucket_cfg, "references", [])
+
+	if length(bucket_refs) == 0 {
+		bucket_const = maps.get(bucket_cfg, "constant_value")
+		if bucket_const is defined {
+			return bucket_const
+		}
+		return ""
+	}
+
+	bucket_reference = bucket_refs[0]
+	if length(bucket_refs) > 1 {
+		bucket_reference = bucket_refs[1]
+	}
+
+	if strings.has_prefix(bucket_reference, const.module_prefix) {
+		return bucket_reference
+	}
+
+	if replication_res.module_address is "" {
+		return bucket_reference
+	}
+
+	return replication_res.module_address + "." + bucket_reference
+}
+
+normalize_bucket_reference = func(ref) {
+	segments = strings.split(ref, ".")
+	if length(segments) < 2 {
+		return ref
+	}
+
+	last_segment = segments[length(segments) - 1]
+	if last_segment is "id" or last_segment is "arn" {
+		return strings.join(segments[0:length(segments) - 1], ".")
+	}
+
+	return ref
+}
+
+replication_targets_bucket = func(replication_res, bucket_address) {
+	bucket_cfg = maps.get(replication_res, "config.bucket", {})
+	bucket_refs = maps.get(bucket_cfg, "references", [])
+
+	for bucket_refs as _, ref {
+		candidate_ref = normalize_bucket_reference(ref)
+		if candidate_ref is bucket_address {
+			return true
+		}
+
+		if not strings.has_prefix(candidate_ref, const.module_prefix) and replication_res.module_address is not "" {
+			if replication_res.module_address + "." + candidate_ref is bucket_address {
+				return true
+			}
+		}
+	}
+
+	bucket_const = maps.get(bucket_cfg, "constant_value", "")
+	if bucket_const is bucket_address {
+		return true
+	}
+
+	return false
+}
+
+get_attr_string = func(obj, key, fallback) {
+	raw_val = maps.get(obj, key, fallback)
+	nested_val = maps.get(obj, key + ".constant_value", null)
+	if nested_val is not null {
+		return nested_val
+	}
+	return raw_val
+}
+
+get_rule_blocks = func(replication_config_res) {
+	rule_cfg = maps.get(replication_config_res.config, "rule", null)
+	if rule_cfg is null {
+		return null
+	}
+
+	const_rules = maps.get(replication_config_res, "config.rule.constant_value", null)
+	if const_rules is not null {
+		return const_rules
+	}
+
+	return rule_cfg
+}
+
 # Check if replication configuration has valid rules with all enabled
 has_valid_replication_rules = func(replication_config_res) {
 	# Check if rule exists
-	rules = maps.get(replication_config_res.values, "rule", null)
+	rules = get_rule_blocks(replication_config_res)
 	if rules is null {
 		return {
 			"valid":  false,
@@ -50,7 +144,7 @@ has_valid_replication_rules = func(replication_config_res) {
 
 	# Check that ALL rules have status "Enabled" and match ReplicationType if specified
 	for rules as _, r {
-		status = maps.get(r, "status", "")
+		status = get_attr_string(r, "status", "")
 		if status is not "Enabled" {
 			return {
 				"valid":  false,
@@ -62,6 +156,9 @@ has_valid_replication_rules = func(replication_config_res) {
 		if ReplicationType is not "" and ReplicationType is not null {
 			# Get destination configuration
 			destinations = maps.get(r, "destination", null)
+			if destinations is null {
+				destinations = maps.get(r, "destination.constant_value", null)
+			}
 			if destinations is null or length(destinations) == 0 {
 				return {
 					"valid":  false,
@@ -71,7 +168,7 @@ has_valid_replication_rules = func(replication_config_res) {
 
 			# Check first destination (typically only one)
 			dest_config = destinations[0]
-			dest_region = maps.get(dest_config, "region", null)
+			dest_region = get_attr_string(dest_config, "region", null)
 
 			# Determine if this is cross-region or same-region replication
 			if ReplicationType is "CROSS-REGION" {
@@ -105,25 +202,20 @@ has_valid_replication_rules = func(replication_config_res) {
 }
 
 # Variables
-s3_buckets = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_s3_bucket).resources
-replication_configs = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_s3_bucket_replication_config).resources
+config_resources = tf.config(config.resources)
 
-# Build a map of bucket addresses to their replication configurations
-bucket_replication_map = {}
-for replication_configs as _, rc {
-	bucket_ref = maps.get(rc.values, "bucket", null)
-	if bucket_ref is not null {
-		bucket_replication_map[bucket_ref] = rc
-	}
-}
+s3_buckets = config_resources.type(const.resource_aws_s3_bucket).resources
+replication_configs = config_resources.type(const.resource_aws_s3_bucket_replication_config).resources
 
 # Check if bucket has valid replication
 bucket_has_valid_replication = func(bucket_res) {
-	# Check if this bucket has a replication configuration
-	replication_config = maps.get(bucket_replication_map, bucket_res.address, null)
+	# Find replication configuration attached to this bucket.
+	replication_config = collection.find(replication_configs, func(rc) {
+		return replication_targets_bucket(rc, bucket_res.address)
+	})
 	
 	# If no replication configuration found, fail
-	if replication_config is null {
+	if replication_config is not defined {
 		return false
 	}
 	
@@ -139,10 +231,12 @@ violations = collection.reject(s3_buckets, bucket_has_valid_replication)
 # Generate summary directly from violations
 violation_list = []
 for violations as address, v {
-	replication_config = maps.get(bucket_replication_map, v.address, null)
+	replication_config = collection.find(replication_configs, func(rc) {
+		return replication_targets_bucket(rc, v.address)
+	})
 	
 	reason = "no replication configuration found"
-	if replication_config is not null {
+	if replication_config is defined {
 		result = has_valid_replication_rules(replication_config)
 		reason = result.reason
 	}

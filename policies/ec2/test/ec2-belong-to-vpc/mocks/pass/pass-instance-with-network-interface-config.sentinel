@@ -34,14 +34,16 @@ resources = {
 			"instance_type": {
 				"constant_value": "t2.micro",
 			},
-			"network_interface": {
-				"constant_value": [
-					{
-						"device_index":         0,
-						"network_interface_id": "eni-0123456789abcdef0",
+			"network_interface": [
+				{
+					"device_index": {
+						"constant_value": 0,
 					},
-				],
-			},
+					"network_interface_id": {
+						"constant_value": "eni-0123456789abcdef0",
+					},
+				},
+			],
 		},
 		"count":        {},
 		"depends_on":   [],

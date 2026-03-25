@@ -20,6 +20,7 @@ const = {
 	"resource_aws_internet_gateway":            "aws_internet_gateway",
 	"resource_aws_internet_gateway_attachment": "aws_internet_gateway_attachment",
 	"vpc_id":                                   "vpc_id",
+	"module_prefix":                            "module.",
 }
 
 # Parse the CSV parameter into a list and trim whitespace
@@ -32,7 +33,10 @@ parse_authorized_vpc_ids = func(csv_string) {
 	trimmed_list = []
 
 	for vpc_list as vpc {
-		trimmed_list = trimmed_list + [strings.trim_space(vpc)]
+		trimmed_vpc = strings.trim_space(vpc)
+		if trimmed_vpc is not "" {
+			trimmed_list = trimmed_list + [trimmed_vpc]
+		}
 	}
 
 	return trimmed_list
@@ -71,6 +75,20 @@ is_vpc_authorized = func(vpc_id) {
 	return false
 }
 
+normalize_resource_reference = func(ref) {
+	parts = strings.split(ref, ".")
+	if length(parts) < 2 {
+		return ref
+	}
+
+	last = parts[length(parts) - 1]
+	if last is "id" or last is "arn" {
+		return strings.join(parts[0:length(parts) - 1], ".")
+	}
+
+	return ref
+}
+
 # Helper function to get VPC ID from config
 get_vpc_id_from_config = func(res_config) {
 	vpc_id_config = maps.get(res_config, "config.vpc_id", null)
@@ -89,6 +107,16 @@ get_vpc_id_from_config = func(res_config) {
 	references = maps.get(vpc_id_config, "references", [])
 	if references is not empty {
 		vpc_ref = references[0]
+		if length(references) > 1 {
+			vpc_ref = references[1]
+		}
+
+		vpc_ref = normalize_resource_reference(vpc_ref)
+
+		if res_config.module_address is not "" and not strings.has_prefix(vpc_ref, const.module_prefix) {
+			vpc_ref = res_config.module_address + "." + vpc_ref
+		}
+
 		return "reference:" + vpc_ref
 	}
 

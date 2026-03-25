@@ -29,6 +29,20 @@ generate_violation_message = func(violation, reason) {
 	return base_message + reason + " Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instances-in-vpc.html for more details."
 }
 
+normalize_resource_reference = func(ref) {
+	parts = strings.split(ref, ".")
+	if length(parts) < 2 {
+		return ref
+	}
+
+	last = parts[length(parts) - 1]
+	if last is "id" or last is "arn" {
+		return strings.join(parts[0:length(parts) - 1], ".")
+	}
+
+	return ref
+}
+
 # Helper function to get referenced resource address from config
 get_referenced_resource_address = func(res, attr) {
 	references_list = maps.get(res, attr, [])
@@ -36,7 +50,13 @@ get_referenced_resource_address = func(res, attr) {
 		return ""
 	}
 	referenced_address = references_list.references[0]
-	if strings.has_prefix(res.address, const.module_prefix) {
+	if length(references_list.references) > 1 {
+		referenced_address = references_list.references[1]
+	}
+
+	referenced_address = normalize_resource_reference(referenced_address)
+
+	if res.module_address is not "" and not strings.has_prefix(referenced_address, const.module_prefix) {
 		referenced_address = res.module_address + "." + referenced_address
 	}
 	return referenced_address
@@ -48,15 +68,21 @@ is_attribute_defined = func(res_config, attr_path) {
 	if attr_config is null {
 		return false
 	}
+
+	constant_value = maps.get(res_config, attr_path + ".constant_value", null)
+	references = maps.get(res_config, attr_path + ".references", [])
+
+	# Nested block attributes may be represented as a non-empty list.
+	if attr_config is not empty and constant_value is null and references is empty {
+		return true
+	}
 	
 	# Check if it has a constant value
-	constant_value = maps.get(attr_config, "constant_value", null)
 	if constant_value is not null and constant_value is not "" {
 		return true
 	}
 	
 	# Check if it has references (resource references)
-	references = maps.get(attr_config, "references", [])
 	if references is not empty {
 		return true
 	}
@@ -85,8 +111,30 @@ check_network_interface_has_subnet = func(ni_config_resources, ni_address) {
 
 # Check if primary_network_interface references a valid network interface with subnet
 is_primary_network_interface_valid = func(res_config, ni_config_resources) {
-	# Get the network_interface_id reference from primary_network_interface block
-	pni_ni_id_ref = get_referenced_resource_address(res_config, "config.primary_network_interface.0.network_interface_id")
+	# Get the network_interface_id reference from primary_network_interface block.
+	pni_ni_id_ref = ""
+	pni_blocks = maps.get(res_config, "config.primary_network_interface", [])
+	if pni_blocks is not empty {
+		pni_ref_attr = maps.get(pni_blocks[0], "network_interface_id", {})
+		pni_refs = maps.get(pni_ref_attr, "references", [])
+		if pni_refs is not empty {
+			referenced_address = pni_refs[0]
+			if length(pni_refs) > 1 {
+				referenced_address = pni_refs[1]
+			}
+
+			referenced_address = normalize_resource_reference(referenced_address)
+			if res_config.module_address is not "" and not strings.has_prefix(referenced_address, const.module_prefix) {
+				referenced_address = res_config.module_address + "." + referenced_address
+			}
+			pni_ni_id_ref = referenced_address
+		}
+	}
+
+	if pni_ni_id_ref is "" {
+		# Backward-compatible fallback for index-addressed primary_network_interface path.
+		pni_ni_id_ref = get_referenced_resource_address(res_config, "config.primary_network_interface.0.network_interface_id")
+	}
 	
 	if pni_ni_id_ref is "" {
 		return false

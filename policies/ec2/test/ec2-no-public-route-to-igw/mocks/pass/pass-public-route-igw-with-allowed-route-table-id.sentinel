@@ -1,35 +1,32 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-planned_values = {
-	"outputs": {},
-	"resources": {
-		"aws_route_table.allowed": {
-			"address":        "aws_route_table.allowed",
-			"depends_on":     [],
-			"deposed_key":    "",
-			"index":          null,
-			"mode":           "managed",
-			"module_address": "",
-			"name":           "allowed",
-			"provider_name":  "registry.terraform.io/hashicorp/aws",
-			"tainted":        false,
-			"type":           "aws_route_table",
-			"values": {
-				"id": "rtb-allowed123",
-				"route": [
+resources = {
+	"aws_route_table.allowed": {
+		"address": "aws_route_table.allowed",
+		"config": {
+			"id": {
+				"constant_value": "rtb-allowed123",
+			},
+			"route": [
 					{
-						"cidr_block":                  "0.0.0.0/0",
-						"destination_cidr_block":      "0.0.0.0/0",
-						"gateway_id":                  "igw-12345678",
-						"nat_gateway_id":              "",
-						"egress_only_gateway_id":      "",
-						"ipv6_cidr_block":             "",
-						"destination_ipv6_cidr_block": "",
+						"cidr_block": {"constant_value": "0.0.0.0/0"},
+						"ipv6_cidr_block": {"constant_value": ""},
+						"gateway_id": {"constant_value": "igw-12345678"},
 					},
 				],
-				"vpc_id": "vpc-12345678",
+			"vpc_id": {
+				"constant_value": "vpc-12345678",
 			},
 		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "allowed",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_route_table",
 	},
 }

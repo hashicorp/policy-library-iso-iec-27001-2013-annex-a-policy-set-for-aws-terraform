@@ -1,62 +1,59 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
-planned_values = {
-	"outputs": {},
-	"resources": {
-		"aws_route_table.allowed1": {
-			"address":        "aws_route_table.allowed1",
-			"depends_on":     [],
-			"deposed_key":    "",
-			"index":          null,
-			"mode":           "managed",
-			"module_address": "",
-			"name":           "allowed1",
-			"provider_name":  "registry.terraform.io/hashicorp/aws",
-			"tainted":        false,
-			"type":           "aws_route_table",
-			"values": {
-				"id": "rtb-allowed123",
-				"route": [
+resources = {
+	"aws_route_table.allowed1": {
+		"address": "aws_route_table.allowed1",
+		"config": {
+			"id": {
+				"constant_value": "rtb-allowed123",
+			},
+			"route": [
 					{
-						"cidr_block":                  "0.0.0.0/0",
-						"destination_cidr_block":      "0.0.0.0/0",
-						"gateway_id":                  "igw-12345678",
-						"nat_gateway_id":              "",
-						"egress_only_gateway_id":      "",
-						"ipv6_cidr_block":             "",
-						"destination_ipv6_cidr_block": "",
+						"cidr_block": {"constant_value": "0.0.0.0/0"},
+						"ipv6_cidr_block": {"constant_value": ""},
+						"gateway_id": {"constant_value": "igw-12345678"},
 					},
 				],
-				"vpc_id": "vpc-12345678",
+			"vpc_id": {
+				"constant_value": "vpc-12345678",
 			},
 		},
-		"aws_route_table.allowed2": {
-			"address":        "aws_route_table.allowed2",
-			"depends_on":     [],
-			"deposed_key":    "",
-			"index":          null,
-			"mode":           "managed",
-			"module_address": "",
-			"name":           "allowed2",
-			"provider_name":  "registry.terraform.io/hashicorp/aws",
-			"tainted":        false,
-			"type":           "aws_route_table",
-			"values": {
-				"id": "rtb-allowed456",
-				"route": [
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "allowed1",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_route_table",
+	},
+	"aws_route_table.allowed2": {
+		"address": "aws_route_table.allowed2",
+		"config": {
+			"id": {
+				"constant_value": "rtb-allowed456",
+			},
+			"route": [
 					{
-						"cidr_block":                  "",
-						"destination_cidr_block":      "",
-						"gateway_id":                  "igw-87654321",
-						"nat_gateway_id":              "",
-						"egress_only_gateway_id":      "",
-						"ipv6_cidr_block":             "::/0",
-						"destination_ipv6_cidr_block": "::/0",
+						"cidr_block": {"constant_value": ""},
+						"ipv6_cidr_block": {"constant_value": "::/0"},
+						"gateway_id": {"constant_value": "igw-87654321"},
 					},
 				],
-				"vpc_id": "vpc-87654321",
+			"vpc_id": {
+				"constant_value": "vpc-87654321",
 			},
 		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "allowed2",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_route_table",
 	},
 }
