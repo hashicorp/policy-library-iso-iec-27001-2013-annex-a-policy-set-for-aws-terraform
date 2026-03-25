@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks that S3 bucket access is restricted to authorized AWS principals, federated users, service principals, IP addresses, or VPCs. This control is compliant if a bucket policy is not present, or if the policy only grants access to approved entities.
 
 Validating S3 bucket policy principals helps prevent unauthorized access by ensuring that only trusted entities can access your S3 data. This is critical for maintaining data confidentiality and preventing data breaches.

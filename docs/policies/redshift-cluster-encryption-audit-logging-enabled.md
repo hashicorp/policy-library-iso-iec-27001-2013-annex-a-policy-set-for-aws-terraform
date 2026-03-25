@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if Amazon Redshift clusters have encryption and audit logging enabled. This control fails if the Redshift cluster is not encrypted, is encrypted with an incorrect key, or does not have audit logging enabled.
 
 Encryption protects data at rest from unauthorized access, while audit logging captures cluster activities for security monitoring and compliance. Together, these features provide comprehensive data protection and visibility into cluster operations.

@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if S3 buckets have default encryption enabled or have bucket policies that explicitly deny put-object requests without server-side encryption using AES-256 or AWS KMS. This control fails if an S3 bucket is not encrypted by default.
 
 Server-side encryption protects data at rest in S3 buckets from unauthorized access. Enabling default encryption ensures that all objects stored in the bucket are automatically encrypted, providing an additional layer of security for sensitive data.

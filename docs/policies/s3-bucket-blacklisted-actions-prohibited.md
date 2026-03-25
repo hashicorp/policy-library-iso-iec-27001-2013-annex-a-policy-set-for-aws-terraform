@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if S3 bucket policies allow blacklisted bucket-level and object-level actions for principals from other AWS accounts. This control fails if any blacklisted actions are allowed by the S3 bucket policy.
 
 Restricting specific S3 actions helps prevent unauthorized data access, modification, or deletion. Blacklisted actions typically include dangerous operations like DeleteBucket, DeleteObject, or PutBucketPolicy that could compromise data security when granted to external accounts.

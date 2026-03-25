@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if there are public routes in the route table to an Internet Gateway (IGW). This control fails if a route to an IGW has a destination CIDR block of 0.0.0.0/0 or ::/0.
 
 Public routes to internet gateways with unrestricted CIDR blocks (0.0.0.0/0 or ::/0) can expose resources to the internet unnecessarily. Route tables should use specific CIDR blocks to limit exposure and maintain proper network segmentation.

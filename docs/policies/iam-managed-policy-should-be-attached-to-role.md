@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if all required managed policies are attached to AWS Identity and Access Management (IAM) roles. This control fails if a required managed policy is not attached to the IAM role.
 
 Ensuring that IAM roles have the appropriate managed policies attached helps maintain consistent permissions across your AWS environment and ensures that roles have the necessary permissions to perform their intended functions securely.

@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if blacklisted policy ARNs are attached to IAM resources (users, groups, or roles). This control fails if a blacklisted policy ARN is attached to any IAM resource.
 
 Preventing the use of specific policy ARNs helps enforce security standards and compliance requirements by ensuring that overly permissive or deprecated policies are not used in your AWS environment.

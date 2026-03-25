@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if Amazon Redshift clusters have audit logging enabled and are logging to a specific S3 bucket. This control fails if audit logging is not enabled for a Redshift cluster or if logs are not being sent to the designated bucket.
 
 Audit logging for Redshift captures information about connections, queries, and user activities. These logs are essential for security monitoring, compliance auditing, troubleshooting performance issues, and forensic investigation.

@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if Amazon RDS Aurora databases are included in AWS Backup plans. This control fails if RDS Aurora databases are not included in any AWS Backup plan.
 
 Including RDS databases in AWS Backup plans ensures that your data is regularly backed up and can be recovered in case of data loss, corruption, or disaster. This is a critical component of business continuity and disaster recovery strategies.

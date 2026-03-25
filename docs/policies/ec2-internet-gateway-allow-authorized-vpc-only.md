@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if internet gateways are attached to an authorized virtual private cloud (Amazon VPC). This control fails if internet gateways are attached to an unauthorized VPC.
 
 Restricting internet gateway attachments to authorized VPCs helps prevent unauthorized network access and ensures that only approved network architectures are deployed. This is important for maintaining network security boundaries and preventing accidental exposure of resources.

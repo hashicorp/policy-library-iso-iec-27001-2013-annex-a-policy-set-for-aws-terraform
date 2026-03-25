@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks whether your Amazon EC2 instances are launched within a Virtual Private Cloud (VPC). This control fails if an EC2 instance is not associated with a VPC.
 
 VPCs provide network isolation and enhanced security controls for your EC2 instances. Instances launched in EC2-Classic (outside of a VPC) lack the security features and fine-grained network controls that VPCs provide, such as security groups, network ACLs, and private IP addressing. Using VPCs is a security best practice for protecting your cloud resources.

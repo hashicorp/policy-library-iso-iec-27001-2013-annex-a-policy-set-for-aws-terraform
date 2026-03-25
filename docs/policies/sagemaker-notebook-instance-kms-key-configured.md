@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if AWS Key Management Service (KMS) keys are configured for Amazon SageMaker notebook instances. This control fails if a KMS key is not configured for the notebook instance.
 
 Configuring KMS keys for SageMaker notebook instances ensures that data stored on the notebook's storage volumes is encrypted at rest. This protects sensitive machine learning code, data, and model artifacts from unauthorized access.

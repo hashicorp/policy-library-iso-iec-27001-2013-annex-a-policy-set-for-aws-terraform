@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control verifies that S3 bucket policies do not allow more permissive inter-account permissions than the control policy you provide. This control fails if bucket policies grant additional cross-account permissions beyond what is specified in the control policy.
 
 Limiting inter-account S3 bucket access helps prevent unauthorized data access from external AWS accounts. By comparing bucket policies against a baseline control policy, you can ensure that only approved cross-account access patterns are permitted.

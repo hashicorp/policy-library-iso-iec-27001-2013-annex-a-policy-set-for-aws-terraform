@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if S3 buckets have replication rules enabled. This control fails if an S3 bucket does not have a replication rule or has a replication rule that is not enabled.
 
 S3 replication automatically copies objects across buckets in different AWS Regions or within the same Region. This provides data redundancy, disaster recovery capabilities, and helps meet compliance requirements for data residency and availability.

@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if recovery points were created for Amazon RDS instances within a specified time period. This control fails if an RDS instance does not have a corresponding recovery point created within the required timeframe.
 
 Regular recovery point creation ensures that recent backups are available for data restoration in case of failures or data loss. This is essential for meeting recovery time objectives (RTO) and recovery point objectives (RPO) in disaster recovery planning.
