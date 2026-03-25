@@ -1,0 +1,106 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+import "strings"
+
+providers = {
+	"aws": {
+		"alias": "",
+		"config": {
+			"region": {
+				"constant_value": "us-east-1",
+			},
+		},
+		"full_name":           "registry.terraform.io/hashicorp/aws",
+		"module_address":      "",
+		"name":                "aws",
+		"provider_config_key": "aws",
+		"version_constraint":  "",
+	},
+}
+
+resources = {
+	"aws_iam_role.example": {
+		"address": "aws_iam_role.example",
+		"config": {
+			"name": {
+				"constant_value": "example",
+			},
+			"assume_role_policy": {
+				"constant_value": "{\\",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_iam_role",
+	},
+	"aws_iam_role_policy_attachment.readonly": {
+		"address": "aws_iam_role_policy_attachment.readonly",
+		"config": {
+			"role": {
+				"references": [
+					"aws_iam_role.example.name",
+					"aws_iam_role.example",
+				],
+			},
+			"policy_arn": {
+				"constant_value": "arn:aws:iam::aws:policy/ReadOnlyAccess",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "readonly",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_iam_role_policy_attachment",
+	},
+	"aws_iam_role_policy_attachment.poweruser": {
+		"address": "aws_iam_role_policy_attachment.poweruser",
+		"config": {
+			"role": {
+				"references": [
+					"aws_iam_role.example.name",
+					"aws_iam_role.example",
+				],
+			},
+			"policy_arn": {
+				"constant_value": "arn:aws:iam::aws:policy/PowerUserAccess",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "poweruser",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_iam_role_policy_attachment",
+	},
+}
+
+provisioners = {}
+
+variables = {}
+
+outputs = {}
+
+module_calls = {}
+
+strip_index = func(addr) {
+	s = strings.split(addr, ".")
+	for s as i, v {
+		s[i] = strings.split(v, "[")[0]
+	}
+
+	return strings.join(s, ".")
+}

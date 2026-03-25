@@ -1,14 +1,28 @@
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
+import "strings"
+
+providers = {
+	"aws": {
+		"alias": "",
+		"config": {
+			"region": {
+				"constant_value": "us-east-1",
+			},
+		},
+		"full_name":           "registry.terraform.io/hashicorp/aws",
+		"module_address":      "",
+		"name":                "aws",
+		"provider_config_key": "aws",
+		"version_constraint":  "",
+	},
+}
+
 resources = {
 	"aws_redshift_cluster.example": {
-		"address":             "aws_redshift_cluster.example",
-		"mode":                "managed",
-		"type":                "aws_redshift_cluster",
-		"name":                "example",
-		"provider_config_key": "aws",
-		"expressions": {
+		"address": "aws_redshift_cluster.example",
+		"config": {
 			"cluster_identifier": {
 				"constant_value": "example-cluster",
 			},
@@ -18,7 +32,38 @@ resources = {
 			"node_type": {
 				"constant_value": "dc1.large",
 			},
+			"master_username": {
+				"constant_value": "admin",
+			},
+			"master_password": {
+				"constant_value": "Password123!",
+			},
 		},
-		"schema_version": 0,
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_redshift_cluster",
 	},
+}
+
+provisioners = {}
+
+variables = {}
+
+outputs = {}
+
+module_calls = {}
+
+strip_index = func(addr) {
+	s = strings.split(addr, ".")
+	for s as i, v {
+		s[i] = strings.split(v, "[")[0]
+	}
+
+	return strings.join(s, ".")
 }

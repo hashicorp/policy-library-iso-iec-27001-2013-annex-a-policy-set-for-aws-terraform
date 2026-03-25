@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 
-mock "tfplan/v2" {
+mock "tfconfig/v2" {
   module {
-    source = "./mocks/pass/pass-iam-user-non-blacklisted-policy.sentinel"
+    source = "./mocks/pass/pass-iam-user-non-blacklisted-policy-config.sentinel"
   }
 }
 

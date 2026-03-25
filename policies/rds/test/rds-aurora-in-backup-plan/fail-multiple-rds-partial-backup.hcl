@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 
-mock "tfplan/v2" {
+mock "tfconfig/v2" {
   module {
-    source = "./mocks/fail/fail-multiple-rds-partial-backup.sentinel"
+    source = "./mocks/fail/fail-multiple-rds-partial-backup-config.sentinel"
   }
 }
 

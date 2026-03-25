@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports
-import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
@@ -21,20 +21,19 @@ param policyUsageType default "ANY"
 const = {
 	"policy_name":                              "iam-policy-arn-should-be-attached",
 	"resource_aws_iam_policy":                  "aws_iam_policy",
+	"resource_aws_iam_user":                    "aws_iam_user",
+	"resource_aws_iam_group":                   "aws_iam_group",
 	"resource_aws_iam_user_policy_attachment":  "aws_iam_user_policy_attachment",
 	"resource_aws_iam_group_policy_attachment": "aws_iam_group_policy_attachment",
 	"resource_aws_iam_role_policy_attachment":  "aws_iam_role_policy_attachment",
-	"resource_aws_iam_group_membership":        "aws_iam_group_membership",
 	"resource_aws_iam_role":                    "aws_iam_role",
+	"resource_aws_iam_group_membership":        "aws_iam_group_membership",
 }
 
 # Functions
 get_policy_arn = func(res) {
-	# Handle both direct ARN and self-reference
-	if maps.has(res.values, "arn") and res.values.arn is not null {
-		return res.values.arn
-	}
-	# Return address as fallback for matching references
+	# For tfconfig, we use the resource address as the identifier
+	# since ARN values are not available in config
 	return res.address
 }
 
@@ -64,29 +63,129 @@ matches_policy = func(policy_arn, policy_identifier) {
 	return false
 }
 
-is_policy_attached_to_user = func(policy_identifier, user_attachments) {
+is_policy_attached_to_user = func(policy_identifier, user_attachments, users) {
 	for user_attachments as _, attachment {
-		policy_arn = maps.get(attachment.values, "policy_arn", "")
-		if matches_policy(policy_arn, policy_identifier) {
-			return true
+		# Get policy_arn from config - it can be a constant or reference
+		policy_arn_config = maps.get(attachment.config, "policy_arn", {})
+		
+		# Check for constant value
+		if maps.has(policy_arn_config, "constant_value") {
+			policy_arn = policy_arn_config.constant_value
+			if matches_policy(policy_arn, policy_identifier) {
+				# Verify the user exists
+				user_config = maps.get(attachment.config, "user", {})
+				if maps.has(user_config, "references") {
+					return true
+				} else if maps.has(user_config, "constant_value") {
+					user_name = user_config.constant_value
+					for users as _, u {
+						u_name_config = maps.get(u.config, "name", {})
+						if maps.has(u_name_config, "constant_value") and u_name_config.constant_value is user_name {
+							return true
+						}
+					}
+				}
+			}
+		}
+		
+		# Check for references to the policy
+		if maps.has(policy_arn_config, "references") {
+			for policy_arn_config.references as _, ref {
+				if matches_policy(ref, policy_identifier) {
+					# Verify the user exists
+					user_config = maps.get(attachment.config, "user", {})
+					if maps.has(user_config, "references") or maps.has(user_config, "constant_value") {
+						return true
+					}
+				}
+			}
 		}
 	}
 	return false
 }
 
-is_policy_attached_to_group = func(policy_identifier, group_attachments, group_memberships) {
+is_policy_attached_to_group = func(policy_identifier, group_attachments, group_memberships, groups) {
 	# Find groups with this policy attached and check if they have members
-	# Uses matches_policy() to handle various Terraform reference formats
 	for group_attachments as _, attachment {
-		policy_arn = maps.get(attachment.values, "policy_arn", "")
-		if matches_policy(policy_arn, policy_identifier) {
-			group_name = maps.get(attachment.values, "group", "")
+		# Get policy_arn from config
+		policy_arn_config = maps.get(attachment.config, "policy_arn", {})
+		policy_matches = false
+		
+		# Check for constant value
+		if maps.has(policy_arn_config, "constant_value") {
+			policy_arn = policy_arn_config.constant_value
+			if matches_policy(policy_arn, policy_identifier) {
+				policy_matches = true
+			}
+		}
+		
+		# Check for references to the policy
+		if maps.has(policy_arn_config, "references") {
+			for policy_arn_config.references as _, ref {
+				if matches_policy(ref, policy_identifier) {
+					policy_matches = true
+				}
+			}
+		}
+		
+		if policy_matches {
+			# Get group name from config
+			group_config = maps.get(attachment.config, "group", {})
+			group_name = ""
+			
+			if maps.has(group_config, "constant_value") {
+				group_name = group_config.constant_value
+			} else if maps.has(group_config, "references") {
+				# Extract group name from reference
+				for group_config.references as _, ref {
+					if strings.has_prefix(ref, "aws_iam_group.") {
+						# Verify the group exists
+						for groups as _, g {
+							if g.address is ref or strings.has_suffix(ref, g.address) {
+								group_name_config = maps.get(g.config, "name", {})
+								if maps.has(group_name_config, "constant_value") {
+									group_name = group_name_config.constant_value
+								}
+							}
+						}
+					}
+				}
+			}
+			
 			# Check if this group has any members
-			for group_memberships as _, membership {
-				membership_group = maps.get(membership.values, "group", "")
-				users = maps.get(membership.values, "users", [])
-				if membership_group is group_name and length(users) > 0 {
-					return true
+			if group_name is not "" {
+				for group_memberships as _, membership {
+					membership_group_config = maps.get(membership.config, "group", {})
+					membership_group = ""
+					
+					if maps.has(membership_group_config, "constant_value") {
+						membership_group = membership_group_config.constant_value
+					} else if maps.has(membership_group_config, "references") {
+						# Extract group name from reference
+						for membership_group_config.references as _, ref {
+							if strings.has_prefix(ref, "aws_iam_group.") {
+								# Find the group and get its name
+								for groups as _, g {
+									if g.address is ref or strings.has_suffix(ref, g.address) {
+										g_name_config = maps.get(g.config, "name", {})
+										if maps.has(g_name_config, "constant_value") {
+											membership_group = g_name_config.constant_value
+										}
+									}
+								}
+							}
+						}
+					}
+					
+					users_config = maps.get(membership.config, "users", {})
+					users = []
+					if maps.has(users_config, "constant_value") {
+						users = users_config.constant_value
+					}
+					
+					if membership_group is group_name and length(users) > 0 {
+						return true
+					}
 				}
 			}
 		}
@@ -119,17 +218,70 @@ has_trusted_entities = func(assume_role_policy_json) {
 
 is_policy_attached_to_role = func(policy_identifier, role_attachments, roles) {
 	# Find roles with this policy attached and check if they have trusted entities
-	# Uses matches_policy() to handle various Terraform reference formats
 	for role_attachments as _, attachment {
-		policy_arn = maps.get(attachment.values, "policy_arn", "")
-		if matches_policy(policy_arn, policy_identifier) {
-			role_name = maps.get(attachment.values, "role", "")
+		# Get policy_arn from config
+		policy_arn_config = maps.get(attachment.config, "policy_arn", {})
+		policy_matches = false
+		
+		# Check for constant value
+		if maps.has(policy_arn_config, "constant_value") {
+			policy_arn = policy_arn_config.constant_value
+			if matches_policy(policy_arn, policy_identifier) {
+				policy_matches = true
+			}
+		}
+		
+		# Check for references to the policy
+		if maps.has(policy_arn_config, "references") {
+			for policy_arn_config.references as _, ref {
+				if matches_policy(ref, policy_identifier) {
+					policy_matches = true
+				}
+			}
+		}
+		
+		if policy_matches {
+			# Get role name from config
+			role_config = maps.get(attachment.config, "role", {})
+			role_name = ""
+			
+			if maps.has(role_config, "constant_value") {
+				role_name = role_config.constant_value
+			} else if maps.has(role_config, "references") {
+				# Extract role name from reference
+				for role_config.references as _, ref {
+					if strings.has_prefix(ref, "aws_iam_role.") {
+						# Verify the role exists
+						for roles as _, r {
+							if r.address is ref or strings.has_suffix(ref, r.address) {
+								role_name_config = maps.get(r.config, "name", {})
+								if maps.has(role_name_config, "constant_value") {
+									role_name = role_name_config.constant_value
+								}
+							}
+						}
+					}
+				}
+			}
+			
 			# Check if this role exists and has an assume role policy with trusted entities
-			for roles as _, r {
-				r_name = maps.get(r.values, "name", "")
-				assume_role_policy = maps.get(r.values, "assume_role_policy", "")
-				if r_name is role_name and has_trusted_entities(assume_role_policy) {
-					return true
+			if role_name is not "" {
+				for roles as _, r {
+					r_name_config = maps.get(r.config, "name", {})
+					r_name = ""
+					if maps.has(r_name_config, "constant_value") {
+						r_name = r_name_config.constant_value
+					}
+					
+					assume_role_policy_config = maps.get(r.config, "assume_role_policy", {})
+					assume_role_policy = ""
+					if maps.has(assume_role_policy_config, "constant_value") {
+						assume_role_policy = assume_role_policy_config.constant_value
+					}
+					
+					if r_name is role_name and has_trusted_entities(assume_role_policy) {
+						return true
+					}
 				}
 			}
 		}
@@ -138,20 +290,20 @@ is_policy_attached_to_role = func(policy_identifier, role_attachments, roles) {
 	return false
 }
 
-is_policy_in_use = func(policy, user_attachments, group_attachments, role_attachments, group_memberships, roles, usage_type) {
+is_policy_in_use = func(policy, user_attachments, group_attachments, role_attachments, group_memberships, roles, users, groups, usage_type) {
 	policy_identifier = get_policy_arn(policy)
 
 	# Check based on policyUsageType parameter
 	if usage_type is "IAM_USER" or usage_type is "ANY" {
 		# Check if policy is attached to any users
-		if is_policy_attached_to_user(policy_identifier, user_attachments) {
+		if is_policy_attached_to_user(policy_identifier, user_attachments, users) {
 			return true
 		}
 	}
 
 	if usage_type is "IAM_GROUP" or usage_type is "ANY" {
 		# Check if policy is attached to groups with members
-		if is_policy_attached_to_group(policy_identifier, group_attachments, group_memberships) {
+		if is_policy_attached_to_group(policy_identifier, group_attachments, group_memberships, groups) {
 			return true
 		}
 	}
@@ -198,12 +350,14 @@ generate_violation_message = func(violation) {
 }
 
 # Variables
-all_policies = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_policy).resources
-user_attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_user_policy_attachment).resources
-group_attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_group_policy_attachment).resources
-role_attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_role_policy_attachment).resources
-group_memberships = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_group_membership).resources
-roles = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_role).resources
+all_policies = tf.config(tfconfig.resources).type(const.resource_aws_iam_policy).resources
+user_attachments = tf.config(tfconfig.resources).type(const.resource_aws_iam_user_policy_attachment).resources
+group_attachments = tf.config(tfconfig.resources).type(const.resource_aws_iam_group_policy_attachment).resources
+role_attachments = tf.config(tfconfig.resources).type(const.resource_aws_iam_role_policy_attachment).resources
+group_memberships = tf.config(tfconfig.resources).type(const.resource_aws_iam_group_membership).resources
+roles = tf.config(tfconfig.resources).type(const.resource_aws_iam_role).resources
+users = tf.config(tfconfig.resources).type(const.resource_aws_iam_user).resources
+groups = tf.config(tfconfig.resources).type(const.resource_aws_iam_group).resources
 
 # Filter policies based on policyARN parameter
 policies = collection.filter(all_policies, func(policy) {
@@ -219,7 +373,7 @@ if not (usage_type in valid_usage_types) {
 }
 
 violations = collection.reject(policies, func(policy) {
-	return is_policy_in_use(policy, user_attachments, group_attachments, role_attachments, group_memberships, roles, usage_type)
+	return is_policy_in_use(policy, user_attachments, group_attachments, role_attachments, group_memberships, roles, users, groups, usage_type)
 })
 
 summary = {

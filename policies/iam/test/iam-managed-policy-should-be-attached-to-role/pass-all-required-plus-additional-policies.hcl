@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 
-mock "tfplan/v2" {
+mock "tfconfig/v2" {
   module {
-    source = "./mocks/pass/pass-all-required-plus-additional-policies.sentinel"
+    source = "./mocks/pass/pass-all-required-plus-additional-policies-config.sentinel"
   }
 }
 

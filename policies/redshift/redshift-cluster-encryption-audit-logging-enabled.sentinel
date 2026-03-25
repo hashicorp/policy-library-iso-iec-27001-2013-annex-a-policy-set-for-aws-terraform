@@ -5,13 +5,11 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports
-import "tfplan/v2" as tfplan
 import "tfconfig/v2" as tfconfig
 import "tfresources" as tf
 import "report" as report
 import "strings"
 import "collection"
-import "collection/maps" as maps
 
 # Parameters
 param loggingEnabled default true
@@ -48,14 +46,14 @@ parse_node_types = func(csv_string) {
 
 # Check if a cluster has associated aws_redshift_logging resource
 # Uses tfconfig to trace resource references
-has_logging_resource = func(cluster_address, logging_resources, tfconfig_resources) {
+has_logging_resource = func(cluster_address, tfconfig_resources) {
 	cluster_id = null
 
 	# Try to get cluster identifier from the cluster resource config
 	for tfconfig_resources as addr, cfg_res {
 		if addr is cluster_address {
-			if "expressions" in cfg_res and const.cluster_identifier_attr in cfg_res.expressions {
-				cluster_id_expr = cfg_res.expressions[const.cluster_identifier_attr]
+			if "config" in cfg_res and const.cluster_identifier_attr in cfg_res.config {
+				cluster_id_expr = cfg_res.config[const.cluster_identifier_attr]
 				if "constant_value" in cluster_id_expr {
 					cluster_id = cluster_id_expr.constant_value
 				}
@@ -64,34 +62,32 @@ has_logging_resource = func(cluster_address, logging_resources, tfconfig_resourc
 		}
 	}
 
-	# Check if any logging resource references this cluster
-	for logging_resources as _, log_res {
-		log_cluster_id = maps.get(log_res.values, const.cluster_identifier_attr, "")
-
-		# Check if logging resource references the cluster resource via tfconfig
-		log_address = log_res.address
-		for tfconfig_resources as addr, cfg_res {
-			if addr is log_address {
-				if "expressions" in cfg_res and const.cluster_identifier_attr in cfg_res.expressions {
-					cluster_ref_expr = cfg_res.expressions[const.cluster_identifier_attr]
-					if "references" in cluster_ref_expr {
-						for cluster_ref_expr.references as ref {
-							if strings.has_prefix(ref, cluster_address) {
-								return {"resource": log_res, "found": true}
-							}
+	# Check if any logging resource references this cluster via tfconfig
+	for tfconfig_resources as addr, cfg_res {
+		if cfg_res.type is const.logging_resource_type {
+			if "config" in cfg_res and const.cluster_identifier_attr in cfg_res.config {
+				cluster_ref_expr = cfg_res.config[const.cluster_identifier_attr]
+				
+				# Check if logging resource references the cluster resource
+				if "references" in cluster_ref_expr {
+					for cluster_ref_expr.references as ref {
+						if strings.has_prefix(ref, cluster_address) {
+							return {"found": true}
 						}
+					}
+				}
+				
+				# Check by cluster identifier value match
+				if "constant_value" in cluster_ref_expr and cluster_id is not null {
+					if cluster_ref_expr.constant_value is cluster_id {
+						return {"found": true}
 					}
 				}
 			}
 		}
-
-		# Check by cluster identifier value match
-		if cluster_id is not null and log_cluster_id is cluster_id {
-			return {"resource": log_res, "found": true}
-		}
 	}
 
-	return {"resource": null, "found": false}
+	return {"found": false}
 }
 
 # Check if node type is in allowed list
@@ -108,13 +104,24 @@ is_node_type_allowed = func(node_type, allowed_types) {
 	return false
 }
 
+# Helper function to get config value
+get_config_value = func(res, attr_name, default_value) {
+	if "config" in res and attr_name in res.config {
+		attr = res.config[attr_name]
+		if "constant_value" in attr {
+			return attr.constant_value
+		}
+	}
+	return default_value
+}
+
 # Validation Functions
 generate_violation_message = func(violation, encryption_compliant, logging_compliant, kms_compliant, node_type_compliant) {
 	messages = []
 
 	if not encryption_compliant {
-		encrypted_value = violation.values.encrypted else false
-		if encrypted_value is false or encrypted_value is undefined {
+		encrypted_value = get_config_value(violation, const.encrypted, true)
+		if encrypted_value is false {
 			messages = messages + ["Database encryption must be enabled (encrypted = true)"]
 		}
 	}
@@ -128,7 +135,7 @@ generate_violation_message = func(violation, encryption_compliant, logging_compl
 	}
 
 	if not node_type_compliant {
-		node_type_value = violation.values.node_type else ""
+		node_type_value = get_config_value(violation, const.node_type, "")
 		messages = messages + ["Node type '" + node_type_value + "' is not in the allowed list"]
 	}
 
@@ -143,7 +150,7 @@ is_encryption_compliant = func(res) {
 
 	# AWS default: encrypted is true if not specified
 	# Check if encrypted is explicitly set to false
-	encrypted = res.values.encrypted else true
+	encrypted = get_config_value(res, const.encrypted, true)
 	return encrypted is true
 }
 
@@ -154,13 +161,13 @@ is_kms_key_compliant = func(res) {
 	}
 
 	# When specifying kms_key_id, encrypted needs to be set to true
-	encrypted = res.values.encrypted else true
+	encrypted = get_config_value(res, const.encrypted, true)
 	if not encrypted {
 		return false
 	}
 
 	# If a specific KMS key is required, check if it matches
-	cluster_kms_key = res.values.kms_key_id else ""
+	cluster_kms_key = get_config_value(res, const.kms_key_id, "")
 
 	# If cluster is not using the specified KMS key, it's non-compliant
 	if cluster_kms_key is "" or cluster_kms_key != kms_key_id {
@@ -189,7 +196,7 @@ is_node_type_compliant = func(res, allowed_types) {
 		return true # No restriction if list is empty
 	}
 
-	node_type = res.values.node_type else ""
+	node_type = get_config_value(res, const.node_type, "")
 
 	if node_type is "" {
 		return false
@@ -206,32 +213,44 @@ is_compliant = func(res, logging_result, allowed_types) {
 	return encryption_ok and kms_ok and logging_ok and node_type_ok
 }
 
+# Get cluster resources from tfconfig
+get_cluster_resources = func(resources) {
+	clusters = {}
+	for resources as addr, res {
+		if res.type is const.cluster_resource_type {
+			clusters[addr] = res
+		}
+	}
+	return clusters
+}
+
 # Variables
 allowed_types = parse_node_types(nodeTypes)
-cluster_resources = tf.plan(tfplan.planned_values.resources).type(const.cluster_resource_type).resources
-logging_resources = tf.plan(tfplan.planned_values.resources).type(const.logging_resource_type).resources
 tfconfig_resources = tfconfig.resources
+cluster_resources = get_cluster_resources(tfconfig_resources)
 
 # Helper function to create violation entry
-create_violation_entry = func(v, logging_resources, tfconfig_resources, allowed_types) {
-	logging_result = has_logging_resource(v.address, logging_resources, tfconfig_resources)
+create_violation_entry = func(addr, res, tfconfig_resources, allowed_types) {
+	logging_result = has_logging_resource(addr, tfconfig_resources)
+	module_addr = res.module_address else ""
 	return {
-		"address":        v.address,
-		"module_address": v.module_address,
-		"message":        generate_violation_message(v, is_encryption_compliant(v), is_logging_compliant(v, logging_result), is_kms_key_compliant(v), is_node_type_compliant(v, allowed_types)),
+		"address":        addr,
+		"module_address": module_addr,
+		"message":        generate_violation_message(res, is_encryption_compliant(res), is_logging_compliant(res, logging_result), is_kms_key_compliant(res), is_node_type_compliant(res, allowed_types)),
 	}
 }
 
-violations = collection.reject(cluster_resources, func(cluster_res) {
-	logging_result = has_logging_resource(cluster_res.address, logging_resources, tfconfig_resources)
-	return is_compliant(cluster_res, logging_result, allowed_types)
-})
+violations = []
+for cluster_resources as addr, res {
+	logging_result = has_logging_resource(addr, tfconfig_resources)
+	if not is_compliant(res, logging_result, allowed_types) {
+		violations = violations + [create_violation_entry(addr, res, tfconfig_resources, allowed_types)]
+	}
+}
 
 summary = {
 	"policy_name": const.policy_name,
-	"violations": map violations as _, v {
-		create_violation_entry(v, logging_resources, tfconfig_resources, allowed_types)
-	},
+	"violations": violations,
 }
 
 # Outputs

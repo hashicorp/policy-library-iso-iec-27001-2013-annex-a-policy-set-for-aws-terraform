@@ -1,0 +1,146 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+import "strings"
+
+providers = {
+	"aws": {
+		"alias": "",
+		"config": {
+			"region": {
+				"constant_value": "us-east-1",
+			},
+		},
+		"full_name":           "registry.terraform.io/hashicorp/aws",
+		"module_address":      "",
+		"name":                "aws",
+		"provider_config_key": "aws",
+		"version_constraint":  "",
+	},
+}
+
+resources = {
+	"aws_iam_policy.example": {
+		"address": "aws_iam_policy.example",
+		"config": {
+			"name": {
+				"constant_value": "example-policy",
+			},
+			"policy": {
+				"constant_value": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Action\":\"s3:ListBucket\",\"Resource\":\"*\"}]}",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_iam_policy",
+	},
+	"aws_iam_group.example": {
+		"address": "aws_iam_group.example",
+		"config": {
+			"name": {
+				"constant_value": "example-group",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_iam_group",
+	},
+	"aws_iam_user.example": {
+		"address": "aws_iam_user.example",
+		"config": {
+			"name": {
+				"constant_value": "example-user",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_iam_user",
+	},
+	"aws_iam_group_membership.example": {
+		"address": "aws_iam_group_membership.example",
+		"config": {
+			"name": {
+				"constant_value": "example-group-membership",
+			},
+			"group": {
+				"references": [
+					"aws_iam_group.example.name",
+					"aws_iam_group.example",
+				],
+			},
+			"users": {
+				"constant_value": ["example-user"],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_iam_group_membership",
+	},
+	"aws_iam_group_policy_attachment.example": {
+		"address": "aws_iam_group_policy_attachment.example",
+		"config": {
+			"group": {
+				"references": [
+					"aws_iam_group.example.name",
+					"aws_iam_group.example",
+				],
+			},
+			"policy_arn": {
+				"references": [
+					"aws_iam_policy.example.arn",
+					"aws_iam_policy.example",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_iam_group_policy_attachment",
+	},
+}
+
+provisioners = {}
+
+variables = {}
+
+outputs = {}
+
+module_calls = {}
+
+strip_index = func(addr) {
+	s = strings.split(addr, ".")
+	for s as i, v {
+		s[i] = strings.split(v, "[")[0]
+	}
+
+	return strings.join(s, ".")
+}

@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 
-mock "tfplan/v2" {
+mock "tfconfig/v2" {
   module {
-    source = "./mocks/fail/fail-policy-attached-to-role-no-trusted-entity.sentinel"
+    source = "./mocks/fail/fail-policy-attached-to-role-no-trusted-entity-config.sentinel"
   }
 }
 

@@ -5,12 +5,10 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports
-import "tfplan/v2" as tfplan
 import "tfconfig/v2" as tfconfig
 import "tfresources" as tf
 import "report" as report
 import "collection" as collection
-import "collection/maps" as maps
 import "strings"
 
 # Parameters
@@ -41,52 +39,56 @@ parse_bucket_names = func(csv_string) {
 	return collection.reject(trimmed_buckets, func(b) { return b is "" })
 }
 
+# Helper function to get config value
+get_config_value = func(res, attr_name, default_value) {
+	if "config" in res and attr_name in res.config {
+		attr = res.config[attr_name]
+		if "constant_value" in attr {
+			return attr.constant_value
+		}
+	}
+	return default_value
+}
+
 # Check if a cluster has associated aws_redshift_logging resource
 # Uses tfconfig to trace resource references
-has_logging_resource = func(cluster_address, logging_resources, tfconfig_resources) {
+has_logging_resource = func(cluster_address, tfconfig_resources) {
 	cluster_id = null
 
 	# Try to get cluster identifier from the cluster resource config
 	for tfconfig_resources as addr, cfg_res {
 		if addr is cluster_address {
-			if "expressions" in cfg_res and const.cluster_identifier_attr in cfg_res.expressions {
-				cluster_id_expr = cfg_res.expressions[const.cluster_identifier_attr]
-				if "constant_value" in cluster_id_expr {
-					cluster_id = cluster_id_expr.constant_value
-				}
-			}
+			cluster_id = get_config_value(cfg_res, const.cluster_identifier_attr, null)
 			break
 		}
 	}
 
-	# Check if any logging resource references this cluster
-	for logging_resources as _, log_res {
-		log_cluster_id = maps.get(log_res.values, const.cluster_identifier_attr, "")
-
-		# Check if logging resource references the cluster resource via tfconfig
-		log_address = log_res.address
-		for tfconfig_resources as addr, cfg_res {
-			if addr is log_address {
-				if "expressions" in cfg_res and const.cluster_identifier_attr in cfg_res.expressions {
-					cluster_ref_expr = cfg_res.expressions[const.cluster_identifier_attr]
-					if "references" in cluster_ref_expr {
-						for cluster_ref_expr.references as ref {
-							if strings.has_prefix(ref, cluster_address) {
-								return {"resource": log_res, "found": true}
-							}
+	# Check if any logging resource references this cluster via tfconfig
+	for tfconfig_resources as addr, cfg_res {
+		if cfg_res.type is const.logging_resource_type {
+			if "config" in cfg_res and const.cluster_identifier_attr in cfg_res.config {
+				cluster_ref_expr = cfg_res.config[const.cluster_identifier_attr]
+				
+				# Check if logging resource references the cluster resource
+				if "references" in cluster_ref_expr {
+					for cluster_ref_expr.references as ref {
+						if strings.has_prefix(ref, cluster_address) {
+							return {"resource": cfg_res, "found": true, "address": addr}
 						}
+					}
+				}
+				
+				# Check by cluster identifier value match
+				if "constant_value" in cluster_ref_expr and cluster_id is not null {
+					if cluster_ref_expr.constant_value is cluster_id {
+						return {"resource": cfg_res, "found": true, "address": addr}
 					}
 				}
 			}
 		}
-
-		# Check by cluster identifier value match
-		if cluster_id is not null and log_cluster_id is cluster_id {
-			return {"resource": log_res, "found": true}
-		}
 	}
 
-	return {"resource": null, "found": false}
+	return {"resource": null, "found": false, "address": null}
 }
 
 # Check if bucket name is in allowed list
@@ -111,8 +113,8 @@ generate_violation_message = func(cluster_res, logging_result, allowed_buckets) 
 	}
 
 	log_res = logging_result.resource
-	log_dest_type = maps.get(log_res.values, const.log_destination_type, "")
-	bucket_name = maps.get(log_res.values, const.bucket_name_attribute, "")
+	log_dest_type = get_config_value(log_res, const.log_destination_type, "")
+	bucket_name = get_config_value(log_res, const.bucket_name_attribute, "")
 
 	# If logging to S3, bucket_name must be specified and validated
 	if log_dest_type is "s3" or (log_dest_type is "" and bucket_name is not "") {
@@ -135,8 +137,8 @@ is_logging_compliant = func(cluster_res, logging_result, allowed_buckets) {
 	}
 
 	log_res = logging_result.resource
-	log_dest_type = maps.get(log_res.values, const.log_destination_type, "")
-	bucket_name = maps.get(log_res.values, const.bucket_name_attribute, "")
+	log_dest_type = get_config_value(log_res, const.log_destination_type, "")
+	bucket_name = get_config_value(log_res, const.bucket_name_attribute, "")
 
 	# CloudWatch logging is acceptable
 	if log_dest_type is "cloudwatch" {
@@ -157,32 +159,44 @@ is_logging_compliant = func(cluster_res, logging_result, allowed_buckets) {
 	return true
 }
 
+# Get cluster resources from tfconfig
+get_cluster_resources = func(resources) {
+	clusters = {}
+	for resources as addr, res {
+		if res.type is const.cluster_resource_type {
+			clusters[addr] = res
+		}
+	}
+	return clusters
+}
+
 # Variables
 allowed_buckets = parse_bucket_names(bucketNames)
-cluster_resources = tf.plan(tfplan.planned_values.resources).type(const.cluster_resource_type).resources
-logging_resources = tf.plan(tfplan.planned_values.resources).type(const.logging_resource_type).resources
 tfconfig_resources = tfconfig.resources
+cluster_resources = get_cluster_resources(tfconfig_resources)
 
 # Helper function to create violation entry
-create_violation_entry = func(v, logging_resources, tfconfig_resources, allowed_buckets) {
-	logging_result = has_logging_resource(v.address, logging_resources, tfconfig_resources)
+create_violation_entry = func(addr, res, tfconfig_resources, allowed_buckets) {
+	logging_result = has_logging_resource(addr, tfconfig_resources)
+	module_addr = res.module_address else ""
 	return {
-		"address":        v.address,
-		"module_address": v.module_address,
-		"message":        generate_violation_message(v, logging_result, allowed_buckets),
+		"address":        addr,
+		"module_address": module_addr,
+		"message":        generate_violation_message(res, logging_result, allowed_buckets),
 	}
 }
 
-violations = collection.reject(cluster_resources, func(cluster_res) {
-	logging_result = has_logging_resource(cluster_res.address, logging_resources, tfconfig_resources)
-	return is_logging_compliant(cluster_res, logging_result, allowed_buckets)
-})
+violations = []
+for cluster_resources as addr, res {
+	logging_result = has_logging_resource(addr, tfconfig_resources)
+	if not is_logging_compliant(res, logging_result, allowed_buckets) {
+		violations = violations + [create_violation_entry(addr, res, tfconfig_resources, allowed_buckets)]
+	}
+}
 
 summary = {
 	"policy_name": const.policy_name,
-	"violations": map violations as _, v {
-		create_violation_entry(v, logging_resources, tfconfig_resources, allowed_buckets)
-	},
+	"violations": violations,
 }
 
 # Outputs

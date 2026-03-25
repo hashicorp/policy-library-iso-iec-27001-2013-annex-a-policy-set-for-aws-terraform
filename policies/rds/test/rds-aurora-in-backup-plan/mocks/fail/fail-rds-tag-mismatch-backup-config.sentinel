@@ -1,0 +1,144 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+import "strings"
+
+providers = {
+	"aws": {
+		"alias": "",
+		"config": {
+			"region": {
+				"constant_value": "us-east-1",
+			},
+		},
+		"full_name":           "registry.terraform.io/hashicorp/aws",
+		"module_address":      "",
+		"name":                "aws",
+		"provider_config_key": "aws",
+		"version_constraint":  "",
+	},
+}
+
+resources = {
+	"aws_db_instance.tagged": {
+		"address": "aws_db_instance.tagged",
+		"config": {
+			"identifier": {
+				"constant_value": "tagged-db",
+			},
+			"engine": {
+				"constant_value": "aurora-postgresql",
+			},
+			"instance_class": {
+				"constant_value": "db.t3.micro",
+			},
+			"tags": {
+				"constant_value": {
+					"Environment": "development",
+					"Backup":      "false",
+				},
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "tagged",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_db_instance",
+	},
+	"aws_iam_role.backup": {
+		"address": "aws_iam_role.backup",
+		"config": {
+			"name": {
+				"constant_value": "backup-role",
+			},
+			"assume_role_policy": {
+				"constant_value": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"backup.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "backup",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_iam_role",
+	},
+	"aws_backup_plan.tag_based": {
+		"address": "aws_backup_plan.tag_based",
+		"config": {
+			"name": {
+				"constant_value": "tag-based-backup-plan",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "tag_based",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_plan",
+	},
+	"aws_backup_selection.tag_based": {
+		"address": "aws_backup_selection.tag_based",
+		"config": {
+			"name": {
+				"constant_value": "tag-based-selection",
+			},
+			"plan_id": {
+				"references": [
+					"aws_backup_plan.tag_based.id",
+					"aws_backup_plan.tag_based",
+				],
+			},
+			"iam_role_arn": {
+				"references": [
+					"aws_iam_role.backup.arn",
+					"aws_iam_role.backup",
+				],
+			},
+			"selection_tag": {
+				"constant_value": [
+					{
+						"type":  "STRINGEQUALS",
+						"key":   "Backup",
+						"value": "true",
+					},
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "tag_based",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+}
+
+provisioners = {}
+
+variables = {}
+
+outputs = {}
+
+module_calls = {}
+
+strip_index = func(addr) {
+	s = strings.split(addr, ".")
+	for s as i, v {
+		s[i] = strings.split(v, "[")[0]
+	}
+
+	return strings.join(s, ".")
+}

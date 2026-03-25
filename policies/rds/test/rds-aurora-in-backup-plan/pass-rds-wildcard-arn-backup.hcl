@@ -2,9 +2,9 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 
-mock "tfplan/v2" {
+mock "tfconfig/v2" {
   module {
-    source = "./mocks/pass/pass-rds-wildcard-arn-backup.sentinel"
+    source = "./mocks/pass/pass-rds-wildcard-arn-backup-config.sentinel"
   }
 }
 

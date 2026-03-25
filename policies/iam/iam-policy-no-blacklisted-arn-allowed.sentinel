@@ -5,15 +5,16 @@
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports
-import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
 import "tfresources" as tf
 import "report" as report
+import "collection" as collection
 import "collection/maps" as maps
 import "strings"
 
 # Params
 # policyArns is a list of IAM policy ARNs that should not be attached to any IAM resource
-param policyArns default []
+param policyArns default ["arn:aws:iam::aws:policy/AdministratorAccess"]
 
 # exceptionList is an optional CSV parameter for excluding specific resources
 # Format: users:[user1;user2], groups:[group1;group2], roles:[role1;role2]
@@ -22,6 +23,7 @@ param exceptionList default ""
 # Constants
 const = {
 	"policy_name":                              "iam-policy-no-blacklisted-arn-allowed",
+	"resource_aws_iam_policy":                  "aws_iam_policy",
 	"resource_aws_iam_user_policy_attachment":  "aws_iam_user_policy_attachment",
 	"resource_aws_iam_group_policy_attachment": "aws_iam_group_policy_attachment",
 	"resource_aws_iam_role_policy_attachment":  "aws_iam_role_policy_attachment",
@@ -84,17 +86,88 @@ parse_exception_list = func(exception_str) {
 	return exceptions
 }
 
-is_blacklisted_policy = func(policy_arn) {
-	for policyArns as blacklisted_arn {
-		if policy_arn is blacklisted_arn {
-			return true
+# Check if a policy ARN (constant or reference) matches a blacklisted ARN
+is_blacklisted_policy = func(policy_arn_config, policies) {
+	# Check for constant value
+	if maps.has(policy_arn_config, "constant_value") {
+		policy_arn = policy_arn_config.constant_value
+		for policyArns as blacklisted_arn {
+			if policy_arn is blacklisted_arn {
+				return true
+			}
 		}
 	}
+	
+	# Check for references to aws_iam_policy resources
+	if maps.has(policy_arn_config, "references") {
+		for policy_arn_config.references as _, ref {
+			# Check if this references an aws_iam_policy resource
+			if strings.has_prefix(ref, "aws_iam_policy.") {
+				# Extract the policy resource address
+				policy_address = ref
+				if strings.has_suffix(ref, ".arn") {
+					parts = strings.split(ref, ".arn")
+					policy_address = parts[0]
+				}
+				
+				# Find the policy resource and check its ARN
+				for policies as _, policy {
+					if policy.address is policy_address {
+						# Check if this policy has a blacklisted ARN in its config
+						arn_config = maps.get(policy.config, "arn", {})
+						if maps.has(arn_config, "constant_value") {
+							arn = arn_config.constant_value
+							for policyArns as blacklisted_arn {
+								if arn is blacklisted_arn {
+									return true
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	
 	return false
+}
+
+# Get resource name from config (constant value or reference)
+get_resource_name = func(resource_config, resource_type, all_resources) {
+	if maps.has(resource_config, "constant_value") {
+		return resource_config.constant_value
+	} else if maps.has(resource_config, "references") {
+		# Extract name from reference
+		for resource_config.references as _, ref {
+			ref_prefix = "aws_iam_" + resource_type + "."
+			if strings.has_prefix(ref, ref_prefix) {
+				# Find the referenced resource
+				resource_address = ref
+				if strings.has_suffix(ref, ".name") {
+					parts = strings.split(ref, ".name")
+					resource_address = parts[0]
+				}
+				
+				for all_resources as _, res {
+					if res.address is resource_address {
+						name_config = maps.get(res.config, "name", {})
+						if maps.has(name_config, "constant_value") {
+							return name_config.constant_value
+						}
+					}
+				}
+			}
+		}
+	}
+	return ""
 }
 
 # Check if a resource is in the exception list
 is_in_exception_list = func(resource_name, resource_type, exceptions) {
+	if resource_name is "" {
+		return false
+	}
+	
 	if resource_type is "user" {
 		for exceptions["users"] as exception_name {
 			if resource_name is exception_name {
@@ -117,58 +190,139 @@ is_in_exception_list = func(resource_name, resource_type, exceptions) {
 	return false
 }
 
-generate_violation_message = func(policy_arn, resource_type) {
-	return "Blacklisted IAM policy ARN '" + policy_arn + "' is attached to " + resource_type + ". This violates the IAM policy blacklist check. Refer to https://docs.aws.amazon.com/config/latest/developerguide/iam-policy-blacklisted-check.html for more details."
+generate_violation_message = func(policy_arn, resource_type, resource_name) {
+	msg = "Blacklisted IAM policy ARN '" + policy_arn + "' is attached to " + resource_type
+	if resource_name is not "" {
+		msg += " '" + resource_name + "'"
+	}
+	msg += ". This violates the IAM policy blacklist check. Refer to https://docs.aws.amazon.com/config/latest/developerguide/iam-policy-blacklisted-check.html for more details."
+	return msg
+}
+
+# Get policy ARN for violation message (from constant or reference)
+get_policy_arn_for_message = func(policy_arn_config, policies) {
+	# Check for constant value
+	if maps.has(policy_arn_config, "constant_value") {
+		return policy_arn_config.constant_value
+	}
+	
+	# Check for references
+	if maps.has(policy_arn_config, "references") {
+		for policy_arn_config.references as _, ref {
+			if strings.has_prefix(ref, "aws_iam_policy.") {
+				policy_address = ref
+				if strings.has_suffix(ref, ".arn") {
+					parts = strings.split(ref, ".arn")
+					policy_address = parts[0]
+				}
+				
+				for policies as _, policy {
+					if policy.address is policy_address {
+						arn_config = maps.get(policy.config, "arn", {})
+						if maps.has(arn_config, "constant_value") {
+							return arn_config.constant_value
+						}
+					}
+				}
+				# If we can't find the ARN, return the reference itself
+				return ref
+			}
+		}
+	}
+	
+	return "unknown"
 }
 
 # Variables
 # Parse exception list
 exceptions = parse_exception_list(exceptionList)
 
-user_policy_attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_user_policy_attachment).resources
-group_policy_attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_group_policy_attachment).resources
-role_policy_attachments = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_iam_role_policy_attachment).resources
+# Get all IAM policies to resolve references
+policies = tf.config(tfconfig.resources).type(const.resource_aws_iam_policy).resources
 
-user_violations = filter user_policy_attachments as _, res {
-	is_blacklisted_policy(maps.get(res.values, const.policy_arn, "")) is true and
-		is_in_exception_list(maps.get(res.values, "user", ""), "user", exceptions) is false
-}
+# Get all IAM resources
+users = tf.config(tfconfig.resources).type("aws_iam_user").resources
+groups = tf.config(tfconfig.resources).type("aws_iam_group").resources
+roles = tf.config(tfconfig.resources).type("aws_iam_role").resources
 
-group_violations = filter group_policy_attachments as _, res {
-	is_blacklisted_policy(maps.get(res.values, const.policy_arn, "")) is true and
-		is_in_exception_list(maps.get(res.values, "group", ""), "group", exceptions) is false
-}
+user_policy_attachments = tf.config(tfconfig.resources).type(const.resource_aws_iam_user_policy_attachment).resources
+group_policy_attachments = tf.config(tfconfig.resources).type(const.resource_aws_iam_group_policy_attachment).resources
+role_policy_attachments = tf.config(tfconfig.resources).type(const.resource_aws_iam_role_policy_attachment).resources
 
-role_violations = filter role_policy_attachments as _, res {
-	is_blacklisted_policy(maps.get(res.values, const.policy_arn, "")) is true and
-		is_in_exception_list(maps.get(res.values, "role", ""), "role", exceptions) is false
-}
+# Check user policy attachments
+user_violations = collection.filter(user_policy_attachments, func(res) {
+	policy_arn_config = maps.get(res.config, const.policy_arn, {})
+	user_config = maps.get(res.config, "user", {})
+	
+	if is_blacklisted_policy(policy_arn_config, policies) {
+		user_name = get_resource_name(user_config, "user", users)
+		return not is_in_exception_list(user_name, "user", exceptions)
+	}
+	return false
+})
 
+# Check group policy attachments
+group_violations = collection.filter(group_policy_attachments, func(res) {
+	policy_arn_config = maps.get(res.config, const.policy_arn, {})
+	group_config = maps.get(res.config, "group", {})
+	
+	if is_blacklisted_policy(policy_arn_config, policies) {
+		group_name = get_resource_name(group_config, "group", groups)
+		return not is_in_exception_list(group_name, "group", exceptions)
+	}
+	return false
+})
+
+# Check role policy attachments
+role_violations = collection.filter(role_policy_attachments, func(res) {
+	policy_arn_config = maps.get(res.config, const.policy_arn, {})
+	role_config = maps.get(res.config, "role", {})
+	
+	if is_blacklisted_policy(policy_arn_config, policies) {
+		role_name = get_resource_name(role_config, "role", roles)
+		return not is_in_exception_list(role_name, "role", exceptions)
+	}
+	return false
+})
+
+# Collect all violations
 all_violations = []
 for user_violations as _, v {
-	policy_arn = maps.get(v.values, const.policy_arn, "unknown")
+	policy_arn_config = maps.get(v.config, const.policy_arn, {})
+	user_config = maps.get(v.config, "user", {})
+	policy_arn = get_policy_arn_for_message(policy_arn_config, policies)
+	user_name = get_resource_name(user_config, "user", users)
+	
 	all_violations += [{
 		"address":        v.address,
 		"module_address": v.module_address,
-		"message":        generate_violation_message(policy_arn, "IAM user"),
+		"message":        generate_violation_message(policy_arn, "IAM user", user_name),
 	}]
 }
 
 for group_violations as _, v {
-	policy_arn = maps.get(v.values, const.policy_arn, "unknown")
+	policy_arn_config = maps.get(v.config, const.policy_arn, {})
+	group_config = maps.get(v.config, "group", {})
+	policy_arn = get_policy_arn_for_message(policy_arn_config, policies)
+	group_name = get_resource_name(group_config, "group", groups)
+	
 	all_violations += [{
 		"address":        v.address,
 		"module_address": v.module_address,
-		"message":        generate_violation_message(policy_arn, "IAM group"),
+		"message":        generate_violation_message(policy_arn, "IAM group", group_name),
 	}]
 }
 
 for role_violations as _, v {
-	policy_arn = maps.get(v.values, const.policy_arn, "unknown")
+	policy_arn_config = maps.get(v.config, const.policy_arn, {})
+	role_config = maps.get(v.config, "role", {})
+	policy_arn = get_policy_arn_for_message(policy_arn_config, policies)
+	role_name = get_resource_name(role_config, "role", roles)
+	
 	all_violations += [{
 		"address":        v.address,
 		"module_address": v.module_address,
-		"message":        generate_violation_message(policy_arn, "IAM role"),
+		"message":        generate_violation_message(policy_arn, "IAM role", role_name),
 	}]
 }
 
