@@ -606,7 +606,6 @@ policy "eventbridge-global-endpoints-should-have-event-replication-enabled" {
   enforcement_level = "advisory"
 }
 
-<<<<<<< HEAD
 policy "cloudtrail-security-best-practices" {
   source = "./policies/cloudtrail/cloudtrail-security-best-practices.sentinel"
   enforcement_level = "advisory"
@@ -722,7 +721,7 @@ policy "backup-recovery-point-manual-deletion-disabled" {
   source = "./policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel"
   enforcement_level = "advisory"
 }
-=======
+
 policy "emr-kerberos-should-be-enabled" {
   source = "./policies/emr/emr-kerberos-should-be-enabled.sentinel"
   enforcement_level = "advisory"
@@ -842,4 +841,3 @@ policy "secretsmanager-secrets-encrypted-using-cmk" {
   source = "./policies/secretsmanager/secretsmanager-secrets-encrypted-using-cmk.sentinel"
   enforcement_level = "advisory"
 }
->>>>>>> 8e5bbcb (Add policies related to aws cloudtrail, ec2, elb, emr, iam, mq, rds, redshift, s3, sagemaker and secretsmanager)

@@ -9,12 +9,12 @@ resources = {
 				"constant_value": "rtb-fail456",
 			},
 			"route": [
-					{
-						"cidr_block": {"constant_value": ""},
-						"ipv6_cidr_block": {"constant_value": "::/0"},
-						"gateway_id": {"constant_value": "igw-12345678"},
-					},
-				],
+				{
+					"cidr_block":      {"constant_value": ""},
+					"ipv6_cidr_block": {"constant_value": "::/0"},
+					"gateway_id":      {"constant_value": "igw-12345678"},
+				},
+			],
 			"vpc_id": {
 				"constant_value": "vpc-12345678",
 			},

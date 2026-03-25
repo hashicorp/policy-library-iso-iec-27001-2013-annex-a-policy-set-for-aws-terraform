@@ -67,7 +67,7 @@ is_policy_attached_to_user = func(policy_identifier, user_attachments, users) {
 	for user_attachments as _, attachment {
 		# Get policy_arn from config - it can be a constant or reference
 		policy_arn_config = maps.get(attachment.config, "policy_arn", {})
-		
+
 		# Check for constant value
 		if maps.has(policy_arn_config, "constant_value") {
 			policy_arn = policy_arn_config.constant_value
@@ -87,7 +87,7 @@ is_policy_attached_to_user = func(policy_identifier, user_attachments, users) {
 				}
 			}
 		}
-		
+
 		# Check for references to the policy
 		if maps.has(policy_arn_config, "references") {
 			for policy_arn_config.references as _, ref {
@@ -110,7 +110,7 @@ is_policy_attached_to_group = func(policy_identifier, group_attachments, group_m
 		# Get policy_arn from config
 		policy_arn_config = maps.get(attachment.config, "policy_arn", {})
 		policy_matches = false
-		
+
 		# Check for constant value
 		if maps.has(policy_arn_config, "constant_value") {
 			policy_arn = policy_arn_config.constant_value
@@ -118,7 +118,7 @@ is_policy_attached_to_group = func(policy_identifier, group_attachments, group_m
 				policy_matches = true
 			}
 		}
-		
+
 		# Check for references to the policy
 		if maps.has(policy_arn_config, "references") {
 			for policy_arn_config.references as _, ref {
@@ -127,12 +127,12 @@ is_policy_attached_to_group = func(policy_identifier, group_attachments, group_m
 				}
 			}
 		}
-		
+
 		if policy_matches {
 			# Get group name from config
 			group_config = maps.get(attachment.config, "group", {})
 			group_name = ""
-			
+
 			if maps.has(group_config, "constant_value") {
 				group_name = group_config.constant_value
 			} else if maps.has(group_config, "references") {
@@ -151,13 +151,13 @@ is_policy_attached_to_group = func(policy_identifier, group_attachments, group_m
 					}
 				}
 			}
-			
+
 			# Check if this group has any members
 			if group_name is not "" {
 				for group_memberships as _, membership {
 					membership_group_config = maps.get(membership.config, "group", {})
 					membership_group = ""
-					
+
 					if maps.has(membership_group_config, "constant_value") {
 						membership_group = membership_group_config.constant_value
 					} else if maps.has(membership_group_config, "references") {
@@ -176,13 +176,13 @@ is_policy_attached_to_group = func(policy_identifier, group_attachments, group_m
 							}
 						}
 					}
-					
+
 					users_config = maps.get(membership.config, "users", {})
 					users = []
 					if maps.has(users_config, "constant_value") {
 						users = users_config.constant_value
 					}
-					
+
 					if membership_group is group_name and length(users) > 0 {
 						return true
 					}
@@ -222,7 +222,7 @@ is_policy_attached_to_role = func(policy_identifier, role_attachments, roles) {
 		# Get policy_arn from config
 		policy_arn_config = maps.get(attachment.config, "policy_arn", {})
 		policy_matches = false
-		
+
 		# Check for constant value
 		if maps.has(policy_arn_config, "constant_value") {
 			policy_arn = policy_arn_config.constant_value
@@ -230,7 +230,7 @@ is_policy_attached_to_role = func(policy_identifier, role_attachments, roles) {
 				policy_matches = true
 			}
 		}
-		
+
 		# Check for references to the policy
 		if maps.has(policy_arn_config, "references") {
 			for policy_arn_config.references as _, ref {
@@ -239,12 +239,12 @@ is_policy_attached_to_role = func(policy_identifier, role_attachments, roles) {
 				}
 			}
 		}
-		
+
 		if policy_matches {
 			# Get role name from config
 			role_config = maps.get(attachment.config, "role", {})
 			role_name = ""
-			
+
 			if maps.has(role_config, "constant_value") {
 				role_name = role_config.constant_value
 			} else if maps.has(role_config, "references") {
@@ -263,7 +263,7 @@ is_policy_attached_to_role = func(policy_identifier, role_attachments, roles) {
 					}
 				}
 			}
-			
+
 			# Check if this role exists and has an assume role policy with trusted entities
 			if role_name is not "" {
 				for roles as _, r {
@@ -272,13 +272,13 @@ is_policy_attached_to_role = func(policy_identifier, role_attachments, roles) {
 					if maps.has(r_name_config, "constant_value") {
 						r_name = r_name_config.constant_value
 					}
-					
+
 					assume_role_policy_config = maps.get(r.config, "assume_role_policy", {})
 					assume_role_policy = ""
 					if maps.has(assume_role_policy_config, "constant_value") {
 						assume_role_policy = assume_role_policy_config.constant_value
 					}
-					
+
 					if r_name is role_name and has_trusted_entities(assume_role_policy) {
 						return true
 					}

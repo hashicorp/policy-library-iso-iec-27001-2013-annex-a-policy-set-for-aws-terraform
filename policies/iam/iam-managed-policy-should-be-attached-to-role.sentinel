@@ -47,11 +47,11 @@ trimmed_required_policies = parse_managed_policy_arns(managedPolicyArns)
 # Extract role name from role config
 get_role_name_from_config = func(role_config) {
 	name_ref = maps.get(role_config, "name", {})
-	
+
 	if "constant_value" in keys(name_ref) {
 		return name_ref.constant_value
 	}
-	
+
 	return ""
 }
 
@@ -59,14 +59,14 @@ get_role_name_from_config = func(role_config) {
 get_role_name_map = func() {
 	role_map = {}
 	roles = tf.config(tfconfig.resources).type(const.resource_aws_iam_role).resources
-	
+
 	for roles as _, role {
 		role_name = get_role_name_from_config(role.config)
 		if role_name is not "" {
 			role_map[role.address] = role_name
 		}
 	}
-	
+
 	return role_map
 }
 
@@ -82,7 +82,7 @@ get_policy_attachments_by_role = func(role_name_map) {
 		# Get role name from config
 		role_ref = attachment.config.role else {}
 		role_name = ""
-		
+
 		# Handle constant value (direct role name)
 		if "constant_value" in keys(role_ref) {
 			role_name = role_ref.constant_value
@@ -95,15 +95,15 @@ get_policy_attachments_by_role = func(role_name_map) {
 			# Look up the actual role name from our map
 			role_name = role_name_map[role_address] else ""
 		}
-		
+
 		# Get policy ARN from config
 		policy_arn_ref = attachment.config.policy_arn else {}
 		policy_arn = ""
-		
+
 		# Handle constant value (AWS managed policies or direct ARNs)
 		if "constant_value" in keys(policy_arn_ref) {
 			policy_arn = policy_arn_ref.constant_value
-			
+
 			if role_name is not "" and policy_arn is not "" {
 				if role_name not in keys(role_policies) {
 					role_policies[role_name] = []

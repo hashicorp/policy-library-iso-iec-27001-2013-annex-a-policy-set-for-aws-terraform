@@ -424,7 +424,7 @@ violations = collection.reject(policy_config_resources, func(policy) {
 	if not has_bucket_reference_in_config(policy, bucket_config_resources) {
 		return false
 	}
-	
+
 	policy_config = maps.get(policy.config, const.policy_attr, {})
 	policy_content = maps.get(policy_config, "constant_value", "")
 	if policy_content is "" {

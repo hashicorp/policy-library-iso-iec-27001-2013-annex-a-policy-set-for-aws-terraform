@@ -69,7 +69,7 @@ normalize_bucket_reference = func(ref) {
 
 	last_segment = segments[length(segments) - 1]
 	if last_segment is "id" or last_segment is "arn" {
-		return strings.join(segments[0:length(segments) - 1], ".")
+		return strings.join(segments[0 : length(segments) - 1], ".")
 	}
 
 	return ref
@@ -213,12 +213,12 @@ bucket_has_valid_replication = func(bucket_res) {
 	replication_config = collection.find(replication_configs, func(rc) {
 		return replication_targets_bucket(rc, bucket_res.address)
 	})
-	
+
 	# If no replication configuration found, fail
 	if replication_config is not defined {
 		return false
 	}
-	
+
 	# Check if replication configuration has valid rules
 	result = has_valid_replication_rules(replication_config)
 	return result.valid
@@ -234,13 +234,13 @@ for violations as address, v {
 	replication_config = collection.find(replication_configs, func(rc) {
 		return replication_targets_bucket(rc, v.address)
 	})
-	
+
 	reason = "no replication configuration found"
 	if replication_config is defined {
 		result = has_valid_replication_rules(replication_config)
 		reason = result.reason
 	}
-	
+
 	violation_details = {
 		"address":        v.address,
 		"module_address": v.module_address,

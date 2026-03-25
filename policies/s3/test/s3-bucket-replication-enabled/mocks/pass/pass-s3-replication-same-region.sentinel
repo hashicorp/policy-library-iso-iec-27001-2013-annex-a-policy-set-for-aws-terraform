@@ -29,18 +29,18 @@ resources = {
 				],
 			},
 			"rule": [
-					{
-						"id": {"constant_value": "same-region-rule"},
-						"status": {"constant_value": "Enabled"},
-						"priority": {"constant_value": 1},
-						"destination": [
-							{
-								"bucket": {"constant_value": "arn:aws:s3:::destination-bucket-same-region"},
-								"storage_class": {"constant_value": "STANDARD"},
-							},
-						],
-					},
-				],
+				{
+					"id":       {"constant_value": "same-region-rule"},
+					"status":   {"constant_value": "Enabled"},
+					"priority": {"constant_value": 1},
+					"destination": [
+						{
+							"bucket":        {"constant_value": "arn:aws:s3:::destination-bucket-same-region"},
+							"storage_class": {"constant_value": "STANDARD"},
+						},
+					],
+				},
+			],
 		},
 		"count":               {},
 		"depends_on":          [],

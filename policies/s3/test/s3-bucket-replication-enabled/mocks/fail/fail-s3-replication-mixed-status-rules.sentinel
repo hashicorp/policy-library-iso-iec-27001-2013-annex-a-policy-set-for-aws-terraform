@@ -29,29 +29,29 @@ resources = {
 				],
 			},
 			"rule": [
-					{
-						"id": {"constant_value": "rule1"},
-						"status": {"constant_value": "Enabled"},
-						"priority": {"constant_value": 1},
-						"destination": [
-							{
-								"bucket": {"constant_value": "arn:aws:s3:::destination-bucket-1"},
-								"storage_class": {"constant_value": "STANDARD"},
-							},
-						],
-					},
-					{
-						"id": {"constant_value": "rule2"},
-						"status": {"constant_value": "Disabled"},
-						"priority": {"constant_value": 2},
-						"destination": [
-							{
-								"bucket": {"constant_value": "arn:aws:s3:::destination-bucket-2"},
-								"storage_class": {"constant_value": "GLACIER"},
-							},
-						],
-					},
-				],
+				{
+					"id":       {"constant_value": "rule1"},
+					"status":   {"constant_value": "Enabled"},
+					"priority": {"constant_value": 1},
+					"destination": [
+						{
+							"bucket":        {"constant_value": "arn:aws:s3:::destination-bucket-1"},
+							"storage_class": {"constant_value": "STANDARD"},
+						},
+					],
+				},
+				{
+					"id":       {"constant_value": "rule2"},
+					"status":   {"constant_value": "Disabled"},
+					"priority": {"constant_value": 2},
+					"destination": [
+						{
+							"bucket":        {"constant_value": "arn:aws:s3:::destination-bucket-2"},
+							"storage_class": {"constant_value": "GLACIER"},
+						},
+					],
+				},
+			],
 		},
 		"count":               {},
 		"depends_on":          [],

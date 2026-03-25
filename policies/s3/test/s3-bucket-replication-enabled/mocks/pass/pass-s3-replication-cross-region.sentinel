@@ -29,19 +29,19 @@ resources = {
 				],
 			},
 			"rule": [
-					{
-						"id": {"constant_value": "cross-region-rule"},
-						"status": {"constant_value": "Enabled"},
-						"priority": {"constant_value": 1},
-						"destination": [
-							{
-								"bucket": {"constant_value": "arn:aws:s3:::destination-bucket"},
-								"region": {"constant_value": "us-west-2"},
-								"storage_class": {"constant_value": "STANDARD"},
-							},
-						],
-					},
-				],
+				{
+					"id":       {"constant_value": "cross-region-rule"},
+					"status":   {"constant_value": "Enabled"},
+					"priority": {"constant_value": 1},
+					"destination": [
+						{
+							"bucket":        {"constant_value": "arn:aws:s3:::destination-bucket"},
+							"region":        {"constant_value": "us-west-2"},
+							"storage_class": {"constant_value": "STANDARD"},
+						},
+					],
+				},
+			],
 		},
 		"count":               {},
 		"depends_on":          [],

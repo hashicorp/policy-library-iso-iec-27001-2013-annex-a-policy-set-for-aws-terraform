@@ -64,7 +64,7 @@ has_valid_backup_selection_dependencies = func(selection_res, backup_plan_resour
 	# Check if plan_id references a backup plan
 	plan_id_config = maps.get(selection_res.config, "plan_id", {})
 	plan_id_refs = maps.get(plan_id_config, "references", [])
-	
+
 	has_plan_ref = false
 	for plan_id_refs as _, ref {
 		if strings.has_prefix(ref, "aws_backup_plan.") {
@@ -78,11 +78,11 @@ has_valid_backup_selection_dependencies = func(selection_res, backup_plan_resour
 			}
 		}
 	}
-	
+
 	# Check if iam_role_arn references an IAM role
 	iam_role_config = maps.get(selection_res.config, "iam_role_arn", {})
 	iam_role_refs = maps.get(iam_role_config, "references", [])
-	
+
 	has_iam_ref = false
 	for iam_role_refs as _, ref {
 		if strings.has_prefix(ref, "aws_iam_role.") {
@@ -96,7 +96,7 @@ has_valid_backup_selection_dependencies = func(selection_res, backup_plan_resour
 			}
 		}
 	}
-	
+
 	# Both dependencies should be present
 	return has_plan_ref and has_iam_ref
 }
@@ -104,17 +104,17 @@ has_valid_backup_selection_dependencies = func(selection_res, backup_plan_resour
 # Get all backup selections with their resources and tags
 get_backup_selections = func(backup_selection_resources, backup_plan_resources, iam_role_resources, db_instance_resources) {
 	selections = []
-	
+
 	for backup_selection_resources as _, sel {
 		# Verify dependencies
 		if not has_valid_backup_selection_dependencies(sel, backup_plan_resources, iam_role_resources) {
 			continue
 		}
-		
+
 		# Get resources list
 		resources_config = maps.get(sel.config, "resources", {})
 		resources_list = []
-		
+
 		# Check if resources is a constant value (list of ARNs)
 		constant_resources = maps.get(resources_config, "constant_value", [])
 		if length(constant_resources) > 0 {
@@ -141,18 +141,18 @@ get_backup_selections = func(backup_selection_resources, backup_plan_resources, 
 				}
 			}
 		}
-		
+
 		# Get selection tags
 		selection_tag_config = maps.get(sel.config, "selection_tag", {})
 		selection_tags = maps.get(selection_tag_config, "constant_value", [])
-		
+
 		selection = {
 			"resources":      resources_list,
 			"selection_tags": selection_tags,
 		}
 		selections = selections + [selection]
 	}
-	
+
 	return selections
 }
 
@@ -162,16 +162,16 @@ check_tag_match = func(rds_tags, selection_tags) {
 	if length(selection_tags) == 0 {
 		return false
 	}
-	
+
 	# Check if all selection tags match (AND logic)
 	for selection_tags as _, tag_condition {
 		tag_type = maps.get(tag_condition, "type", "")
 		tag_key = maps.get(tag_condition, "key", "")
 		tag_value = maps.get(tag_condition, "value", "")
-		
+
 		# Get the RDS instance tag value
 		rds_tag_value = maps.get(rds_tags, tag_key, "")
-		
+
 		# Check based on type
 		if tag_type == "STRINGEQUALS" {
 			if rds_tag_value != tag_value {
@@ -179,7 +179,7 @@ check_tag_match = func(rds_tags, selection_tags) {
 			}
 		}
 	}
-	
+
 	return true
 }
 
@@ -187,10 +187,10 @@ check_tag_match = func(rds_tags, selection_tags) {
 is_rds_protected = func(rds_resource, backup_selections) {
 	identifier_config = maps.get(rds_resource.config, "identifier", {})
 	rds_identifier = maps.get(identifier_config, "constant_value", "")
-	
+
 	tags_config = maps.get(rds_resource.config, "tags", {})
 	rds_tags = maps.get(tags_config, "constant_value", {})
-	
+
 	# Check each backup selection
 	for backup_selections as _, selection {
 		# Check resource-based protection
@@ -200,20 +200,20 @@ is_rds_protected = func(rds_resource, backup_selections) {
 			if strings.has_suffix(protected_arn, ":db:" + rds_identifier) {
 				return true
 			}
-			
+
 			# Check for wildcard patterns like arn:aws:rds:*:*:db:*
 			if strings.has_suffix(protected_arn, ":db:*") {
 				return true
 			}
 		}
-		
+
 		# Check tag-based protection
 		selection_tags = selection.selection_tags
 		if check_tag_match(rds_tags, selection_tags) {
 			return true
 		}
 	}
-	
+
 	return false
 }
 

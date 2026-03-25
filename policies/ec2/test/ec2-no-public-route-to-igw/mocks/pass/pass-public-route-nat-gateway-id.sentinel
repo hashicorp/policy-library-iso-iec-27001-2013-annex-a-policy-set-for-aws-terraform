@@ -9,12 +9,12 @@ resources = {
 				"constant_value": "rtb-pass-nat123",
 			},
 			"route": [
-					{
-						"cidr_block": {"constant_value": "0.0.0.0/0"},
-						"ipv6_cidr_block": {"constant_value": ""},
-						"gateway_id": {"constant_value": ""},
-					},
-				],
+				{
+					"cidr_block":      {"constant_value": "0.0.0.0/0"},
+					"ipv6_cidr_block": {"constant_value": ""},
+					"gateway_id":      {"constant_value": ""},
+				},
+			],
 			"vpc_id": {
 				"constant_value": "vpc-12345678",
 			},

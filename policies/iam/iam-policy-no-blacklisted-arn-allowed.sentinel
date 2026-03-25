@@ -97,7 +97,7 @@ is_blacklisted_policy = func(policy_arn_config, policies) {
 			}
 		}
 	}
-	
+
 	# Check for references to aws_iam_policy resources
 	if maps.has(policy_arn_config, "references") {
 		for policy_arn_config.references as _, ref {
@@ -109,7 +109,7 @@ is_blacklisted_policy = func(policy_arn_config, policies) {
 					parts = strings.split(ref, ".arn")
 					policy_address = parts[0]
 				}
-				
+
 				# Find the policy resource and check its ARN
 				for policies as _, policy {
 					if policy.address is policy_address {
@@ -128,7 +128,7 @@ is_blacklisted_policy = func(policy_arn_config, policies) {
 			}
 		}
 	}
-	
+
 	return false
 }
 
@@ -147,7 +147,7 @@ get_resource_name = func(resource_config, resource_type, all_resources) {
 					parts = strings.split(ref, ".name")
 					resource_address = parts[0]
 				}
-				
+
 				for all_resources as _, res {
 					if res.address is resource_address {
 						name_config = maps.get(res.config, "name", {})
@@ -167,7 +167,7 @@ is_in_exception_list = func(resource_name, resource_type, exceptions) {
 	if resource_name is "" {
 		return false
 	}
-	
+
 	if resource_type is "user" {
 		for exceptions["users"] as exception_name {
 			if resource_name is exception_name {
@@ -205,7 +205,7 @@ get_policy_arn_for_message = func(policy_arn_config, policies) {
 	if maps.has(policy_arn_config, "constant_value") {
 		return policy_arn_config.constant_value
 	}
-	
+
 	# Check for references
 	if maps.has(policy_arn_config, "references") {
 		for policy_arn_config.references as _, ref {
@@ -215,7 +215,7 @@ get_policy_arn_for_message = func(policy_arn_config, policies) {
 					parts = strings.split(ref, ".arn")
 					policy_address = parts[0]
 				}
-				
+
 				for policies as _, policy {
 					if policy.address is policy_address {
 						arn_config = maps.get(policy.config, "arn", {})
@@ -229,7 +229,7 @@ get_policy_arn_for_message = func(policy_arn_config, policies) {
 			}
 		}
 	}
-	
+
 	return "unknown"
 }
 
@@ -253,7 +253,7 @@ role_policy_attachments = tf.config(tfconfig.resources).type(const.resource_aws_
 user_violations = collection.filter(user_policy_attachments, func(res) {
 	policy_arn_config = maps.get(res.config, const.policy_arn, {})
 	user_config = maps.get(res.config, "user", {})
-	
+
 	if is_blacklisted_policy(policy_arn_config, policies) {
 		user_name = get_resource_name(user_config, "user", users)
 		return not is_in_exception_list(user_name, "user", exceptions)
@@ -265,7 +265,7 @@ user_violations = collection.filter(user_policy_attachments, func(res) {
 group_violations = collection.filter(group_policy_attachments, func(res) {
 	policy_arn_config = maps.get(res.config, const.policy_arn, {})
 	group_config = maps.get(res.config, "group", {})
-	
+
 	if is_blacklisted_policy(policy_arn_config, policies) {
 		group_name = get_resource_name(group_config, "group", groups)
 		return not is_in_exception_list(group_name, "group", exceptions)
@@ -277,7 +277,7 @@ group_violations = collection.filter(group_policy_attachments, func(res) {
 role_violations = collection.filter(role_policy_attachments, func(res) {
 	policy_arn_config = maps.get(res.config, const.policy_arn, {})
 	role_config = maps.get(res.config, "role", {})
-	
+
 	if is_blacklisted_policy(policy_arn_config, policies) {
 		role_name = get_resource_name(role_config, "role", roles)
 		return not is_in_exception_list(role_name, "role", exceptions)
@@ -292,7 +292,7 @@ for user_violations as _, v {
 	user_config = maps.get(v.config, "user", {})
 	policy_arn = get_policy_arn_for_message(policy_arn_config, policies)
 	user_name = get_resource_name(user_config, "user", users)
-	
+
 	all_violations += [{
 		"address":        v.address,
 		"module_address": v.module_address,
@@ -305,7 +305,7 @@ for group_violations as _, v {
 	group_config = maps.get(v.config, "group", {})
 	policy_arn = get_policy_arn_for_message(policy_arn_config, policies)
 	group_name = get_resource_name(group_config, "group", groups)
-	
+
 	all_violations += [{
 		"address":        v.address,
 		"module_address": v.module_address,
@@ -318,7 +318,7 @@ for role_violations as _, v {
 	role_config = maps.get(v.config, "role", {})
 	policy_arn = get_policy_arn_for_message(policy_arn_config, policies)
 	role_name = get_resource_name(role_config, "role", roles)
-	
+
 	all_violations += [{
 		"address":        v.address,
 		"module_address": v.module_address,

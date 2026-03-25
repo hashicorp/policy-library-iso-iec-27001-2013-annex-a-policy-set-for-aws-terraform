@@ -67,7 +67,7 @@ has_logging_resource = func(cluster_address, tfconfig_resources) {
 		if cfg_res.type is const.logging_resource_type {
 			if "config" in cfg_res and const.cluster_identifier_attr in cfg_res.config {
 				cluster_ref_expr = cfg_res.config[const.cluster_identifier_attr]
-				
+
 				# Check if logging resource references the cluster resource
 				if "references" in cluster_ref_expr {
 					for cluster_ref_expr.references as ref {
@@ -76,7 +76,7 @@ has_logging_resource = func(cluster_address, tfconfig_resources) {
 						}
 					}
 				}
-				
+
 				# Check by cluster identifier value match
 				if "constant_value" in cluster_ref_expr and cluster_id is not null {
 					if cluster_ref_expr.constant_value is cluster_id {
@@ -250,7 +250,7 @@ for cluster_resources as addr, res {
 
 summary = {
 	"policy_name": const.policy_name,
-	"violations": violations,
+	"violations":  violations,
 }
 
 # Outputs

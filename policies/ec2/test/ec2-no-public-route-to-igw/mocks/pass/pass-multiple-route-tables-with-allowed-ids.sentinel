@@ -9,12 +9,12 @@ resources = {
 				"constant_value": "rtb-allowed123",
 			},
 			"route": [
-					{
-						"cidr_block": {"constant_value": "0.0.0.0/0"},
-						"ipv6_cidr_block": {"constant_value": ""},
-						"gateway_id": {"constant_value": "igw-12345678"},
-					},
-				],
+				{
+					"cidr_block":      {"constant_value": "0.0.0.0/0"},
+					"ipv6_cidr_block": {"constant_value": ""},
+					"gateway_id":      {"constant_value": "igw-12345678"},
+				},
+			],
 			"vpc_id": {
 				"constant_value": "vpc-12345678",
 			},
@@ -36,12 +36,12 @@ resources = {
 				"constant_value": "rtb-allowed456",
 			},
 			"route": [
-					{
-						"cidr_block": {"constant_value": ""},
-						"ipv6_cidr_block": {"constant_value": "::/0"},
-						"gateway_id": {"constant_value": "igw-87654321"},
-					},
-				],
+				{
+					"cidr_block":      {"constant_value": ""},
+					"ipv6_cidr_block": {"constant_value": "::/0"},
+					"gateway_id":      {"constant_value": "igw-87654321"},
+				},
+			],
 			"vpc_id": {
 				"constant_value": "vpc-87654321",
 			},

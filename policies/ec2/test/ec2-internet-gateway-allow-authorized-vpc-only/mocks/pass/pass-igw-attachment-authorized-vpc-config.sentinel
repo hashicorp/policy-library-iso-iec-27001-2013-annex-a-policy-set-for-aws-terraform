@@ -21,8 +21,8 @@ providers = {
 
 resources = {
 	"aws_internet_gateway.example": {
-		"address": "aws_internet_gateway.example",
-		"config":  {},
+		"address":             "aws_internet_gateway.example",
+		"config":              {},
 		"count":               {},
 		"depends_on":          [],
 		"for_each":            {},

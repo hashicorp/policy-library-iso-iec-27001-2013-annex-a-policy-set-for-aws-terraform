@@ -19,8 +19,8 @@ const = {
 	"policy_name":                              "ec2-internet-gateway-allow-authorized-vpc-only",
 	"resource_aws_internet_gateway":            "aws_internet_gateway",
 	"resource_aws_internet_gateway_attachment": "aws_internet_gateway_attachment",
-	"vpc_id":                                   "vpc_id",
-	"module_prefix":                            "module.",
+	"vpc_id":        "vpc_id",
+	"module_prefix": "module.",
 }
 
 # Parse the CSV parameter into a list and trim whitespace
@@ -83,7 +83,7 @@ normalize_resource_reference = func(ref) {
 
 	last = parts[length(parts) - 1]
 	if last is "id" or last is "arn" {
-		return strings.join(parts[0:length(parts) - 1], ".")
+		return strings.join(parts[0 : length(parts) - 1], ".")
 	}
 
 	return ref
@@ -126,7 +126,7 @@ get_vpc_id_from_config = func(res_config) {
 # Check if internet gateway is attached to authorized VPC
 check_igw_vpc = func(res_config) {
 	vpc_id = get_vpc_id_from_config(res_config)
-	
+
 	if vpc_id is null {
 		return {
 			"compliant": false,
