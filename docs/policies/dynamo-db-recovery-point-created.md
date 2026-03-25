@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks whether Amazon DynamoDB tables are configured with recovery coverage that can create recovery points. In Terraform, the policy treats a table as compliant when either `point_in_time_recovery.enabled = true` is set on `aws_dynamodb_table` or the table is associated with an `aws_backup_selection` that points to an `aws_backup_plan` with a schedule that is at least as frequent as the configured recovery-point age window.
 
 Recovery points are backups of your DynamoDB tables that can be used to restore data in case of accidental deletion, corruption, or disaster. Having recovery points ensures business continuity and data protection by enabling point-in-time recovery. Because Terraform plan data does not expose the timestamp of the last created recovery point, this policy validates the configured protection path and backup schedule rather than the existence of an already-created recovery point.

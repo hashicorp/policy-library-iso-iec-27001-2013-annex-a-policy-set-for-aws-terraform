@@ -6,6 +6,9 @@
 
 ## Description
 
+
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if Amazon Aurora DB clusters have recovery points created through automated backups or through a compliant AWS Backup plan. This control fails if the Aurora cluster is not covered by either protection path.
 
 Recovery points are backups of your Aurora DB clusters that can be used to restore data in case of accidental deletion, corruption, or disaster. Having recovery points ensures business continuity and data protection by enabling point-in-time recovery. Regular backups are essential for meeting compliance requirements and maintaining data integrity. In Terraform, this policy treats an Aurora cluster as compliant when it has a sufficient `backup_retention_period` or when a matching `aws_backup_selection` points to a compliant `aws_backup_plan` schedule.

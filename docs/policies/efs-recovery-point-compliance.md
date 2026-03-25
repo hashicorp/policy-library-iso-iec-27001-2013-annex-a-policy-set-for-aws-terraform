@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if Amazon EFS file systems are associated with AWS Backup plans that can create recovery points within the required time period. This control fails if a file system is not covered by a backup selection tied to a compliant backup plan schedule.
 
 AWS Config evaluates whether a recovery point was created within the specified time period, but Terraform plan data does not expose actual recovery point timestamps for EFS file systems. The strongest plan-time evidence available is backup coverage through `aws_backup_selection` together with `aws_backup_plan.rule[].schedule`.

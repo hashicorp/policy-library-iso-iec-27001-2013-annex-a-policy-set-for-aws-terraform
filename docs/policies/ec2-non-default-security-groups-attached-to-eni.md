@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if non-default Amazon EC2 security groups are attached to elastic network interfaces (ENIs). This control fails if a managed non-default security group is not associated with any ENI.
 
 AWS Config reports this rule on the security group resource type, not on the ENI resource type. In Terraform, the relevant evidence comes from attachments configured through `aws_network_interface.security_groups`, `aws_network_interface_sg_attachment.security_group_id`, and `aws_instance.vpc_security_group_ids` for primary ENIs.
