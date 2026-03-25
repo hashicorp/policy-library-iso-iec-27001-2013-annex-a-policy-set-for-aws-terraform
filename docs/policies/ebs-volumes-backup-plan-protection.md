@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if Amazon EBS volumes are included in AWS Backup plans. In Terraform, the policy treats a volume as compliant when an `aws_backup_selection` includes it directly by ARN or Terraform reference, through an EBS wildcard resource pattern, through `selection_tag`, or through a matching `condition` filter, and the same selection does not exclude the volume with `not_resources`.
 
 This aligns with AWS Config rule `EBS_IN_BACKUP_PLAN`, whose intent is to verify inclusion in AWS Backup plans rather than to validate backup frequency or recovery-point age.

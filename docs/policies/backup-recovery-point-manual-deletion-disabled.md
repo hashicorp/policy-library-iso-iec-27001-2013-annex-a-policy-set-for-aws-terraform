@@ -6,6 +6,8 @@
 
 ## Description
 
+DISCLAIMER - This policy works when all resources are present in root module
+
 This control checks if AWS Backup recovery points have manual deletion disabled. This control fails if manual deletion is enabled for backup vaults.
 
 Disabling manual deletion of recovery points prevents accidental or malicious deletion of backups, ensuring that critical data remains protected for the configured retention period. This is a crucial security measure to maintain data integrity and meet compliance requirements by preventing unauthorized backup deletion.
