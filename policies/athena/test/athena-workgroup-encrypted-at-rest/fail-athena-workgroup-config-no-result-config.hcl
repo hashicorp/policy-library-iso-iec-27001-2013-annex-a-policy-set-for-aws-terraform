@@ -3,7 +3,7 @@
 
 mock "tfplan/v2" {
   module {
-    source = "./mocks/policy-fail-athena-workgroup-config-no-result-config/mock-tfplan-v2.sentinel"
+    source = "./mocks/policy-failure-athena-workgroup-config-no-result-config/mock-tfplan-v2.sentinel"
   }
 }
 
