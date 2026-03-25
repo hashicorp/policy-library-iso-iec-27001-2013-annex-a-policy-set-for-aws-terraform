@@ -6,6 +6,7 @@
 
 ## Description
 
+
 DISCLAIMER - This policy works when all resources are present in root module
 
 This control checks if Amazon API Gateway REST API stages have the cache cluster enabled and if the associated method settings have caching and cache encryption enabled. This control fails if the stage cache cluster is disabled or if the related method settings do not enable caching and cache encryption.
