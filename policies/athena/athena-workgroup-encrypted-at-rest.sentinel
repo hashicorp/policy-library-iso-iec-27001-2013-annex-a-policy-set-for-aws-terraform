@@ -1,0 +1,112 @@
+# This policy ensures that Amazon Athena workgroups are encrypted at rest.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":                   "athena-workgroup-encrypted-at-rest",
+	"resource_aws_athena_workgroup": "aws_athena_workgroup",
+	"configuration":                 "configuration",
+	"encryption_configuration":      "encryption_configuration",
+	"encryption_option":             "encryption_option",
+	"kms_key":                       "kms_key",
+	"kms_key_arn":                   "kms_key_arn",
+	"message":                       "Amazon Athena workgroup must have encryption enabled at rest. Refer to https://docs.aws.amazon.com/config/latest/developerguide/athena-workgroup-encrypted-at-rest.html for more details.",
+	"managed_query_results_configuration": "managed_query_results_configuration",
+	"result_configuration":                "result_configuration",
+}
+
+# Functions
+is_valid_result_encryption = func(encryption_config) {
+	encryption_option = maps.get(encryption_config, const.encryption_option, "")
+
+	if encryption_option is not "SSE_S3" and encryption_option is not "SSE_KMS" and encryption_option is not "CSE_KMS" {
+		return false
+	}
+
+	if encryption_option is "SSE_KMS" or encryption_option is "CSE_KMS" {
+		return maps.get(encryption_config, const.kms_key_arn, "") is not ""
+	}
+
+	return true
+}
+
+is_valid_managed_query_results_encryption = func(managed_query_results_config) {
+	if maps.get(managed_query_results_config, "enabled", false) is not true {
+		return false
+	}
+
+	encryption_configuration = maps.get(managed_query_results_config, const.encryption_configuration, [])
+	if length(encryption_configuration) is 0 {
+		return false
+	}
+
+	encryption_config = encryption_configuration[0]
+	return maps.get(encryption_config, const.kms_key, "") is not ""
+}
+
+is_encryption_enabled = func(res) {
+	configuration = maps.get(res.values, const.configuration, [])
+	if length(configuration) is 0 {
+		return false
+	}
+
+	config = configuration[0]
+
+	result_configuration = maps.get(config, const.result_configuration, [])
+	if length(result_configuration) > 0 {
+		result_config = result_configuration[0]
+		encryption_configuration = maps.get(result_config, const.encryption_configuration, [])
+
+		if length(encryption_configuration) > 0 {
+			encryption_config = encryption_configuration[0]
+			if is_valid_result_encryption(encryption_config) {
+				return true
+			}
+		}
+	}
+
+	managed_query_results_configuration = maps.get(config, const.managed_query_results_configuration, [])
+	if length(managed_query_results_configuration) > 0 {
+		managed_query_results_config = managed_query_results_configuration[0]
+		if is_valid_managed_query_results_encryption(managed_query_results_config) {
+			return true
+		}
+	}
+
+	return false
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_athena_workgroup).resources
+
+violations = collection.reject(resources, func(res) {
+	return is_encryption_enabled(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        const.message,
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

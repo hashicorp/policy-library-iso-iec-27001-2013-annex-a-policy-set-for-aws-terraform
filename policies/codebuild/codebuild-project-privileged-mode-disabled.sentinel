@@ -1,0 +1,119 @@
+# This policy checks if AWS CodeBuild projects have privileged mode disabled
+# in their environment configuration.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+
+# Params
+# exemptedProjects (Optional)
+# Type: CSV
+# Comma-separated list of CodeBuild project names that are allowed to have 'privilegedMode' with value 'true'.
+param exemptedProjects default ""
+
+# Constants
+const = {
+	"policy_name":                    "codebuild-project-privileged-mode-disabled",
+	"message":                        "AWS CodeBuild project should have privileged mode disabled unless required for specific use cases. Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-environment-privileged-check.html for more details.",
+	"resource_aws_codebuild_project": "aws_codebuild_project",
+	"environment":                    "environment",
+	"privileged_mode":                "privileged_mode",
+}
+
+# Functions
+# Parse comma-separated list of exempted project names
+get_exempted_projects = func() {
+	if exemptedProjects is "" {
+		return []
+	}
+
+	# Split by comma and trim whitespace
+	projects = strings.split(exemptedProjects, ",")
+	trimmed_projects = []
+	for projects as project {
+		trimmed = strings.trim_space(project)
+		if trimmed is not "" {
+			trimmed_projects = trimmed_projects + [trimmed]
+		}
+	}
+
+	return trimmed_projects
+}
+
+# Check if a project name is in the exemption list
+is_project_exempted = func(project_name) {
+	exempted_list = get_exempted_projects()
+
+	for exempted_list as exempted {
+		if project_name is exempted {
+			return true
+		}
+	}
+
+	return false
+}
+
+generate_violation_message = func(violation) {
+	environment_blocks = maps.get(violation.values, const.environment, [])
+	if length(environment_blocks) > 0 {
+		privileged_value = maps.get(environment_blocks[0], const.privileged_mode, false)
+		if privileged_value is true {
+			return "AWS CodeBuild project has privileged mode enabled. Privileged mode should be disabled unless required for specific use cases like Docker builds. Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-environment-privileged-check.html for more details."
+		}
+	}
+	return "AWS CodeBuild project environment configuration is non-compliant with privileged mode settings. Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-environment-privileged-check.html for more details."
+}
+
+is_privileged_mode_disabled = func(res) {
+	# Check if this project is exempted
+	project_name = maps.get(res.values, "name", "")
+	if project_name is not "" and is_project_exempted(project_name) {
+		return true
+	}
+
+	environment_blocks = maps.get(res.values, const.environment, [])
+
+	# If environment is not defined or empty, consider it compliant (no privileged mode)
+	if length(environment_blocks) is 0 {
+		return true
+	}
+
+	# Check first environment block (CodeBuild projects have single environment block)
+	environment = environment_blocks[0]
+	privileged_mode = maps.get(environment, const.privileged_mode, false)
+
+	return privileged_mode is false
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_codebuild_project).resources
+
+violations = collection.reject(resources, func(res) {
+	return is_privileged_mode_disabled(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

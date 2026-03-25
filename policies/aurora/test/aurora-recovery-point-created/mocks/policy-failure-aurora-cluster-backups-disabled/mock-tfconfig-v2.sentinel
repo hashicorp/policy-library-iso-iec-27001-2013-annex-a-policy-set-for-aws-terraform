@@ -1,0 +1,34 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_rds_cluster.main": {
+		"address": "aws_rds_cluster.main",
+		"config": {
+			"backup_retention_period": {
+				"constant_value": 0,
+			},
+			"cluster_identifier": {
+				"constant_value": "aurora-cluster-no-backups",
+			},
+			"engine": {
+				"constant_value": "aurora-postgresql",
+			},
+			"engine_version": {
+				"constant_value": "13.7",
+			},
+			"skip_final_snapshot": {
+				"constant_value": true,
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "main",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_rds_cluster",
+	},
+}

@@ -1,0 +1,173 @@
+# This policy ensures that managed non-default security groups are attached to
+# elastic network interfaces.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+import "types"
+
+# Constants
+const = {
+	"policy_name":                               "ec2-security-group-attached-to-eni-periodic",
+	"resource_aws_instance":                     "aws_instance",
+	"resource_aws_network_interface":            "aws_network_interface",
+	"resource_aws_network_interface_attachment": "aws_network_interface_sg_attachment",
+	"resource_aws_security_group":               "aws_security_group",
+	"constant_value":                            "constant_value",
+	"references":                                "references",
+	"security_group_id":                         "security_group_id",
+	"security_groups":                           "security_groups",
+	"vpc_security_group_ids":                    "vpc_security_group_ids",
+	"message":                                   "Non-default security groups must be attached to an elastic network interface. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-security-group-attached-to-eni-periodic.html for more details.",
+}
+
+# Functions
+get_config_attribute = func(res, attr) {
+	return maps.get(res, "config." + attr, {})
+}
+
+get_attribute_values = func(attr) {
+	references = maps.get(attr, const.references, [])
+	if length(references) > 0 {
+		return references
+	}
+
+	constant = maps.get(attr, const.constant_value, [])
+	constant_type = types.type_of(constant)
+	if constant is null or constant is "" {
+		return []
+	}
+
+	if constant_type is "list" {
+		return constant
+	}
+
+	return [constant]
+}
+
+append_reference = func(refs, value) {
+	if value is null {
+		return refs
+	}
+
+	ref_string = string(value)
+	if ref_string is "" {
+		return refs
+	}
+
+	return refs + [ref_string]
+}
+
+get_attached_security_group_references = func(network_interfaces, sg_attachments, instances) {
+	refs = []
+
+	for network_interfaces as _, eni {
+		security_groups = get_attribute_values(get_config_attribute(eni, const.security_groups))
+		for security_groups as _, security_group_ref {
+			refs = append_reference(refs, security_group_ref)
+		}
+	}
+
+	for sg_attachments as _, attachment {
+		security_group_values = get_attribute_values(get_config_attribute(attachment, const.security_group_id))
+		for security_group_values as _, security_group_ref {
+			refs = append_reference(refs, security_group_ref)
+		}
+	}
+
+	for instances as _, instance {
+		security_groups = get_attribute_values(get_config_attribute(instance, const.vpc_security_group_ids))
+		for security_groups as _, security_group_ref {
+			refs = append_reference(refs, security_group_ref)
+		}
+	}
+
+	return refs
+}
+
+matches_security_group_reference = func(security_group_res, security_group_ref) {
+	ref_string = string(security_group_ref)
+	security_group_address = ""
+	security_group_id = ""
+
+	if types.type_of(security_group_res) is "string" {
+		security_group_address = string(security_group_res)
+	} else {
+		security_group_address = security_group_res.address
+		security_group_id = maps.get(security_group_res, "config.id.constant_value", "")
+	}
+
+	if ref_string is security_group_address or ref_string is security_group_address + ".id" {
+		return true
+	}
+
+	if ref_string matches ".*" + security_group_address + ".*" {
+		return true
+	}
+
+	if security_group_id is not "" and ref_string is security_group_id {
+		return true
+	}
+
+	return false
+}
+
+is_security_group_attached = func(security_group_res, attached_security_group_refs) {
+	for attached_security_group_refs as security_group_ref {
+		if matches_security_group_reference(security_group_res, security_group_ref) {
+			return true
+		}
+	}
+
+	return false
+}
+
+is_security_group_violation = func(security_group_res, attached_security_group_refs) {
+	return not is_security_group_attached(security_group_res, attached_security_group_refs)
+}
+
+generate_violation_message = func(violation) {
+	return "Security group '" + violation.address + "' is not attached to any elastic network interface in this Terraform plan. " + const.message
+}
+
+# Variables
+planned_resources = tf.plan(tfplan.planned_values.resources)
+config_resources = tf.config(tfconfig.resources)
+
+security_groups = config_resources.type(const.resource_aws_security_group).resources
+network_interfaces = config_resources.type(const.resource_aws_network_interface).resources
+network_interface_sg_attachments = config_resources.type(const.resource_aws_network_interface_attachment).resources
+instances = config_resources.type(const.resource_aws_instance).resources
+
+attached_security_group_refs = get_attached_security_group_references(network_interfaces, network_interface_sg_attachments, instances)
+
+violations = filter security_groups as res {
+	is_security_group_violation(res, attached_security_group_refs)
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

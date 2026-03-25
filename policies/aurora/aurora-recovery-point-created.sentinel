@@ -1,0 +1,361 @@
+# This policy ensures that a recovery point was created for Amazon Aurora DB clusters
+# within the specified time period to enable backup and disaster recovery capabilities.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+import "json"
+
+# Params
+# max_days_since_backup refers to the maximum number of days allowed since the last backup
+param max_days_since_backup default 1
+
+# resourceTags (Optional)
+# Type: String
+# Tags of Aurora DB clusters for the rule to check, in JSON format {"tagkey" : "tagValue"}.
+param resourceTags default ""
+
+# resourceId (Optional)
+# Type: String
+# ID of Aurora DB cluster for the rule to check.
+param resourceId default ""
+
+# recoveryPointAgeValue (Optional)
+# Type: int
+# Default: 1
+# Numerical value for maximum allowed age. No more than 744 for hours, 31 for days.
+param recoveryPointAgeValue default 1
+
+# recoveryPointAgeUnit (Optional)
+# Type: String
+# Default: days
+# Unit of time for maximum allowed age. Accepted values: 'hours', 'days'.
+param recoveryPointAgeUnit default "days"
+
+# Constants
+const = {
+	"policy_name":                   "aurora-recovery-point-created",
+	"message":                       "Aurora DB clusters must have automated backups enabled or be associated with a compliant AWS Backup plan to ensure recovery points are created within the required time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html for more details.",
+	"resource_aws_backup_plan":      "aws_backup_plan",
+	"resource_aws_backup_selection": "aws_backup_selection",
+	"resource_aws_rds_cluster":      "aws_rds_cluster",
+	"backup_retention_period":       "backup_retention_period",
+	"cluster_identifier":            "cluster_identifier",
+	"constant_value":                "constant_value",
+	"engine":                        "engine",
+	"plan_id":                       "plan_id",
+	"references":                    "references",
+	"resources":                     "resources",
+	"rule":                          "rule",
+	"schedule":                      "schedule",
+	"selection_tag":                 "selection_tag",
+}
+
+# Functions
+get_config_attribute = func(res, attr) {
+	return maps.get(res, "config." + attr, {})
+}
+
+get_constant_value = func(attr, fallback) {
+	return maps.get(attr, const.constant_value, fallback)
+}
+
+get_references = func(attr) {
+	refs = maps.get(attr, const.references, [])
+	if length(refs) > 0 {
+		return refs
+	}
+
+	return maps.get(attr, const.constant_value, [])
+}
+
+# Check if resource matches the specified resourceId filter
+matches_resource_id = func(res) {
+	if resourceId is "" {
+		return true
+	}
+
+	cluster_id = maps.get(res, "config.cluster_identifier.constant_value", "")
+	return cluster_id is resourceId
+}
+
+# Check if resource matches the specified resourceTags filter
+matches_resource_tags = func(res) {
+	if resourceTags is "" {
+		return true
+	}
+
+	# Parse the resourceTags JSON string
+	filter_tags = json.unmarshal(resourceTags)
+	resource_tags = maps.get(res, "config.tags.constant_value", {})
+
+	# Check if all filter tags match
+	for filter_tags as tag_key, tag_value {
+		resource_tag_value = maps.get(resource_tags, tag_key, "")
+		if resource_tag_value is not tag_value {
+			return false
+		}
+	}
+
+	return true
+}
+
+is_aurora_cluster = func(res) {
+	engine = maps.get(res, "config." + const.engine + "." + const.constant_value, "")
+	return strings.has_prefix(engine, "aurora")
+}
+
+# Calculate the required backup frequency based on recoveryPointAgeUnit
+get_required_hours = func() {
+	if recoveryPointAgeUnit is "hours" {
+		return recoveryPointAgeValue
+	}
+
+	return recoveryPointAgeValue * 24
+}
+
+# Keep the legacy max_days_since_backup parameter effective by treating it as
+# a minimum day-based threshold alongside recoveryPointAgeValue/recoveryPointAgeUnit.
+get_required_retention_days = func() {
+	required_days = (get_required_hours() + 23) / 24
+	if max_days_since_backup > required_days {
+		return max_days_since_backup
+	}
+
+	return required_days
+}
+
+get_backup_frequency_hours = func(schedule) {
+	if strings.has_prefix(schedule, "rate(") {
+		parts = strings.split(schedule, " ")
+		if length(parts) >= 2 {
+			numeric_part = strings.trim_prefix(parts[0], "rate(")
+			value = int(numeric_part)
+
+			if strings.has_prefix(parts[1], "hour") {
+				return value
+			}
+
+			if strings.has_prefix(parts[1], "day") {
+				return value * 24
+			}
+		}
+	}
+
+	if strings.has_prefix(schedule, "cron(") {
+		cron_expr = strings.trim_prefix(schedule, "cron(")
+		cron_expr = strings.trim_suffix(cron_expr, ")")
+		parts = strings.split(cron_expr, " ")
+
+		if length(parts) >= 3 {
+			day_of_month = parts[2]
+			if day_of_month is "*" {
+				return 24
+			}
+
+			if day_of_month matches "[0-9]+" {
+				return 720
+			}
+		}
+	}
+
+	return 720
+}
+
+has_backup_enabled = func(res) {
+	backup_retention = maps.get(res, "config." + const.backup_retention_period + "." + const.constant_value, 0)
+	required_retention = get_required_retention_days()
+	return backup_retention >= required_retention
+}
+
+is_backup_plan_compliant = func(plan_res) {
+	rules_list = maps.get(plan_res, "config." + const.rule, [])
+	if length(rules_list) is 0 {
+		return false
+	}
+
+	required_hours = get_required_hours()
+	for rules_list as _, backup_rule {
+		schedule = maps.get(backup_rule, const.schedule + "." + const.constant_value, "")
+		if schedule is not "" {
+			frequency = get_backup_frequency_hours(schedule)
+			if frequency <= required_hours {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+selection_matches_cluster_tags = func(selection_res, cluster_res) {
+	selection_tags = maps.get(selection_res, "config." + const.selection_tag, [])
+	if length(selection_tags) is 0 {
+		return false
+	}
+
+	cluster_tags = maps.get(cluster_res, "config.tags.constant_value", {})
+	if length(cluster_tags) is 0 {
+		return false
+	}
+
+	for selection_tags as _, selection_tag {
+		tag_key = maps.get(selection_tag, "key." + const.constant_value, "")
+		tag_value = maps.get(selection_tag, "value." + const.constant_value, "")
+		tag_type = maps.get(selection_tag, "type." + const.constant_value, "STRINGEQUALS")
+
+		if tag_type is not "STRINGEQUALS" {
+			return false
+		}
+
+		if maps.get(cluster_tags, tag_key, "") is not tag_value {
+			return false
+		}
+	}
+
+	return true
+}
+
+selection_references_cluster = func(selection_res, cluster_res) {
+	resources_list = get_references(get_config_attribute(selection_res, const.resources))
+	cluster_address = cluster_res.address
+	cluster_name = cluster_res.name
+	cluster_identifier = maps.get(cluster_res, "config." + const.cluster_identifier + "." + const.constant_value, "")
+
+	for resources_list as _, resource_ref {
+		ref = string(resource_ref)
+		ref_lower = strings.to_lower(ref)
+
+		if ref is "*" {
+			return true
+		}
+
+		if ref matches ".*" + cluster_address + ".*" or ref matches ".*" + cluster_name + ".*" {
+			return true
+		}
+
+		if cluster_identifier is not "" {
+			if ref is cluster_identifier or strings.has_suffix(ref, ":cluster:" + cluster_identifier) {
+				return true
+			}
+
+			if ref_lower matches "arn:aws:rds:.*:cluster:\\*" {
+				return true
+			}
+		}
+	}
+
+	return selection_matches_cluster_tags(selection_res, cluster_res)
+}
+
+selection_has_compliant_plan = func(selection_res, backup_plans) {
+	plan_id_attr = get_config_attribute(selection_res, const.plan_id)
+	plan_id = get_constant_value(plan_id_attr, "")
+	plan_references = get_references(plan_id_attr)
+
+	if plan_id is not "" or length(plan_references) > 0 {
+		for backup_plans as _, plan_res {
+			plan_name = plan_res.name
+			plan_display_name = maps.get(plan_res, "config.name.constant_value", "")
+
+			if plan_id is plan_res.address or
+				plan_id is plan_name or
+				plan_id is plan_display_name or
+				strings.has_suffix(plan_id, "." + plan_name) or
+				plan_res.address in plan_references or
+				(plan_res.address + ".id") in plan_references {
+				return is_backup_plan_compliant(plan_res)
+			}
+		}
+
+		return false
+	}
+
+	for backup_plans as _, plan_res {
+		if is_backup_plan_compliant(plan_res) {
+			return true
+		}
+	}
+
+	return false
+}
+
+has_compliant_backup_plan = func(cluster_res, backup_selections, backup_plans) {
+	for backup_selections as _, selection_res {
+		if selection_references_cluster(selection_res, cluster_res) and selection_has_compliant_plan(selection_res, backup_plans) {
+			return true
+		}
+	}
+
+	return false
+}
+
+is_cluster_compliant = func(cluster_res, backup_selections, backup_plans) {
+	return has_backup_enabled(cluster_res) or has_compliant_backup_plan(cluster_res, backup_selections, backup_plans)
+}
+
+generate_violation_message = func(violation) {
+	backup_retention = maps.get(violation, "config." + const.backup_retention_period + "." + const.constant_value, 0)
+	required_retention = get_required_retention_days()
+	age_description = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
+
+	if backup_retention is 0 {
+		return "Aurora DB cluster '" + violation.address + "' must have either automated backups enabled with a backup_retention_period of at least " + string(required_retention) + " day(s) (equivalent to " + age_description + ") or a compliant AWS Backup plan that creates recovery points within the required time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html for more details."
+	}
+
+	return "Aurora DB cluster '" + violation.address + "' must have automated backups configured with a backup_retention_period of at least " + string(required_retention) + " day(s) (equivalent to " + age_description + ") or be associated with a compliant AWS Backup plan. Current backup_retention_period: " + string(backup_retention) + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html for more details."
+}
+
+# Variables
+planned_resources = tf.plan(tfplan.planned_values.resources)
+config_resources = tf.config(tfconfig.resources)
+rds_clusters = config_resources.type(const.resource_aws_rds_cluster).resources
+backup_plans = config_resources.type(const.resource_aws_backup_plan).resources
+backup_selections = config_resources.type(const.resource_aws_backup_selection).resources
+
+# Filter Aurora clusters
+aurora_clusters = filter rds_clusters as _, res {
+	is_aurora_cluster(res)
+}
+
+# Apply resourceId filter if specified
+filtered_by_id = filter aurora_clusters as _, res {
+	matches_resource_id(res)
+}
+
+# Apply resourceTags filter if specified
+filtered_by_tags = filter filtered_by_id as _, res {
+	matches_resource_tags(res)
+}
+
+# Check for backup compliance
+violations = collection.reject(filtered_by_tags, func(res) {
+	return is_cluster_compliant(res, backup_selections, backup_plans)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

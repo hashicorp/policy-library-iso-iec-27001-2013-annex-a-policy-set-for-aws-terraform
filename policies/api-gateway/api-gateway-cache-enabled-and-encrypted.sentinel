@@ -1,0 +1,171 @@
+# This policy verifies that all methods in Amazon API Gateway stages have cache enabled and encrypted.
+# It checks both aws_api_gateway_stage and aws_api_gateway_method_settings resources.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":                              "api-gateway-cache-enabled-and-encrypted",
+	"message":                                  "API Gateway stages must have cache enabled and encrypted. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details.",
+	"resource_aws_api_gateway_stage":           "aws_api_gateway_stage",
+	"resource_aws_api_gateway_method_settings": "aws_api_gateway_method_settings",
+	"cache_cluster_enabled":                    "cache_cluster_enabled",
+	"cache_data_encrypted":                     "cache_data_encrypted",
+	"caching_enabled":                          "caching_enabled",
+	"constant_value":                           "constant_value",
+	"rest_api_id":                              "rest_api_id",
+	"references":                               "references",
+	"settings":                                 "settings",
+	"stage_name":                               "stage_name",
+}
+
+# Functions
+get_attribute_config = func(res, attr) {
+	return maps.get(res, "config." + attr, {})
+}
+
+attributes_match = func(left, right) {
+	if left is empty or right is empty {
+		return false
+	}
+
+	left_constant = maps.get(left, const.constant_value, null)
+	right_constant = maps.get(right, const.constant_value, null)
+
+	if left_constant is not null and right_constant is not null and left_constant is right_constant {
+		return true
+	}
+
+	left_references = maps.get(left, const.references, [])
+	right_references = maps.get(right, const.references, [])
+
+	for left_references as _, reference {
+		if reference in right_references {
+			return true
+		}
+	}
+
+	return false
+}
+
+get_matching_method_settings = func(stage, method_settings_resources) {
+	stage_rest_api_id = get_attribute_config(stage, const.rest_api_id)
+	stage_name = get_attribute_config(stage, const.stage_name)
+
+	return filter method_settings_resources as _, res {
+		attributes_match(stage_rest_api_id, get_attribute_config(res, const.rest_api_id)) and
+			attributes_match(stage_name, get_attribute_config(res, const.stage_name))
+	}
+}
+
+generate_stage_violation_message = func(violation, method_settings_resources) {
+	cache_enabled = maps.get(violation, "config." + const.cache_cluster_enabled + "." + const.constant_value, false)
+	matching_method_settings = get_matching_method_settings(violation, method_settings_resources)
+
+	if not cache_enabled {
+		return "API Gateway stage must have cache cluster enabled. Attribute 'cache_cluster_enabled' must be set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
+	}
+	if length(matching_method_settings) is 0 {
+		return "API Gateway stage must have associated aws_api_gateway_method_settings with caching enabled and cache encrypted. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
+	}
+	return "API Gateway stage must have cache cluster enabled and all associated method settings must enable caching and cache encryption. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
+}
+
+generate_method_settings_violation_message = func(violation) {
+	settings = maps.get(violation, "config." + const.settings, [])
+
+	if length(settings) == 0 {
+		return "API Gateway method settings must have caching enabled and cache encrypted. Settings block is missing or empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
+	}
+
+	return "API Gateway method settings must have caching enabled and cache encrypted in the settings block. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
+}
+
+is_method_settings_compliant = func(res) {
+	settings = maps.get(res, "config." + const.settings, [])
+
+	if length(settings) == 0 {
+		return false
+	}
+
+	return collection.find(settings, func(setting) {
+		caching_enabled = maps.get(setting, const.caching_enabled + "." + const.constant_value, false)
+		cache_encrypted = maps.get(setting, const.cache_data_encrypted + "." + const.constant_value, false)
+
+		return caching_enabled is not true or cache_encrypted is not true
+	}) is not defined
+}
+
+is_stage_compliant = func(res, method_settings_resources) {
+	cache_enabled = maps.get(res, "config." + const.cache_cluster_enabled + "." + const.constant_value, false)
+
+	# Check stage-level cache settings
+	if cache_enabled is not true {
+		return false
+	}
+
+	matching_method_settings = get_matching_method_settings(res, method_settings_resources)
+
+	# Terraform manages stage cache encryption through aws_api_gateway_method_settings
+	if length(matching_method_settings) is 0 {
+		return false
+	}
+
+	return collection.find(matching_method_settings, func(method_settings) {
+		return not is_method_settings_compliant(method_settings)
+	}) is not defined
+}
+
+# Variables
+planned_resources = tf.plan(tfplan.planned_values.resources)
+config_resources = tf.config(tfconfig.resources)
+stage_resources = config_resources.type(const.resource_aws_api_gateway_stage).resources
+method_settings_resources = config_resources.type(const.resource_aws_api_gateway_method_settings).resources
+
+stage_violations = collection.reject(stage_resources, func(res) {
+	return is_stage_compliant(res, method_settings_resources)
+})
+
+method_settings_violations = collection.reject(method_settings_resources, func(res) {
+	return is_method_settings_compliant(res)
+})
+
+# Combine violations for reporting
+all_violations = []
+for stage_violations as _, v {
+	all_violations += [{
+		"address":        v.address,
+		"module_address": v.module_address,
+		"message":        generate_stage_violation_message(v, method_settings_resources),
+	}]
+}
+
+for method_settings_violations as _, v {
+	all_violations += [{
+		"address":        v.address,
+		"module_address": v.module_address,
+		"message":        generate_method_settings_violation_message(v),
+	}]
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations":  all_violations,
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	length(stage_violations) + length(method_settings_violations) is 0
+}

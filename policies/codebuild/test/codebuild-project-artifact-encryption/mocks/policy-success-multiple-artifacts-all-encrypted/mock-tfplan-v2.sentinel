@@ -1,0 +1,35 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_codebuild_project.example": {
+			"address":        "aws_codebuild_project.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_codebuild_project",
+			"values": {
+				"name": "example-project",
+				"artifacts": [
+					{
+						"type":                "S3",
+						"location":            "my-bucket-1",
+						"encryption_disabled": false,
+					},
+					{
+						"type":                "S3",
+						"location":            "my-bucket-2",
+						"encryption_disabled": false,
+					},
+				],
+			},
+		},
+	},
+}

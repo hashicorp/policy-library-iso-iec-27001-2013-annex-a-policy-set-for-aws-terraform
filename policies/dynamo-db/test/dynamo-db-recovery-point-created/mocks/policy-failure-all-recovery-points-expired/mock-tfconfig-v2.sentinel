@@ -1,0 +1,95 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_dynamodb_table.expired": {
+		"address": "aws_dynamodb_table.expired",
+		"config": {
+			"billing_mode": {
+				"constant_value": "PAY_PER_REQUEST",
+			},
+			"hash_key": {
+				"constant_value": "id",
+			},
+			"name": {
+				"constant_value": "expired-table",
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "expired-table",
+				},
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "expired",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_dynamodb_table",
+	},
+	"aws_backup_plan.expired": {
+		"address": "aws_backup_plan.expired",
+		"config": {
+			"name": {
+				"constant_value": "expired-backup-plan",
+			},
+			"rule": [
+				{
+					"lifecycle": [
+						{
+							"delete_after": {
+								"constant_value": 30,
+							},
+						},
+					],
+					"rule_name": {
+						"constant_value": "monthly-backup",
+					},
+					"schedule": {
+						"constant_value": "cron(0 2 1 * ? *)",
+					},
+				},
+			],
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "expired",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_plan",
+	},
+	"aws_backup_selection.expired": {
+		"address": "aws_backup_selection.expired",
+		"config": {
+			"name": {
+				"constant_value": "expired-backup-selection",
+			},
+			"plan_id": {
+				"references": [
+					"aws_backup_plan.expired.id",
+					"aws_backup_plan.expired",
+				],
+			},
+			"resources": {
+				"constant_value": [
+					"arn:aws:dynamodb:us-east-1:123456789012:table/expired-table",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "expired",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+}

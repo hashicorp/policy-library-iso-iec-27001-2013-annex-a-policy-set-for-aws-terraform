@@ -1,0 +1,118 @@
+# This policy requires that ECS task definitions specify a non-root user for container execution.
+# Each container definition in the task definition must have a 'user' attribute that specifies
+# a non-root user (not '0' or 'root').
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "json"
+import "strings"
+
+# Constants
+const = {
+	"policy_name":                      "ecs-task-definition-nonroot-user",
+	"message":                          "ECS task definitions used for the EC2 launch type must specify a non-root user for all container definitions. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details.",
+	"resource_aws_ecs_task_definition": "aws_ecs_task_definition",
+	"container_definitions":            "container_definitions",
+	"requires_compatibilities":         "requires_compatibilities",
+	"user":            "user",
+	"ec2_launch_type": "ec2",
+}
+
+# Functions
+parse_container_definitions = func(res) {
+	container_defs = maps.get(res.values, const.container_definitions, "")
+
+	if container_defs is "" {
+		return []
+	}
+
+	return json.unmarshal(container_defs)
+}
+
+applies_to_ec2_launch_type = func(res) {
+	compatibilities = maps.get(res.values, const.requires_compatibilities, null)
+
+	if compatibilities is null or compatibilities is empty {
+		return true
+	}
+
+	for compatibilities as _, compatibility {
+		compatibility_name = strings.to_lower(strings.trim_space(string(compatibility)))
+		if compatibility_name is const.ec2_launch_type {
+			return true
+		}
+	}
+
+	return false
+}
+
+has_non_root_user = func(container_definition) {
+	user_value = maps.get(container_definition, const.user, null)
+	if user_value is null {
+		return false
+	}
+
+	user_string = strings.to_lower(strings.trim_space(string(user_value)))
+	if user_string is "" {
+		return false
+	}
+
+	user_parts = strings.split(user_string, ":")
+	primary_user = user_parts[0]
+
+	return primary_user is not "" and primary_user is not "root" and primary_user is not "0"
+}
+
+check_container_definitions = func(res) {
+	if not applies_to_ec2_launch_type(res) {
+		return true
+	}
+
+	container_definitions = parse_container_definitions(res)
+	if container_definitions is empty {
+		return false
+	}
+
+	invalid_container_definitions = filter container_definitions as _, container_definition {
+		not has_non_root_user(container_definition)
+	}
+
+	return invalid_container_definitions is empty
+}
+
+generate_violation_message = func(violation) {
+	return "ECS task definition '" + violation.address + "' must specify a non-root user for all EC2 launch type container definitions. Each applicable container must have a 'user' attribute set to a non-root user (not '0' or 'root'). Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details."
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_ecs_task_definition).resources
+
+violations = collection.reject(resources, func(res) {
+	return check_container_definitions(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

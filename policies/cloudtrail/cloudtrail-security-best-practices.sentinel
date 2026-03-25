@@ -1,0 +1,213 @@
+# This policy ensures that at least one AWS CloudTrail trail is defined with security best practices
+# according to AWS Audit Manager requirements.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":           "cloudtrail-security-best-practices",
+	"resource_cloudtrail":   "aws_cloudtrail",
+	"message_no_compliant":  "No AWS CloudTrail trail found that meets all security best practices. At least one trail must: have logging enabled, record global service events, be multi-region, have log file validation enabled, be encrypted with a KMS key, and log all management events for both reads and writes without exclusions. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-security-trail-enabled.html for more details.",
+	"message_non_compliant": "CloudTrail trail does not meet all security best practices requirements. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-security-trail-enabled.html for more details.",
+}
+
+# Functions
+list_contains = func(values, expected) {
+	for values as value {
+		if value is expected {
+			return true
+		}
+	}
+
+	return false
+}
+
+check_basic_management_event_selectors = func(selectors) {
+	# Without any selectors, CloudTrail management event logging defaults to all read and write events.
+	if length(selectors) == 0 {
+		return true
+	}
+
+	has_read_only = false
+	has_write_only = false
+
+	for selectors as selector {
+		include_mgmt = maps.get(selector, "include_management_events", true)
+		if include_mgmt is false {
+			continue
+		}
+
+		exclude_sources = maps.get(selector, "exclude_management_event_sources", [])
+		if length(exclude_sources) > 0 {
+			continue
+		}
+
+		read_write_type = maps.get(selector, "read_write_type", "All")
+		if read_write_type == "All" {
+			return true
+		}
+
+		if read_write_type == "ReadOnly" {
+			has_read_only = true
+		}
+
+		if read_write_type == "WriteOnly" {
+			has_write_only = true
+		}
+	}
+
+	return has_read_only is true and has_write_only is true
+}
+
+get_advanced_management_selector_coverage = func(selector) {
+	field_selectors = maps.get(selector, "field_selector", [])
+	has_management_category = false
+	has_limiting_filters = false
+	read_only_present = false
+	logs_read_only = false
+	logs_write_only = false
+
+	for field_selectors as field_selector {
+		field_name = maps.get(field_selector, "field", "")
+
+		if field_name is "eventCategory" {
+			if list_contains(maps.get(field_selector, "equals", []), "Management") {
+				has_management_category = true
+			}
+			continue
+		}
+
+		if field_name is "readOnly" {
+			read_only_present = true
+			read_only_values = maps.get(field_selector, "equals", [])
+
+			if list_contains(read_only_values, "true") {
+				logs_read_only = true
+			}
+
+			if list_contains(read_only_values, "false") {
+				logs_write_only = true
+			}
+			continue
+		}
+
+		has_limiting_filters = true
+	}
+
+	return {
+		"has_management_category": has_management_category,
+		"has_limiting_filters":    has_limiting_filters,
+		"read_only_present":       read_only_present,
+		"logs_read_only":          logs_read_only,
+		"logs_write_only":         logs_write_only,
+	}
+}
+
+check_advanced_management_event_selectors = func(selectors) {
+	has_read_only = false
+	has_write_only = false
+
+	for selectors as selector {
+		coverage = get_advanced_management_selector_coverage(selector)
+		if coverage.has_management_category is false {
+			continue
+		}
+
+		if coverage.has_limiting_filters is true {
+			continue
+		}
+
+		if coverage.read_only_present is false {
+			return true
+		}
+
+		if coverage.logs_read_only is true {
+			has_read_only = true
+		}
+
+		if coverage.logs_write_only is true {
+			has_write_only = true
+		}
+	}
+
+	return has_read_only is true and has_write_only is true
+}
+
+has_required_management_event_logging = func(res) {
+	advanced_selectors = maps.get(res.values, "advanced_event_selector", [])
+	if length(advanced_selectors) > 0 {
+		return check_advanced_management_event_selectors(advanced_selectors)
+	}
+
+	event_selectors = maps.get(res.values, "event_selector", [])
+	return check_basic_management_event_selectors(event_selectors)
+}
+
+is_trail_compliant = func(res) {
+	# Check enable_logging is true (defaults to true if not specified)
+	logging_enabled = maps.get(res.values, "enable_logging", true)
+
+	# Check include_global_service_events is true (defaults to true if not specified)
+	include_global = maps.get(res.values, "include_global_service_events", true)
+
+	# Check is_multi_region_trail is true
+	is_multi_region = maps.get(res.values, "is_multi_region_trail", false)
+
+	# Check enable_log_file_validation is true
+	log_validation = maps.get(res.values, "enable_log_file_validation", false)
+
+	# Check kms_key_id is defined (encrypted with KMS)
+	kms_encrypted = maps.has(res.values, "kms_key_id") and res.values.kms_key_id is not null and res.values.kms_key_id is not ""
+
+	# Check management event coverage across default, basic, or advanced selectors.
+	has_valid_management_logging = has_required_management_event_logging(res)
+
+	# All conditions must be true
+	return logging_enabled is true and
+		include_global is true and
+		is_multi_region is true and
+		log_validation is true and
+		kms_encrypted is true and
+		has_valid_management_logging is true
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_cloudtrail).resources
+
+# Find compliant trails
+compliant_trails = filter resources as _, res {
+	is_trail_compliant(res) is true
+}
+
+# Check if at least one compliant trail exists
+has_compliant_trail = length(compliant_trails) > 0
+
+# If no compliant trail exists, create a violation entry
+violations = []
+if has_compliant_trail is false {
+	violations = [{
+		"address":        "No compliant CloudTrail trail found",
+		"module_address": "",
+		"message":        const.message_no_compliant,
+	}]
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations":  violations,
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

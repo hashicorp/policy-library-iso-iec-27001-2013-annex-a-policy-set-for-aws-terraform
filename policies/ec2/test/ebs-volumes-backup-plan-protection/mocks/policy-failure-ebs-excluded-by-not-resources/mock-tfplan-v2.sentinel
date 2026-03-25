@@ -1,0 +1,50 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_ebs_volume.excluded": {
+			"address":        "aws_ebs_volume.excluded",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "excluded",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_ebs_volume",
+			"values": {
+				"arn":               "arn:aws:ec2:us-east-1:123456789012:volume/vol-excluded1",
+				"availability_zone": "us-east-1b",
+				"encrypted":         true,
+				"id":                "vol-excluded1",
+				"size":              60,
+				"type":              "gp3",
+			},
+		},
+		"aws_backup_selection.excluded": {
+			"address":        "aws_backup_selection.excluded",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "excluded",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_selection",
+			"values": {
+				"name":         "excluded-backup",
+				"plan_id":      "backup-plan-id-8",
+				"iam_role_arn": "arn:aws:iam::123456789012:role/backup-role",
+				"resources":    ["arn:aws:ec2:*:*:volume/*"],
+				"not_resources": [
+					"arn:aws:ec2:us-east-1:123456789012:volume/vol-excluded1",
+				],
+				"condition": [],
+			},
+		},
+	},
+}

@@ -1,0 +1,43 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_security_group.example": {
+			"address":        "aws_security_group.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_security_group",
+			"values": {
+				"description": "Attached via ENI inline security_groups",
+				"id":          "sg-11111111111111111",
+				"name":        "attached-inline-sg",
+				"vpc_id":      "vpc-12345678",
+			},
+		},
+		"aws_network_interface.example": {
+			"address":        "aws_network_interface.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_network_interface",
+			"values": {
+				"private_ips":     ["10.0.1.10"],
+				"security_groups": ["aws_security_group.example.id"],
+				"subnet_id":       "subnet-12345678",
+			},
+		},
+	},
+}

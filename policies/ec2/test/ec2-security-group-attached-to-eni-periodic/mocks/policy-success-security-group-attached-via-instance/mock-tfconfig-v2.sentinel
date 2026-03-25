@@ -1,0 +1,60 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_security_group.example": {
+		"address": "aws_security_group.example",
+		"config": {
+			"description": {
+				"constant_value": "Attached via instance primary ENI",
+			},
+			"id": {
+				"constant_value": "sg-33333333333333333",
+			},
+			"name": {
+				"constant_value": "attached-by-instance-sg",
+			},
+			"vpc_id": {
+				"constant_value": "vpc-12345678",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_security_group",
+	},
+	"aws_instance.example": {
+		"address": "aws_instance.example",
+		"config": {
+			"ami": {
+				"constant_value": "ami-0c55b159cbfafe1f0",
+			},
+			"instance_type": {
+				"constant_value": "t2.micro",
+			},
+			"subnet_id": {
+				"constant_value": "subnet-12345678",
+			},
+			"vpc_security_group_ids": {
+				"references": [
+					"aws_security_group.example.id",
+					"aws_security_group.example",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_instance",
+	},
+}

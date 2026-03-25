@@ -1,0 +1,35 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_eks_cluster.example": {
+			"address":        "aws_eks_cluster.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_eks_cluster",
+			"values": {
+				"name": "example-cluster",
+				"enabled_cluster_log_types": [
+					"audit",
+					"authenticator",
+					"controllerManager",
+					"scheduler",
+				],
+				"role_arn": "arn:aws:iam::123456789012:role/eks-cluster-role",
+				"vpc_config": [
+					{
+						"subnet_ids": ["subnet-12345", "subnet-67890"],
+					},
+				],
+			},
+		},
+	},
+}

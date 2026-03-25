@@ -1,0 +1,74 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_ebs_volume.tagged": {
+		"address": "aws_ebs_volume.tagged",
+		"config": {
+			"availability_zone": {
+				"constant_value": "us-east-1b",
+			},
+			"encrypted": {
+				"constant_value": true,
+			},
+			"size": {
+				"constant_value": 75,
+			},
+			"tags": {
+				"constant_value": {
+					"Name":        "tagged-volume",
+					"Environment": "production",
+					"Backup":      "true",
+				},
+			},
+			"type": {
+				"constant_value": "gp3",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "tagged",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_ebs_volume",
+	},
+	"aws_backup_selection.tag_based": {
+		"address": "aws_backup_selection.tag_based",
+		"config": {
+			"iam_role_arn": {
+				"constant_value": "arn:aws:iam::123456789012:role/backup-role",
+			},
+			"name": {
+				"constant_value": "tag-based-backup",
+			},
+			"plan_id": {
+				"constant_value": "backup-plan-id-3",
+			},
+			"selection_tag": [
+				{
+					"key": {
+						"constant_value": "Backup",
+					},
+					"type": {
+						"constant_value": "STRINGEQUALS",
+					},
+					"value": {
+						"constant_value": "true",
+					},
+				},
+			],
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "tag_based",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+}

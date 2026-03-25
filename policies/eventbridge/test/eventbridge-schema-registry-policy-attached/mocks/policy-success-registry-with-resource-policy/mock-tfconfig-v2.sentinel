@@ -1,0 +1,45 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_schemas_registry.example": {
+		"address": "aws_schemas_registry.example",
+		"config": {
+			"description": {
+				"constant_value": "Custom schema registry with policy",
+			},
+			"name": {
+				"constant_value": "my-custom-registry",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_schemas_registry",
+	},
+	"aws_schemas_registry_policy.example": {
+		"address": "aws_schemas_registry_policy.example",
+		"config": {
+			"policy": {
+				"constant_value": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::123456789012:root\"},\"Action\":\"schemas:*\",\"Resource\":\"*\"}]}",
+			},
+			"registry_name": {
+				"constant_value": "my-custom-registry",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_schemas_registry_policy",
+	},
+}

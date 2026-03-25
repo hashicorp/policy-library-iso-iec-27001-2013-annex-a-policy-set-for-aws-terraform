@@ -1,0 +1,541 @@
+# This policy verifies that Amazon EBS volumes are covered by AWS Backup plans
+# that can create recovery points within the specified time period.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+import "json"
+
+# Parameters
+# max_recovery_point_age_hours refers to the maximum time period (in hours) within which
+# a recovery point should be created for EBS volumes
+param max_recovery_point_age_hours default 24
+
+# resourceTags (Optional)
+# Type: String
+# Tags of Amazon EBS volumes for the rule to check, in JSON format {"tagkey" : "tagValue"}.
+param resourceTags default ""
+
+# resourceId (Optional)
+# Type: String
+# ID of Amazon EBS volume for the rule to check.
+param resourceId default ""
+
+# recoveryPointAgeValue (Optional)
+# Type: int
+# Default: 1
+# Numerical value for maximum allowed age. No more than 744 for hours, 31 for days.
+param recoveryPointAgeValue default 1
+
+# recoveryPointAgeUnit (Optional)
+# Type: String
+# Default: days
+# Unit of time for maximum allowed age. Accepted values: 'hours', 'days'.
+param recoveryPointAgeUnit default "days"
+
+# Constants
+const = {
+	"policy_name":                   "ec2-backup-recovery-point-time-period",
+	"message":                       "Amazon EBS volumes must be associated with a compliant AWS Backup plan that creates recovery points within the specified time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details.",
+	"resource_aws_backup_plan":      "aws_backup_plan",
+	"resource_aws_backup_selection": "aws_backup_selection",
+	"resource_aws_ebs_volume":       "aws_ebs_volume",
+	"constant_value":                "constant_value",
+	"condition":                     "condition",
+	"not_resources":                 "not_resources",
+	"name":                          "name",
+	"plan_id_key":                   "plan_id",
+	"references":                    "references",
+	"resources_key":                 "resources",
+	"rule_key":                      "rule",
+	"schedule_key":                  "schedule",
+	"selection_tag_key":             "selection_tag",
+	"type_key":                      "type",
+	"key_key":                       "key",
+	"value_key":                     "value",
+	"test_key":                      "test",
+	"variable_key":                  "variable",
+	"values_key":                    "values",
+	"string_equals":                 "string_equals",
+	"string_not_equals":             "string_not_equals",
+	"string_like":                   "string_like",
+	"string_not_like":               "string_not_like",
+}
+
+get_config_attribute = func(res, attr) {
+	return maps.get(res, "config." + attr, {})
+}
+
+get_constant_value = func(attr, fallback) {
+	return maps.get(attr, const.constant_value, fallback)
+}
+
+get_list_values = func(attr) {
+	refs = maps.get(attr, const.references, [])
+	if length(refs) > 0 {
+		return refs
+	}
+
+	return maps.get(attr, const.constant_value, [])
+}
+
+# Functions
+# Check if resource matches the specified resourceId filter
+matches_resource_id = func(res) {
+	if resourceId is "" {
+		return true
+	}
+
+	volume_id = maps.get(res, "config.id.constant_value", "")
+	volume_arn = maps.get(res, "config.arn.constant_value", "")
+	return volume_id is resourceId or volume_arn is resourceId
+}
+
+# Check if resource matches the specified resourceTags filter
+matches_resource_tags = func(res) {
+	if resourceTags is "" {
+		return true
+	}
+
+	filter_tags = json.unmarshal(resourceTags)
+	resource_tags = maps.get(res, "config.tags.constant_value", {})
+
+	for filter_tags as tag_key, tag_value {
+		resource_tag_value = maps.get(resource_tags, tag_key, "")
+		if resource_tag_value is not tag_value {
+			return false
+		}
+	}
+
+	return true
+}
+
+# Calculate the required hours based on recoveryPointAgeUnit
+get_required_hours = func() {
+	if recoveryPointAgeValue is not 1 or recoveryPointAgeUnit is not "days" {
+		if recoveryPointAgeUnit is "hours" {
+			return recoveryPointAgeValue
+		}
+
+		return recoveryPointAgeValue * 24
+	}
+
+	return max_recovery_point_age_hours
+}
+
+get_backup_frequency_hours = func(schedule) {
+	if strings.has_prefix(schedule, "rate(") {
+		parts = strings.split(schedule, " ")
+		if length(parts) >= 2 {
+			numeric_part = strings.trim_prefix(parts[0], "rate(")
+			value = int(numeric_part)
+
+			if strings.has_prefix(parts[1], "hour") {
+				return value
+			}
+
+			if strings.has_prefix(parts[1], "day") {
+				return value * 24
+			}
+		}
+	}
+
+	if strings.has_prefix(schedule, "cron(") {
+		cron_expr = strings.trim_prefix(schedule, "cron(")
+		cron_expr = strings.trim_suffix(cron_expr, ")")
+		parts = strings.split(cron_expr, " ")
+
+		if length(parts) >= 3 {
+			minute = parts[0]
+			hour = parts[1]
+			day_of_month = parts[2]
+
+			if hour is "*" {
+				return 1
+			}
+
+			if hour matches ".*/[0-9]+" {
+				hour_parts = strings.split(hour, "/")
+				return int(hour_parts[length(hour_parts) - 1])
+			}
+
+			if minute is "*" or minute matches ".*/[0-9]+" {
+				return 1
+			}
+
+			if day_of_month is "*" or day_of_month is "?" {
+				return 24
+			}
+
+			if day_of_month matches "[0-9]+" {
+				return 720
+			}
+		}
+	}
+
+	return 720
+}
+
+is_backup_plan_compliant = func(plan_res) {
+	rules_list = maps.get(plan_res, "config." + const.rule_key, [])
+
+	if length(rules_list) is 0 {
+		return false
+	}
+
+	required_hours = get_required_hours()
+	for rules_list as r {
+		schedule = maps.get(r, const.schedule_key + "." + const.constant_value, "")
+		if schedule is not "" {
+			frequency = get_backup_frequency_hours(schedule)
+			if frequency <= required_hours {
+				return true
+			}
+		}
+	}
+
+	return false
+}
+
+matches_volume_reference = func(volume_res, resource_ref, all_volumes) {
+	volume_address = volume_res.address
+	volume_arn = maps.get(volume_res, "config.arn.constant_value", "")
+	volume_id = maps.get(volume_res, "config.id.constant_value", "")
+	volume_name = volume_res.name
+	ref_str = string(resource_ref)
+	ref_lower = strings.to_lower(ref_str)
+
+	if ref_str is "*" {
+		return true
+	}
+
+	if ref_str matches ".*" + volume_address + ".*" or
+		ref_str matches ".*" + volume_name + ".*" {
+		return true
+	}
+
+	if length(volume_arn) > 0 and ref_str is volume_arn {
+		return true
+	}
+
+	if length(volume_id) > 0 and strings.has_suffix(ref_str, ":volume/" + volume_id) {
+		return true
+	}
+
+	if ref_lower matches "arn:aws:ec2:.*:volume/\\*" or ref_lower matches "arn:aws:ec2:.*:volume/vol-\\*" {
+		return true
+	}
+
+	if length(volume_arn) is 0 and
+		length(volume_id) is 0 and
+		ref_lower matches ".*arn:aws:ec2:.*:volume/vol-.*" and
+		length(all_volumes) is 1 {
+		return true
+	}
+
+	return false
+}
+
+condition_key_to_tag = func(key) {
+	if strings.has_prefix(key, "aws:ResourceTag/") {
+		parts = strings.split(key, "/")
+		return parts[length(parts) - 1]
+	}
+
+	return key
+}
+
+wildcard_matches = func(value, pattern) {
+	if pattern is "*" {
+		return true
+	}
+
+	if pattern is value {
+		return true
+	}
+
+	if pattern matches "^[^*]+\\*$" {
+		parts = strings.split(pattern, "*")
+		return strings.has_prefix(value, parts[0])
+	}
+
+	if pattern matches "^\\*[^*]+$" {
+		parts = strings.split(pattern, "*")
+		return strings.has_suffix(value, parts[length(parts) - 1])
+	}
+
+	if pattern matches "^\\*[^*]+\\*$" {
+		parts = strings.split(pattern, "*")
+		return value matches ".*" + parts[1] + ".*"
+	}
+
+	return false
+}
+
+generic_condition_matches = func(condition_entry, volume_tags) {
+	test_name = strings.to_lower(maps.get(condition_entry, const.test_key + "." + const.constant_value, ""))
+	tag_key = condition_key_to_tag(maps.get(condition_entry, const.variable_key + "." + const.constant_value, ""))
+	values = maps.get(condition_entry, const.values_key + "." + const.constant_value, [])
+	actual_value = maps.get(volume_tags, tag_key, "")
+
+	if length(values) is 0 {
+		return false
+	}
+
+	for values as _, expected_value {
+		expected = string(expected_value)
+
+		if test_name is "stringequals" and actual_value is expected {
+			return true
+		}
+
+		if test_name is "stringnotequals" and actual_value is not expected {
+			return true
+		}
+
+		if test_name is "stringlike" and wildcard_matches(actual_value, expected) {
+			return true
+		}
+
+		if test_name is "stringnotlike" and not wildcard_matches(actual_value, expected) {
+			return true
+		}
+	}
+
+	return false
+}
+
+condition_entries_match = func(entries, volume_tags, operator) {
+	for entries as _, entry {
+		tag_key = condition_key_to_tag(maps.get(entry, const.key_key + "." + const.constant_value, ""))
+		expected_value = maps.get(entry, const.value_key + "." + const.constant_value, "")
+		actual_value = maps.get(volume_tags, tag_key, "")
+
+		if operator is const.string_equals and actual_value is not expected_value {
+			return false
+		}
+
+		if operator is const.string_not_equals and actual_value is expected_value {
+			return false
+		}
+
+		if operator is const.string_like and not wildcard_matches(actual_value, expected_value) {
+			return false
+		}
+
+		if operator is const.string_not_like and wildcard_matches(actual_value, expected_value) {
+			return false
+		}
+	}
+
+	return true
+}
+
+selection_conditions_match = func(selection_res, volume_res) {
+	conditions = maps.get(selection_res, "config." + const.condition, [])
+	if length(conditions) is 0 {
+		return true
+	}
+
+	volume_tags = maps.get(volume_res, "config.tags.constant_value", {})
+	if length(volume_tags) is 0 {
+		return false
+	}
+
+	for conditions as _, condition_block {
+		generic_test = maps.get(condition_block, const.test_key + "." + const.constant_value, "")
+		if generic_test is not "" {
+			if not generic_condition_matches(condition_block, volume_tags) {
+				return false
+			}
+			continue
+		}
+
+		if not condition_entries_match(maps.get(condition_block, const.string_equals, []), volume_tags, const.string_equals) {
+			return false
+		}
+
+		if not condition_entries_match(maps.get(condition_block, const.string_not_equals, []), volume_tags, const.string_not_equals) {
+			return false
+		}
+
+		if not condition_entries_match(maps.get(condition_block, const.string_like, []), volume_tags, const.string_like) {
+			return false
+		}
+
+		if not condition_entries_match(maps.get(condition_block, const.string_not_like, []), volume_tags, const.string_not_like) {
+			return false
+		}
+	}
+
+	return true
+}
+
+selection_matches_volume_tags = func(selection_res, volume_res) {
+	selection_tags = maps.get(selection_res, "config." + const.selection_tag_key, [])
+	if length(selection_tags) is 0 {
+		return false
+	}
+
+	volume_tags = maps.get(volume_res, "config.tags.constant_value", {})
+	if length(volume_tags) is 0 {
+		return false
+	}
+
+	for selection_tags as _, selection_tag {
+		tag_key = maps.get(selection_tag, const.key_key + "." + const.constant_value, "")
+		tag_value = maps.get(selection_tag, const.value_key + "." + const.constant_value, "")
+		tag_type = maps.get(selection_tag, const.type_key + "." + const.constant_value, "STRINGEQUALS")
+
+		if tag_type is not "STRINGEQUALS" {
+			return false
+		}
+
+		if maps.get(volume_tags, tag_key, "") is not tag_value {
+			return false
+		}
+	}
+
+	return true
+}
+
+selection_excludes_volume = func(volume_res, selection_res, all_volumes) {
+	not_resources_attr = get_config_attribute(selection_res, const.not_resources)
+	not_resources = get_list_values(not_resources_attr)
+	for not_resources as _, resource_ref {
+		if matches_volume_reference(volume_res, resource_ref, all_volumes) {
+			return true
+		}
+	}
+
+	return false
+}
+
+selection_covers_volume = func(volume_res, selection_res, all_volumes) {
+	if selection_excludes_volume(volume_res, selection_res, all_volumes) {
+		return false
+	}
+
+	resources_attr = get_config_attribute(selection_res, const.resources_key)
+	resources_list = get_list_values(resources_attr)
+	selection_has_resources = length(resources_list) > 0
+	selection_has_tags = length(maps.get(selection_res, "config." + const.selection_tag_key, [])) > 0
+	selection_has_conditions = length(maps.get(selection_res, "config." + const.condition, [])) > 0
+
+	if not selection_has_resources and not selection_has_tags and not selection_has_conditions {
+		return false
+	}
+
+	resource_match = not selection_has_resources
+	if selection_has_resources {
+		resource_match = false
+		for resources_list as _, resource_ref {
+			if matches_volume_reference(volume_res, resource_ref, all_volumes) {
+				resource_match = true
+			}
+		}
+	}
+
+	tag_match = true
+	if selection_has_tags {
+		tag_match = selection_matches_volume_tags(selection_res, volume_res)
+	}
+
+	condition_match = selection_conditions_match(selection_res, volume_res)
+
+	return resource_match and tag_match and condition_match
+}
+
+selection_has_compliant_plan = func(selection_res, backup_plans) {
+	plan_id_attr = get_config_attribute(selection_res, const.plan_id_key)
+	plan_id = get_constant_value(plan_id_attr, "")
+	plan_references = maps.get(plan_id_attr, const.references, [])
+	if plan_id is not "" {
+		for backup_plans as _, plan_res {
+			plan_name = plan_res.name
+			plan_display_name = maps.get(plan_res, "config." + const.name + "." + const.constant_value, "")
+			if plan_id is plan_res.address or
+				plan_id is plan_name or
+				plan_id is plan_display_name or
+				strings.has_suffix(plan_id, "." + plan_name) or
+				plan_res.address in plan_references or
+				(plan_res.address + ".id") in plan_references {
+				return is_backup_plan_compliant(plan_res)
+			}
+		}
+
+		return false
+	}
+
+	for backup_plans as _, plan_res {
+		if is_backup_plan_compliant(plan_res) {
+			return true
+		}
+	}
+
+	return false
+}
+
+has_compliant_backup_plan = func(volume_res, backup_selections, backup_plans, all_volumes) {
+	for backup_selections as _, selection_res {
+		if selection_covers_volume(volume_res, selection_res, all_volumes) and selection_has_compliant_plan(selection_res, backup_plans) {
+			return true
+		}
+	}
+
+	return false
+}
+
+generate_violation_message = func(violation) {
+	required_hours = get_required_hours()
+	age_description = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
+	return "Amazon EBS volume '" + violation.address + "' is not associated with a compliant AWS Backup plan scheduled within " + string(required_hours) + " hour(s) (equivalent to " + age_description + "). Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details."
+}
+
+# Variables
+planned_resources = tf.plan(tfplan.planned_values.resources)
+config_resources = tf.config(tfconfig.resources)
+backup_plans = config_resources.type(const.resource_aws_backup_plan).resources
+backup_selections = config_resources.type(const.resource_aws_backup_selection).resources
+ebs_volumes = config_resources.type(const.resource_aws_ebs_volume).resources
+
+# Apply resourceId filter if specified
+filtered_by_id = filter ebs_volumes as _, res {
+	matches_resource_id(res)
+}
+
+# Apply resourceTags filter if specified
+filtered_ebs_volumes = filter filtered_by_id as _, res {
+	matches_resource_tags(res)
+}
+
+violations = filter filtered_ebs_volumes as _, volume_res {
+	not has_compliant_backup_plan(volume_res, backup_selections, backup_plans, filtered_ebs_volumes)
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

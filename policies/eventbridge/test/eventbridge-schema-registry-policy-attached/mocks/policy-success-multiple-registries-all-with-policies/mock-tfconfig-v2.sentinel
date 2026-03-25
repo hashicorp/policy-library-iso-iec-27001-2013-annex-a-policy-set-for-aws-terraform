@@ -1,0 +1,125 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_schemas_registry.registry1": {
+		"address": "aws_schemas_registry.registry1",
+		"config": {
+			"description": {
+				"constant_value": "First custom schema registry",
+			},
+			"name": {
+				"constant_value": "first-registry",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "registry1",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_schemas_registry",
+	},
+	"aws_schemas_registry.registry2": {
+		"address": "aws_schemas_registry.registry2",
+		"config": {
+			"description": {
+				"constant_value": "Second custom schema registry",
+			},
+			"name": {
+				"constant_value": "second-registry",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "registry2",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_schemas_registry",
+	},
+	"aws_schemas_registry.registry3": {
+		"address": "aws_schemas_registry.registry3",
+		"config": {
+			"description": {
+				"constant_value": "Third custom schema registry",
+			},
+			"name": {
+				"constant_value": "third-registry",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "registry3",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_schemas_registry",
+	},
+	"aws_schemas_registry_policy.policy1": {
+		"address": "aws_schemas_registry_policy.policy1",
+		"config": {
+			"policy": {
+				"constant_value": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"AWS\":\"arn:aws:iam::123456789012:root\"},\"Action\":\"schemas:*\",\"Resource\":\"*\"}]}",
+			},
+			"registry_name": {
+				"constant_value": "first-registry",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "policy1",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_schemas_registry_policy",
+	},
+	"aws_schemas_registry_policy.policy2": {
+		"address": "aws_schemas_registry_policy.policy2",
+		"config": {
+			"policy": {
+				"constant_value": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"events.amazonaws.com\"},\"Action\":\"schemas:DescribeRegistry\",\"Resource\":\"*\"}]}",
+			},
+			"registry_name": {
+				"constant_value": "second-registry",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "policy2",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_schemas_registry_policy",
+	},
+	"aws_schemas_registry_policy.policy3": {
+		"address": "aws_schemas_registry_policy.policy3",
+		"config": {
+			"policy": {
+				"constant_value": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Deny\",\"Principal\":\"*\",\"Action\":\"schemas:DeleteRegistry\",\"Resource\":\"*\"}]}",
+			},
+			"registry_name": {
+				"constant_value": "third-registry",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "policy3",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_schemas_registry_policy",
+	},
+}

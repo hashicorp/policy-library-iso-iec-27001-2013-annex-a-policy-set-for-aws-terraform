@@ -1,0 +1,61 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_api_gateway_stage.example": {
+		"address": "aws_api_gateway_stage.example",
+		"config": {
+			"stage_name": {
+				"constant_value": "production",
+			},
+			"rest_api_id": {
+				"constant_value": "abc123",
+			},
+			"cache_cluster_enabled": {
+				"constant_value": true,
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_api_gateway_stage",
+	},
+	"aws_api_gateway_method_settings.example": {
+		"address": "aws_api_gateway_method_settings.example",
+		"config": {
+			"rest_api_id": {
+				"constant_value": "abc123",
+			},
+			"stage_name": {
+				"constant_value": "production",
+			},
+			"method_path": {
+				"constant_value": "*/*",
+			},
+			"settings": [
+				{
+					"caching_enabled": {
+						"constant_value": true,
+					},
+					"cache_data_encrypted": {
+						"constant_value": false,
+					},
+				},
+			],
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_api_gateway_method_settings",
+	},
+}

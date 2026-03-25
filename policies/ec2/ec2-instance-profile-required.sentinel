@@ -1,0 +1,151 @@
+# This policy requires that EC2 instances have an IAM instance profile attached.
+# This ensures proper identity and access management for EC2 instances.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+
+# Params
+# IamInstanceProfileArnList (Optional)
+# Type: CSV
+# Comma-separated list of IAM profile Amazon Resource Names (ARNs) that can be attached to Amazon EC2 instances.
+param IamInstanceProfileArnList default ""
+
+# Constants
+const = {
+	"policy_name":          "ec2-instance-profile-required",
+	"message":              "EC2 instance must have an IAM instance profile attached for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details.",
+	"resource_type":        "aws_instance",
+	"iam_instance_profile": "iam_instance_profile",
+}
+
+# Functions
+# Parse comma-separated list of allowed IAM instance profile ARNs
+get_allowed_profile_arns = func() {
+	if IamInstanceProfileArnList is "" {
+		return []
+	}
+
+	# Split by comma and trim whitespace
+	arns = strings.split(IamInstanceProfileArnList, ",")
+	trimmed_arns = []
+	for arns as arn {
+		trimmed = strings.trim_space(arn)
+		if trimmed is not "" {
+			trimmed_arns = trimmed_arns + [trimmed]
+		}
+	}
+
+	return trimmed_arns
+}
+
+extract_instance_profile_name = func(profile_identifier) {
+	if profile_identifier is "" {
+		return ""
+	}
+
+	if strings.has_prefix(profile_identifier, "arn:") {
+		parts = strings.split(profile_identifier, "/")
+		return parts[length(parts) - 1]
+	}
+
+	if strings.has_prefix(profile_identifier, "aws_iam_instance_profile.") {
+		parts = strings.split(profile_identifier, ".")
+		return parts[length(parts) - 1]
+	}
+
+	return profile_identifier
+}
+
+# Check if an IAM instance profile is in the allowed list
+is_profile_allowed = func(profile_value) {
+	allowed_arns = get_allowed_profile_arns()
+	profile_name = extract_instance_profile_name(profile_value)
+
+	# If no specific profiles are required, any profile is allowed
+	if length(allowed_arns) is 0 {
+		return true
+	}
+
+	# Compare against both exact ARN values and profile names derived from the
+	# allowed ARNs, because aws_instance.iam_instance_profile is configured as the
+	# instance profile name in Terraform.
+	for allowed_arns as allowed {
+		allowed_name = extract_instance_profile_name(allowed)
+		if profile_value is allowed or profile_name is allowed_name {
+			return true
+		}
+	}
+
+	return false
+}
+
+generate_violation_message = func(violation) {
+	profile = maps.get(violation.values, const.iam_instance_profile, null)
+	allowed_arns = get_allowed_profile_arns()
+
+	if profile is null {
+		if length(allowed_arns) > 0 {
+			arns_list = strings.join(allowed_arns, ", ")
+			return "EC2 instance '" + violation.address + "' must have an IAM instance profile from the allowed list: " + arns_list + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+		}
+		return "EC2 instance '" + violation.address + "' must have an IAM instance profile attached. The 'iam_instance_profile' attribute is required for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+	}
+
+	if profile is "" {
+		if length(allowed_arns) > 0 {
+			arns_list = strings.join(allowed_arns, ", ")
+			return "EC2 instance '" + violation.address + "' has an empty 'iam_instance_profile' attribute. Must use one of the allowed profiles: " + arns_list + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+		}
+		return "EC2 instance '" + violation.address + "' has an empty 'iam_instance_profile' attribute. A valid IAM instance profile must be specified for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+	}
+
+	# Profile exists but not in allowed list
+	if length(allowed_arns) > 0 {
+		arns_list = strings.join(allowed_arns, ", ")
+		return "EC2 instance '" + violation.address + "' is using IAM instance profile '" + profile + "' which is not in the allowed list. Allowed profiles: " + arns_list + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+	}
+
+	return "EC2 instance '" + violation.address + "' IAM instance profile validation failed. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_type).resources
+
+violations = collection.reject(resources, func(res) {
+	profile = maps.get(res.values, const.iam_instance_profile, null)
+
+	# Profile must exist and not be empty
+	if profile is null or profile is "" {
+		return false
+	}
+
+	# Profile must be in the allowed list (if specified)
+	return is_profile_allowed(profile)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

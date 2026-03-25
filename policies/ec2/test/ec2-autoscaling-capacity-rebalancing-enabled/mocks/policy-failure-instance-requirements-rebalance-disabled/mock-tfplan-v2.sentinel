@@ -1,0 +1,60 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_autoscaling_group.example": {
+			"address":        "aws_autoscaling_group.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_autoscaling_group",
+			"values": {
+				"name":               "example-asg",
+				"max_size":           4,
+				"min_size":           1,
+				"desired_capacity":   2,
+				"capacity_rebalance": false,
+				"availability_zones": ["us-east-1a"],
+				"mixed_instances_policy": [
+					{
+						"launch_template": [
+							{
+								"launch_template_specification": [
+									{
+										"launch_template_id": "lt-12345",
+										"version":            "$Latest",
+									},
+								],
+								"override": [
+									{
+										"instance_requirements": [
+											{
+												"memory_mib": [
+													{
+														"min": 4096,
+													},
+												],
+												"vcpu_count": [
+													{
+														"min": 2,
+													},
+												],
+											},
+										],
+									},
+								],
+							},
+						],
+					},
+				],
+			},
+		},
+	},
+}

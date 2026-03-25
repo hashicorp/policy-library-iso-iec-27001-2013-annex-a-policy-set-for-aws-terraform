@@ -1,0 +1,116 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_efs_file_system.first": {
+			"address":        "aws_efs_file_system.first",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "first",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_efs_file_system",
+			"values": {
+				"creation_token": "my-efs-first",
+				"id":             "fs-12345678",
+				"arn":            "arn:aws:elasticfilesystem:us-east-1:123456789012:file-system/fs-12345678",
+				"encrypted":      true,
+				"tags": {
+					"Name":        "first-efs",
+					"Environment": "prod",
+				},
+			},
+		},
+		"aws_efs_file_system.second": {
+			"address":        "aws_efs_file_system.second",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "second",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_efs_file_system",
+			"values": {
+				"creation_token": "my-efs-second",
+				"id":             "fs-87654321",
+				"arn":            "arn:aws:elasticfilesystem:us-east-1:123456789012:file-system/fs-87654321",
+				"encrypted":      true,
+				"tags": {
+					"Name":        "second-efs",
+					"Environment": "prod",
+				},
+			},
+		},
+		"aws_backup_selection.first": {
+			"address":        "aws_backup_selection.first",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "first",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_selection",
+			"values": {
+				"name":    "efs-backup-selection-first",
+				"plan_id": "daily",
+				"resources": [
+					"arn:aws:elasticfilesystem:us-east-1:123456789012:file-system/fs-12345678",
+				],
+			},
+		},
+		"aws_backup_selection.second": {
+			"address":        "aws_backup_selection.second",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "second",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_selection",
+			"values": {
+				"name":    "efs-backup-selection-second",
+				"plan_id": "daily",
+				"selection_tag": [
+					{
+						"type":  "STRINGEQUALS",
+						"key":   "Environment",
+						"value": "prod",
+					},
+				],
+			},
+		},
+		"aws_backup_plan.daily": {
+			"address":        "aws_backup_plan.daily",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "daily",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_plan",
+			"values": {
+				"name": "efs-backup-plan-daily",
+				"rule": [
+					{
+						"rule_name":         "daily-backup",
+						"target_vault_name": "Default",
+						"schedule":          "cron(0 2 * * ? *)",
+					},
+				],
+			},
+		},
+	},
+}

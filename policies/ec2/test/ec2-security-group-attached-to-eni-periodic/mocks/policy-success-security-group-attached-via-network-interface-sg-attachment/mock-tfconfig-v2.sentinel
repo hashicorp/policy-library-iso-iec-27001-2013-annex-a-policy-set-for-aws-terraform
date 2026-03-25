@@ -1,0 +1,54 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_security_group.example": {
+		"address": "aws_security_group.example",
+		"config": {
+			"description": {
+				"constant_value": "Attached via aws_network_interface_sg_attachment",
+			},
+			"id": {
+				"constant_value": "sg-22222222222222222",
+			},
+			"name": {
+				"constant_value": "attached-by-resource-sg",
+			},
+			"vpc_id": {
+				"constant_value": "vpc-12345678",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_security_group",
+	},
+	"aws_network_interface_sg_attachment.example": {
+		"address": "aws_network_interface_sg_attachment.example",
+		"config": {
+			"network_interface_id": {
+				"constant_value": "eni-12345678",
+			},
+			"security_group_id": {
+				"references": [
+					"aws_security_group.example.id",
+					"aws_security_group.example",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_network_interface_sg_attachment",
+	},
+}

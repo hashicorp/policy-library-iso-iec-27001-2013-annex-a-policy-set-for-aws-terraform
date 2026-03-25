@@ -1,0 +1,107 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_rds_cluster.main": {
+		"address": "aws_rds_cluster.main",
+		"config": {
+			"backup_retention_period": {
+				"constant_value": 0,
+			},
+			"cluster_identifier": {
+				"constant_value": "aurora-cluster-with-backup-plan",
+			},
+			"engine": {
+				"constant_value": "aurora-mysql",
+			},
+			"engine_version": {
+				"constant_value": "5.7.mysql_aurora.2.10.1",
+			},
+			"skip_final_snapshot": {
+				"constant_value": true,
+			},
+			"tags": {
+				"constant_value": {
+					"Backup": "enabled",
+				},
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "main",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_rds_cluster",
+	},
+	"aws_backup_plan.aurora_backup": {
+		"address": "aws_backup_plan.aurora_backup",
+		"config": {
+			"name": {
+				"constant_value": "aurora-backup-plan",
+			},
+			"rule": [
+				{
+					"lifecycle": [
+						{
+							"delete_after": {
+								"constant_value": 30,
+							},
+						},
+					],
+					"rule_name": {
+						"constant_value": "daily_backup",
+					},
+					"schedule": {
+						"constant_value": "cron(0 2 * * ? *)",
+					},
+					"target_vault_name": {
+						"constant_value": "Default",
+					},
+				},
+			],
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "aurora_backup",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_plan",
+	},
+	"aws_backup_selection.aurora_selection": {
+		"address": "aws_backup_selection.aurora_selection",
+		"config": {
+			"iam_role_arn": {
+				"constant_value": "arn:aws:iam::123456789012:role/aws-backup-role",
+			},
+			"name": {
+				"constant_value": "aurora-backup-selection",
+			},
+			"plan_id": {
+				"references": [
+					"aws_backup_plan.aurora_backup.id",
+					"aws_backup_plan.aurora_backup",
+				],
+			},
+			"resources": {
+				"constant_value": [
+					"arn:aws:rds:us-east-1:123456789012:cluster:aurora-cluster-with-backup-plan",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "aurora_selection",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+}

@@ -1,0 +1,50 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_ebs_volume.example": {
+			"address":        "aws_ebs_volume.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_ebs_volume",
+			"values": {
+				"arn":               "arn:aws:ec2:us-east-1:123456789012:volume/vol-55555555",
+				"availability_zone": "us-east-1b",
+				"encrypted":         true,
+				"id":                "vol-55555555",
+				"size":              90,
+				"type":              "gp3",
+			},
+		},
+		"aws_backup_plan.example": {
+			"address":        "aws_backup_plan.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "aws",
+			"tainted":        false,
+			"type":           "aws_backup_plan",
+			"values": {
+				"name": "unused-plan",
+				"rule": [
+					{
+						"rule_name":         "daily-backup",
+						"schedule":          "cron(0 2 * * ? *)",
+						"target_vault_name": "Default",
+					},
+				],
+			},
+		},
+	},
+}

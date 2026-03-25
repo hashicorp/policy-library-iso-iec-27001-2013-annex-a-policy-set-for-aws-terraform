@@ -1,0 +1,103 @@
+# This policy verifies that Amazon CloudWatch Log Groups are encrypted with AWS KMS.
+# Optionally, it can check for a specific KMS key ID if provided.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+
+# Parameters
+# kms_key_id is optional. If not provided, any KMS key is acceptable.
+# If provided, the log group must be encrypted with this specific KMS key.
+param kms_key_id default ""
+
+# KmsKeyId (Optional)
+# Type: String
+# Amazon Resource Name (ARN) of the ID for the KMS key that is used to encrypt the log group.
+param KmsKeyId default ""
+
+# Constants
+const = {
+	"policy_name":                       "cloudwatch-log-group-kms-encryption",
+	"message":                           "CloudWatch Log Group must be encrypted with an AWS KMS key. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details.",
+	"resource_aws_cloudwatch_log_group": "aws_cloudwatch_log_group",
+	"kms_key_id_attr":                   "kms_key_id",
+}
+
+# Functions
+# Get the effective required KMS key ID (prioritize KmsKeyId over kms_key_id)
+get_required_kms_key_id = func() {
+	if KmsKeyId is not "" {
+		return KmsKeyId
+	}
+	if kms_key_id is not "" {
+		return kms_key_id
+	}
+	return ""
+}
+
+generate_violation_message = func(violation) {
+	kms_key = maps.get(violation.values, const.kms_key_id_attr, "")
+	required_key = get_required_kms_key_id()
+
+	if required_key is "" {
+		if kms_key is "" {
+			return "CloudWatch Log Group must be encrypted with an AWS KMS key. Attribute 'kms_key_id' is not set. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details."
+		}
+	} else {
+		if kms_key is "" {
+			return "CloudWatch Log Group must be encrypted with AWS KMS key '" + required_key + "'. Attribute 'kms_key_id' is not set. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details."
+		}
+		return "CloudWatch Log Group must be encrypted with AWS KMS key '" + required_key + "'. Current value is '" + kms_key + "'. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details."
+	}
+
+	return "CloudWatch Log Group encryption check failed. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudwatch-log-group-encrypted.html for more details."
+}
+
+is_encrypted_with_kms = func(res) {
+	kms_key = maps.get(res.values, const.kms_key_id_attr, "")
+	required_key = get_required_kms_key_id()
+
+	# Check if kms_key_id is set (not empty)
+	if kms_key is "" {
+		return false
+	}
+
+	# If specific KMS key is required, verify it matches
+	if required_key is not "" {
+		return kms_key is required_key
+	}
+
+	# Otherwise, any KMS key is acceptable
+	return true
+}
+
+# Variables
+resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_cloudwatch_log_group).resources
+violations = collection.reject(resources, func(res) {
+	return is_encrypted_with_kms(res)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

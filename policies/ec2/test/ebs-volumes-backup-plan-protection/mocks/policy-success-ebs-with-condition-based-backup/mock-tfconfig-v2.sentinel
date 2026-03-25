@@ -1,0 +1,98 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_ebs_volume.conditional": {
+		"address": "aws_ebs_volume.conditional",
+		"config": {
+			"arn": {
+				"constant_value": "arn:aws:ec2:us-east-1:123456789012:volume/vol-conditional1",
+			},
+			"availability_zone": {
+				"constant_value": "us-east-1a",
+			},
+			"encrypted": {
+				"constant_value": true,
+			},
+			"id": {
+				"constant_value": "vol-conditional1",
+			},
+			"size": {
+				"constant_value": 90,
+			},
+			"tags": {
+				"constant_value": {
+					"Backup":      "true",
+					"Environment": "production",
+				},
+			},
+			"type": {
+				"constant_value": "gp3",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "conditional",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_ebs_volume",
+	},
+	"aws_backup_selection.conditional": {
+		"address": "aws_backup_selection.conditional",
+		"config": {
+			"condition": [
+				{
+					"string_equals": [
+						{
+							"key": {
+								"constant_value": "aws:ResourceTag/Backup",
+							},
+							"value": {
+								"constant_value": "true",
+							},
+						},
+					],
+					"string_like": [
+						{
+							"key": {
+								"constant_value": "aws:ResourceTag/Environment",
+							},
+							"value": {
+								"constant_value": "prod*",
+							},
+						},
+					],
+				},
+			],
+			"iam_role_arn": {
+				"constant_value": "arn:aws:iam::123456789012:role/backup-role",
+			},
+			"name": {
+				"constant_value": "conditional-backup",
+			},
+			"not_resources": {
+				"constant_value": [],
+			},
+			"plan_id": {
+				"constant_value": "backup-plan-id-7",
+			},
+			"resources": {
+				"constant_value": [
+					"*",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "conditional",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+}
