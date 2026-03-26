@@ -732,11 +732,6 @@ policy "iam-policy-no-blacklisted-arn-allowed" {
   enforcement_level = "advisory"
 }
 
-policy "iam-policy-arn-should-be-attached" {
-  source = "./policies/iam/iam-policy-arn-should-be-attached.sentinel"
-  enforcement_level = "advisory"
-}
-
 policy "iam-managed-policy-should-be-attached-to-role" {
   source = "./policies/iam/iam-managed-policy-should-be-attached-to-role.sentinel"
   enforcement_level = "advisory"
@@ -759,11 +754,6 @@ policy "ec2-internet-gateway-allow-authorized-vpc-only" {
 
 policy "mq-should-have-audit-logging-enabled" {
   source = "./policies/mq/mq-should-have-audit-logging-enabled.sentinel"
-  enforcement_level = "advisory"
-}
-
-policy "cloudtrail-multi-region-enabled" {
-  source = "./policies/cloudtrail/cloudtrail-multi-region-enabled.sentinel"
   enforcement_level = "advisory"
 }
 
