@@ -1,0 +1,29 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# No SSH ingress rules - policy should pass
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_vpc_security_group_ingress_rule.http": {
+			"address":        "aws_vpc_security_group_ingress_rule.http",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "http",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_vpc_security_group_ingress_rule",
+			"values": {
+				"cidr_ipv4":         "0.0.0.0/0",
+				"description":       "HTTP from anywhere",
+				"from_port":         80,
+				"ip_protocol":       "tcp",
+				"security_group_id": "sg-12345678",
+				"to_port":           80,
+			},
+		},
+	},
+}

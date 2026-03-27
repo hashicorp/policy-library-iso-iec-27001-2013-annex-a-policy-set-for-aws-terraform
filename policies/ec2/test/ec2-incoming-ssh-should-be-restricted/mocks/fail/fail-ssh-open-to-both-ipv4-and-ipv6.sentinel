@@ -1,0 +1,48 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_vpc_security_group_ingress_rule.ssh_ipv4_unrestricted": {
+			"address":        "aws_vpc_security_group_ingress_rule.ssh_ipv4_unrestricted",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "ssh_ipv4_unrestricted",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_vpc_security_group_ingress_rule",
+			"values": {
+				"cidr_ipv4":         "0.0.0.0/0",
+				"description":       "SSH from anywhere IPv4",
+				"from_port":         22,
+				"ip_protocol":       "tcp",
+				"security_group_id": "sg-12345678",
+				"to_port":           22,
+			},
+		},
+		"aws_vpc_security_group_ingress_rule.ssh_ipv6_unrestricted": {
+			"address":        "aws_vpc_security_group_ingress_rule.ssh_ipv6_unrestricted",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "ssh_ipv6_unrestricted",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_vpc_security_group_ingress_rule",
+			"values": {
+				"cidr_ipv6":         "::/0",
+				"description":       "SSH from anywhere IPv6",
+				"from_port":         22,
+				"ip_protocol":       "tcp",
+				"security_group_id": "sg-12345678",
+				"to_port":           22,
+			},
+		},
+	},
+}

@@ -1,0 +1,261 @@
+# This policy verifies that AWS Aurora DB instances are protected by a backup plan.
+# The rule is NON_COMPLIANT if the Aurora DB instance is not covered by a backup plan.
+# Note: This rule only applies to Amazon Aurora DB instances. DB clusters are not supported.
+# This policy uses tfconfig to track inter-resource dependencies.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfconfig/v2" as tfconfig
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+
+# Constants
+const = {
+	"policy_name":                   "rds-aurora-in-backup-plan",
+	"resource_aws_db_instance":      "aws_db_instance",
+	"resource_aws_backup_selection": "aws_backup_selection",
+	"resource_aws_backup_plan":      "aws_backup_plan",
+	"resource_aws_iam_role":         "aws_iam_role",
+	"message":                       "Aurora DB instance is not covered by a backup plan. Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-in-backup-plan.html for more details.",
+	"aurora_engines": [
+		"aurora",
+		"aurora-mysql",
+		"aurora-postgresql",
+	],
+}
+
+# Functions
+# Check if engine is Aurora
+is_aurora_engine = func(engine) {
+	for const.aurora_engines as _, aurora_engine {
+		if strings.has_prefix(engine, aurora_engine) {
+			return true
+		}
+	}
+	return false
+}
+
+# Check if a value is a reference to another resource
+is_reference = func(value) {
+	if value is null {
+		return false
+	}
+	references = maps.get(value, "references", [])
+	return length(references) > 0
+}
+
+# Extract resource address from reference
+extract_resource_from_reference = func(ref) {
+	# Reference format: "aws_db_instance.example.arn" or "aws_db_instance.example"
+	parts = strings.split(ref, ".")
+	if length(parts) >= 2 {
+		return parts[0] + "." + parts[1]
+	}
+	return ref
+}
+
+# Check if backup selection has valid dependencies
+has_valid_backup_selection_dependencies = func(selection_res, backup_plan_resources, iam_role_resources) {
+	# Check if plan_id references a backup plan
+	plan_id_config = maps.get(selection_res.config, "plan_id", {})
+	plan_id_refs = maps.get(plan_id_config, "references", [])
+
+	has_plan_ref = false
+	for plan_id_refs as _, ref {
+		if strings.has_prefix(ref, "aws_backup_plan.") {
+			# Verify the backup plan exists
+			plan_addr = extract_resource_from_reference(ref)
+			for backup_plan_resources as _, plan_res {
+				if plan_res.address == plan_addr {
+					has_plan_ref = true
+					break
+				}
+			}
+		}
+	}
+
+	# Check if iam_role_arn references an IAM role
+	iam_role_config = maps.get(selection_res.config, "iam_role_arn", {})
+	iam_role_refs = maps.get(iam_role_config, "references", [])
+
+	has_iam_ref = false
+	for iam_role_refs as _, ref {
+		if strings.has_prefix(ref, "aws_iam_role.") {
+			# Verify the IAM role exists
+			role_addr = extract_resource_from_reference(ref)
+			for iam_role_resources as _, role_res {
+				if role_res.address == role_addr {
+					has_iam_ref = true
+					break
+				}
+			}
+		}
+	}
+
+	# Both dependencies should be present
+	return has_plan_ref and has_iam_ref
+}
+
+# Get all backup selections with their resources and tags
+get_backup_selections = func(backup_selection_resources, backup_plan_resources, iam_role_resources, db_instance_resources) {
+	selections = []
+
+	for backup_selection_resources as _, sel {
+		# Verify dependencies
+		if not has_valid_backup_selection_dependencies(sel, backup_plan_resources, iam_role_resources) {
+			continue
+		}
+
+		# Get resources list
+		resources_config = maps.get(sel.config, "resources", {})
+		resources_list = []
+
+		# Check if resources is a constant value (list of ARNs)
+		constant_resources = maps.get(resources_config, "constant_value", [])
+		if length(constant_resources) > 0 {
+			resources_list = constant_resources
+		} else {
+			# Check if resources references other resources
+			resources_refs = maps.get(resources_config, "references", [])
+			for resources_refs as _, ref {
+				if strings.has_prefix(ref, "aws_db_instance.") {
+					# Find the referenced DB instance
+					db_addr = extract_resource_from_reference(ref)
+					for db_instance_resources as _, db_res {
+						if db_res.address == db_addr {
+							# Get the identifier to construct ARN pattern
+							identifier_config = maps.get(db_res.config, "identifier", {})
+							identifier = maps.get(identifier_config, "constant_value", "")
+							if identifier is not "" {
+								# Add ARN pattern
+								resources_list = resources_list + ["arn:aws:rds:*:*:db:" + identifier]
+							}
+							break
+						}
+					}
+				}
+			}
+		}
+
+		# Get selection tags
+		selection_tag_config = maps.get(sel.config, "selection_tag", {})
+		selection_tags = maps.get(selection_tag_config, "constant_value", [])
+
+		selection = {
+			"resources":      resources_list,
+			"selection_tags": selection_tags,
+		}
+		selections = selections + [selection]
+	}
+
+	return selections
+}
+
+# Check if RDS instance tags match selection tags
+check_tag_match = func(rds_tags, selection_tags) {
+	# If no selection tags, return false (not protected by tags)
+	if length(selection_tags) == 0 {
+		return false
+	}
+
+	# Check if all selection tags match (AND logic)
+	for selection_tags as _, tag_condition {
+		tag_type = maps.get(tag_condition, "type", "")
+		tag_key = maps.get(tag_condition, "key", "")
+		tag_value = maps.get(tag_condition, "value", "")
+
+		# Get the RDS instance tag value
+		rds_tag_value = maps.get(rds_tags, tag_key, "")
+
+		# Check based on type
+		if tag_type == "STRINGEQUALS" {
+			if rds_tag_value != tag_value {
+				return false
+			}
+		}
+	}
+
+	return true
+}
+
+# Check if RDS instance is protected by backup plan
+is_rds_protected = func(rds_resource, backup_selections) {
+	identifier_config = maps.get(rds_resource.config, "identifier", {})
+	rds_identifier = maps.get(identifier_config, "constant_value", "")
+
+	tags_config = maps.get(rds_resource.config, "tags", {})
+	rds_tags = maps.get(tags_config, "constant_value", {})
+
+	# Check each backup selection
+	for backup_selections as _, selection {
+		# Check resource-based protection
+		resources_list = selection.resources
+		for resources_list as _, protected_arn {
+			# Check if identifier matches in the ARN
+			if strings.has_suffix(protected_arn, ":db:" + rds_identifier) {
+				return true
+			}
+
+			# Check for wildcard patterns like arn:aws:rds:*:*:db:*
+			if strings.has_suffix(protected_arn, ":db:*") {
+				return true
+			}
+		}
+
+		# Check tag-based protection
+		selection_tags = selection.selection_tags
+		if check_tag_match(rds_tags, selection_tags) {
+			return true
+		}
+	}
+
+	return false
+}
+
+generate_violation_message = func(rds_address, engine) {
+	return "Aurora DB instance '" + rds_address + "' (engine: " + engine + ") is not covered by an AWS Backup plan. Ensure the instance is included in a backup selection resource with proper dependencies (aws_backup_plan, aws_iam_role). Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-in-backup-plan.html for more details."
+}
+
+# Variables
+all_rds_resources = tf.config(tfconfig.resources).type(const.resource_aws_db_instance).resources
+backup_selection_resources = tf.config(tfconfig.resources).type(const.resource_aws_backup_selection).resources
+backup_plan_resources = tf.config(tfconfig.resources).type(const.resource_aws_backup_plan).resources
+iam_role_resources = tf.config(tfconfig.resources).type(const.resource_aws_iam_role).resources
+
+# Filter for Aurora instances only
+aurora_resources = collection.filter(all_rds_resources, func(res) {
+	engine_config = maps.get(res.config, "engine", {})
+	engine = maps.get(engine_config, "constant_value", "")
+	return is_aurora_engine(engine)
+})
+
+# Get backup selections with validated dependencies
+backup_selections = get_backup_selections(backup_selection_resources, backup_plan_resources, iam_role_resources, all_rds_resources)
+
+violations = collection.reject(aurora_resources, func(res) {
+	return is_rds_protected(res, backup_selections)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v.address, maps.get(maps.get(v.config, "engine", {}), "constant_value", "")),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

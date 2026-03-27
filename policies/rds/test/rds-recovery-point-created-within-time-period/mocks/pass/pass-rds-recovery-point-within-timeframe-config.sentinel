@@ -1,0 +1,161 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+import "strings"
+
+providers = {
+	"aws": {
+		"alias": "",
+		"config": {
+			"region": {
+				"constant_value": "us-east-1",
+			},
+		},
+		"full_name":           "registry.terraform.io/hashicorp/aws",
+		"module_address":      "",
+		"name":                "aws",
+		"provider_config_key": "aws",
+		"version_constraint":  "",
+	},
+}
+
+resources = {
+	"aws_db_instance.main": {
+		"address": "aws_db_instance.main",
+		"config": {
+			"identifier": {
+				"constant_value": "mydb-instance",
+			},
+			"engine": {
+				"constant_value": "mysql",
+			},
+			"instance_class": {
+				"constant_value": "db.t3.micro",
+			},
+			"allocated_storage": {
+				"constant_value": 20,
+			},
+			"backup_retention_period": {
+				"constant_value": 7,
+			},
+			"backup_window": {
+				"constant_value": "03:00-04:00",
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "MyRDSInstance",
+				},
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "main",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_db_instance",
+	},
+	"aws_iam_role.backup": {
+		"address": "aws_iam_role.backup",
+		"config": {
+			"name": {
+				"constant_value": "backup-role",
+			},
+			"assume_role_policy": {
+				"constant_value": "{\"Version\":\"2012-10-17\",\"Statement\":[{\"Effect\":\"Allow\",\"Principal\":{\"Service\":\"backup.amazonaws.com\"},\"Action\":\"sts:AssumeRole\"}]}",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "backup",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_iam_role",
+	},
+	"aws_backup_plan.main": {
+		"address": "aws_backup_plan.main",
+		"config": {
+			"name": {
+				"constant_value": "rds-backup-plan",
+			},
+			"rule": {
+				"constant_value": [
+					{
+						"rule_name":         "daily_backup",
+						"target_vault_name": "Default",
+						"schedule":          "cron(0 2 * * ? *)",
+						"lifecycle": {
+							"delete_after": 30,
+						},
+					},
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "main",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_plan",
+	},
+	"aws_backup_selection.rds_backup": {
+		"address": "aws_backup_selection.rds_backup",
+		"config": {
+			"name": {
+				"constant_value": "rds-backup-selection",
+			},
+			"plan_id": {
+				"references": [
+					"aws_backup_plan.main.id",
+					"aws_backup_plan.main",
+				],
+			},
+			"iam_role_arn": {
+				"references": [
+					"aws_iam_role.backup.arn",
+					"aws_iam_role.backup",
+				],
+			},
+			"resources": {
+				"references": [
+					"aws_db_instance.main.arn",
+					"aws_db_instance.main",
+				],
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "rds_backup",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_backup_selection",
+	},
+}
+
+provisioners = {}
+
+variables = {}
+
+outputs = {}
+
+module_calls = {}
+
+strip_index = func(addr) {
+	s = strings.split(addr, ".")
+	for s as i, v {
+		s[i] = strings.split(v, "[")[0]
+	}
+
+	return strings.join(s, ".")
+}

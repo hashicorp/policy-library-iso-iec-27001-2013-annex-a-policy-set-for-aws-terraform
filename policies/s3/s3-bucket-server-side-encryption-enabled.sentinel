@@ -1,0 +1,291 @@
+# This policy checks if your Amazon S3 bucket either has the Amazon S3 default encryption enabled
+# or that the Amazon S3 bucket policy explicitly denies put-object requests without server side
+# encryption that uses AES-256 or AWS Key Management Service.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfconfig/v2" as tfconfig
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "collection/maps" as maps
+import "strings"
+import "json"
+
+# Constants
+const = {
+	"policy_name":                                                 "s3-bucket-server-side-encryption-enabled",
+	"resource_aws_s3_bucket":                                      "aws_s3_bucket",
+	"resource_aws_s3_bucket_policy":                               "aws_s3_bucket_policy",
+	"resource_aws_s3_bucket_server_side_encryption_configuration": "aws_s3_bucket_server_side_encryption_configuration",
+}
+
+# Functions
+# Check if there's a separate aws_s3_bucket_server_side_encryption_configuration resource for this bucket
+# Also validates that it properly references a KMS key when using aws:kms or aws:kms:dsse
+has_separate_encryption_resource = func(bucket_address, encryption_resources, encryption_config_resources, kms_config_resources) {
+	for encryption_resources as _, enc_res {
+		bucket_ref = maps.get(enc_res.values, "bucket", "")
+		if strings.has_suffix(bucket_ref, bucket_address) or bucket_ref is bucket_address {
+			# Found encryption resource, now check if it uses KMS and has proper key reference
+			rules = maps.get(enc_res.values, "rule", [])
+			if length(rules) > 0 {
+				for rules as _, r {
+					encryption_defaults = maps.get(r, "apply_server_side_encryption_by_default", [])
+					if length(encryption_defaults) > 0 {
+						for encryption_defaults as _, enc_default {
+							sse_algorithm = maps.get(enc_default, "sse_algorithm", "")
+							# If using KMS encryption, verify KMS key reference exists in config
+							if sse_algorithm is "aws:kms" or sse_algorithm is "aws:kms:dsse" {
+								# Check if kms_master_key_id is present in the config
+								if not has_kms_key_reference(enc_res.address, encryption_config_resources, kms_config_resources) {
+									return false
+								}
+							}
+							# AES256 doesn't require KMS key, so it's valid
+							return true
+						}
+					}
+				}
+			}
+			return true
+		}
+	}
+	return false
+}
+
+# Check if encryption configuration properly references a KMS key in config
+has_kms_key_reference = func(enc_address, encryption_config_resources, kms_config_resources) {
+	for encryption_config_resources as _, config_res {
+		if config_res.address is enc_address {
+			# Check if rule has kms_master_key_id with references
+			rules = maps.get(config_res.config, "rule", [])
+			if length(rules) > 0 {
+				for rules as _, r {
+					encryption_defaults = maps.get(r, "apply_server_side_encryption_by_default", [])
+					if length(encryption_defaults) > 0 {
+						for encryption_defaults as _, enc_default {
+							kms_key_id = maps.get(enc_default, "kms_master_key_id", {})
+							# Check if kms_master_key_id has references to a KMS key
+							references = maps.get(kms_key_id, "references", [])
+							if length(references) > 0 {
+								for references as _, ref {
+									# Check if reference points to an aws_kms_key resource
+									if strings.has_prefix(ref, "aws_kms_key.") {
+										# Verify the KMS key resource exists
+										kms_key_name = strings.split(ref, ".")[1]
+										for kms_config_resources as _, kms_res {
+											if kms_res.name is kms_key_name {
+												return true
+											}
+										}
+									}
+								}
+							}
+							# Also check for constant_value (ARN string)
+							constant_value = maps.get(kms_key_id, "constant_value", "")
+							if constant_value is not "" {
+								return true
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	return false
+}
+
+# Check if a policy statement properly denies unencrypted uploads
+is_valid_deny_statement = func(statement) {
+	# Must have Deny effect
+	effect = maps.get(statement, "Effect", "")
+	if effect is not "Deny" {
+		return false
+	}
+
+	# Must have s3:PutObject action
+	actions_raw = maps.get(statement, "Action", "")
+	has_putobject = false
+
+	# Check if it's a direct match (string case)
+	if actions_raw is "s3:PutObject" or actions_raw is "s3:*" {
+		has_putobject = true
+	}
+
+	# Also check if it's in a list
+	if actions_raw contains "s3:PutObject" or actions_raw contains "s3:*" {
+		has_putobject = true
+	}
+
+	if not has_putobject {
+		return false
+	}
+
+	# Must have a condition that checks for encryption
+	condition = maps.get(statement, "Condition", {})
+	if condition is {} {
+		return false
+	}
+
+	# Check for valid encryption-denying conditions
+	# StringNotEquals or Null are valid for denying unencrypted uploads
+	# StringEquals would require encryption to match a specific value, not deny unencrypted
+	has_valid_condition = false
+
+	# Check for StringNotEquals with s3:x-amz-server-side-encryption
+	string_not_equals = maps.get(condition, "StringNotEquals", {})
+	if string_not_equals is not {} {
+		if "s3:x-amz-server-side-encryption" in keys(string_not_equals) {
+			has_valid_condition = true
+		}
+	}
+
+	# Check for Null condition with s3:x-amz-server-side-encryption
+	null_condition = maps.get(condition, "Null", {})
+	if null_condition is not {} {
+		if "s3:x-amz-server-side-encryption" in keys(null_condition) {
+			encryption_value = maps.get(null_condition, "s3:x-amz-server-side-encryption", "")
+			# Null: {"s3:x-amz-server-side-encryption": "true"} denies when header is missing
+			if encryption_value is "true" or encryption_value is true {
+				has_valid_condition = true
+			}
+		}
+	}
+
+	return has_valid_condition
+}
+
+# Check if bucket policy denies unencrypted put-object requests
+# Also validates that the policy resource properly references the bucket in config
+has_deny_unencrypted_policy = func(bucket_address, bucket_name, policy_resources, policy_config_resources, bucket_resources) {
+	for policy_resources as _, policy_res {
+		bucket_ref = maps.get(policy_res.values, "bucket", "")
+		policy_json_str = maps.get(policy_res.values, "policy", "")
+
+		# Check if policy is for this bucket
+		# Match by address, bucket name, or if bucket_ref contains the address
+		bucket_matches = strings.has_suffix(bucket_ref, bucket_address) or bucket_ref is bucket_address or bucket_ref is bucket_name or strings.has_suffix(bucket_address, bucket_ref)
+
+		if bucket_matches and policy_json_str is not "" {
+			# Verify the policy properly references the bucket in config
+			if not has_bucket_reference_in_config(policy_res.address, policy_config_resources, bucket_resources) {
+				return false
+			}
+
+			# Parse the JSON policy
+			policy_doc = json.unmarshal(policy_json_str)
+
+			# Get statements from policy
+			statements_raw = maps.get(policy_doc, "Statement", [])
+			# Handle both single statement and list of statements
+			statements = []
+			if length(statements_raw) else 0 is 0 {
+				# It's likely a map (single statement), wrap it
+				statements = [statements_raw]
+			} else {
+				statements = statements_raw
+			}
+
+			# Check if any statement properly denies unencrypted uploads
+			for statements as _, statement {
+				if is_valid_deny_statement(statement) {
+					return true
+				}
+			}
+		}
+	}
+	return false
+}
+
+# Check if bucket policy properly references the bucket in config
+has_bucket_reference_in_config = func(policy_address, policy_config_resources, bucket_resources) {
+	for policy_config_resources as _, config_res {
+		if config_res.address is policy_address {
+			# Check if bucket attribute has references
+			bucket_config = maps.get(config_res.config, "bucket", {})
+			references = maps.get(bucket_config, "references", [])
+			if length(references) > 0 {
+				for references as _, ref {
+					# Check if reference points to an aws_s3_bucket resource
+					if strings.has_prefix(ref, "aws_s3_bucket.") {
+						# Verify the bucket resource exists
+						bucket_name = strings.split(ref, ".")[1]
+						for bucket_resources as _, bucket_res {
+							if bucket_res.name is bucket_name {
+								return true
+							}
+						}
+					}
+				}
+			}
+			# If no references found, it might be using a constant value (bucket name string)
+			# which is also valid
+			constant_value = maps.get(bucket_config, "constant_value", "")
+			if constant_value is not "" {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+# Check if bucket is compliant
+is_bucket_compliant = func(bucket_res, policy_resources, encryption_resources, policy_config_resources, encryption_config_resources, bucket_config_resources, kms_resources, kms_config_resources) {
+	# Check if there's a separate encryption configuration resource
+	if has_separate_encryption_resource(bucket_res.address, encryption_resources, encryption_config_resources, kms_config_resources) {
+		return true
+	}
+
+	# Get bucket name from values
+	bucket_name = maps.get(bucket_res.values, "bucket", "")
+
+	# Check if bucket policy denies unencrypted uploads
+	if has_deny_unencrypted_policy(bucket_res.address, bucket_name, policy_resources, policy_config_resources, bucket_config_resources) {
+		return true
+	}
+
+	return false
+}
+
+generate_violation_message = func(violation) {
+	return "S3 bucket '" + violation.address + "' must have default encryption enabled using aws_s3_bucket_server_side_encryption_configuration resource or a bucket policy that explicitly denies put-object requests without server side encryption that uses AES-256 or AWS KMS. The server_side_encryption_configuration attribute on aws_s3_bucket is deprecated. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-server-side-encryption-enabled.html for more details."
+}
+
+# Variables
+bucket_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_s3_bucket).resources
+policy_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_s3_bucket_policy).resources
+encryption_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_aws_s3_bucket_server_side_encryption_configuration).resources
+
+# Get config resources for dependency validation
+bucket_config_resources = tf.config(tfconfig.resources).type(const.resource_aws_s3_bucket).resources
+policy_config_resources = tf.config(tfconfig.resources).type(const.resource_aws_s3_bucket_policy).resources
+encryption_config_resources = tf.config(tfconfig.resources).type(const.resource_aws_s3_bucket_server_side_encryption_configuration).resources
+kms_resources = tf.plan(tfplan.planned_values.resources).type("aws_kms_key").resources
+kms_config_resources = tf.config(tfconfig.resources).type("aws_kms_key").resources
+
+violations = collection.reject(bucket_resources, func(res) {
+	return is_bucket_compliant(res, policy_resources, encryption_resources, policy_config_resources, encryption_config_resources, bucket_config_resources, kms_resources, kms_config_resources)
+})
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations": map violations as _, v {
+		{
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v),
+		}
+	},
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

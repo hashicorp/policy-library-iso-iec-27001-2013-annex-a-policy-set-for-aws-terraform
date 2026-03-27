@@ -1,0 +1,55 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+resources = {
+	"aws_s3_bucket.example": {
+		"address": "aws_s3_bucket.example",
+		"config": {
+			"bucket": {
+				"constant_value": "my-bucket-with-disabled-replication",
+			},
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_s3_bucket",
+	},
+	"aws_s3_bucket_replication_configuration.replication": {
+		"address": "aws_s3_bucket_replication_configuration.replication",
+		"config": {
+			"bucket": {
+				"references": [
+					"aws_s3_bucket.example.id",
+					"aws_s3_bucket.example",
+				],
+			},
+			"rule": [
+				{
+					"id":       {"constant_value": "rule1"},
+					"status":   {"constant_value": "Disabled"},
+					"priority": {"constant_value": 1},
+					"destination": [
+						{
+							"bucket":        {"constant_value": "arn:aws:s3:::destination-bucket"},
+							"storage_class": {"constant_value": "STANDARD"},
+						},
+					],
+				},
+			],
+		},
+		"count":               {},
+		"depends_on":          [],
+		"for_each":            {},
+		"mode":                "managed",
+		"module_address":      "",
+		"name":                "replication",
+		"provider_config_key": "aws",
+		"provisioners":        [],
+		"type":                "aws_s3_bucket_replication_configuration",
+	},
+}

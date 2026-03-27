@@ -1,0 +1,25 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_lb.example": {
+			"address":        "aws_lb.example",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "example",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_lb",
+			"values": {
+				"load_balancer_type":               "network",
+				"enable_cross_zone_load_balancing": true,
+				"name": "example-nlb",
+			},
+		},
+	},
+}
