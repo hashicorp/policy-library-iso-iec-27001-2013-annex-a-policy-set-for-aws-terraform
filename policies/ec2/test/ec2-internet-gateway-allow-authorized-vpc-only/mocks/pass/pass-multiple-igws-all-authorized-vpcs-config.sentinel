@@ -1,0 +1,106 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+import "strings"
+
+providers = {
+	"aws": {
+		"alias": "",
+		"config": {
+			"region": {
+				"constant_value": "us-east-1",
+			},
+		},
+		"full_name":           "registry.terraform.io/hashicorp/aws",
+		"module_address":      "",
+		"name":                "aws",
+		"provider_config_key": "aws",
+		"version_constraint":  "",
+	},
+}
+
+resources = {
+	"aws_internet_gateway.igw_one": {
+		"address":             "aws_internet_gateway.igw_one",
+		"mode":                "managed",
+		"type":                "aws_internet_gateway",
+		"name":                "igw_one",
+		"provider_config_key": "aws",
+		"module_address":      "",
+		"config": {
+			"vpc_id": {
+				"constant_value": "vpc-authorized111",
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "igw-one",
+				},
+			},
+		},
+		"count":        {},
+		"depends_on":   [],
+		"for_each":     {},
+		"provisioners": [],
+	},
+	"aws_internet_gateway.igw_two": {
+		"address":             "aws_internet_gateway.igw_two",
+		"mode":                "managed",
+		"type":                "aws_internet_gateway",
+		"name":                "igw_two",
+		"provider_config_key": "aws",
+		"module_address":      "",
+		"config": {
+			"vpc_id": {
+				"constant_value": "vpc-authorized222",
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "igw-two",
+				},
+			},
+		},
+		"count":        {},
+		"depends_on":   [],
+		"for_each":     {},
+		"provisioners": [],
+	},
+	"aws_internet_gateway.igw_three": {
+		"address":             "aws_internet_gateway.igw_three",
+		"mode":                "managed",
+		"type":                "aws_internet_gateway",
+		"name":                "igw_three",
+		"provider_config_key": "aws",
+		"module_address":      "",
+		"config": {
+			"vpc_id": {
+				"constant_value": "vpc-authorized333",
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "igw-three",
+				},
+			},
+		},
+		"count":        {},
+		"depends_on":   [],
+		"for_each":     {},
+		"provisioners": [],
+	},
+}
+
+provisioners = {}
+
+variables = {}
+
+outputs = {}
+
+module_calls = {}
+
+strip_index = func(addr) {
+	s = strings.split(addr, ".")
+	for s as i, v {
+		s[i] = strings.split(v, "[")[0]
+	}
+
+	return strings.join(s, ".")
+}

@@ -1,4 +1,4 @@
-# Copyright IBM Corp. 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 import "module" "report" {
@@ -597,7 +597,7 @@ policy "ebs-volumes-should-be-in-a-backup-plan" {
 }
 
 policy "network-firewall-should-be-deployed-across-multiple-azs" {
-  source = "./policies/networkfirewall/network-firewall-should-be-deployed-across-multiple-azs.sentinel"
+  source = "./policies/network-firewall/network-firewall-should-be-deployed-across-multiple-azs.sentinel"
   enforcement_level = "advisory"
 }
 
@@ -719,5 +719,115 @@ policy "ec2-security-group-attached-to-eni-periodic" {
 
 policy "backup-recovery-point-manual-deletion-disabled" {
   source = "./policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "emr-kerberos-should-be-enabled" {
+  source = "./policies/emr/emr-kerberos-should-be-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "iam-policy-no-blacklisted-arn-allowed" {
+  source = "./policies/iam/iam-policy-no-blacklisted-arn-allowed.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "iam-managed-policy-should-be-attached-to-role" {
+  source = "./policies/iam/iam-managed-policy-should-be-attached-to-role.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ec2-incoming-ssh-should-be-restricted" {
+  source = "./policies/ec2/ec2-incoming-ssh-should-be-restricted.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ec2-belong-to-vpc" {
+  source = "./policies/ec2/ec2-belong-to-vpc.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ec2-internet-gateway-allow-authorized-vpc-only" {
+  source = "./policies/ec2/ec2-internet-gateway-allow-authorized-vpc-only.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "mq-should-have-audit-logging-enabled" {
+  source = "./policies/mq/mq-should-have-audit-logging-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "elb-nlb-cross-zone-load-balancing-enabled" {
+  source = "./policies/elb/elb-nlb-cross-zone-load-balancing-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "ec2-no-public-route-to-igw" {
+  source = "./policies/ec2/ec2-no-public-route-to-igw.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "rds-aurora-in-backup-plan" {
+  source = "./policies/rds/rds-aurora-in-backup-plan.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "rds-recovery-point-created-within-time-period" {
+  source = "./policies/rds/rds-recovery-point-created-within-time-period.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "redshift-audit-logging-should-be-enabled" {
+  source = "./policies/redshift/redshift-audit-logging-should-be-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "redshift-cluster-encryption-audit-logging-enabled" {
+  source = "./policies/redshift/redshift-cluster-encryption-audit-logging-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "s3-account-level-public-access-configured" {
+  source = "./policies/s3/s3-account-level-public-access-configured.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "s3-bucket-blacklisted-actions-prohibited" {
+  source = "./policies/s3/s3-bucket-blacklisted-actions-prohibited.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "s3-bucket-policy-principal-validation" {
+  source = "./policies/s3/s3-bucket-policy-principal-validation.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "s3-bucket-inter-account-permissions-check" {
+  source = "./policies/s3/s3-bucket-inter-account-permissions-check.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "s3-bucket-replication-enabled" {
+  source = "./policies/s3/s3-bucket-replication-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "s3-bucket-server-side-encryption-enabled" {
+  source = "./policies/s3/s3-bucket-server-side-encryption-enabled.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "sagemaker-endpoint-configuration-kms-key-configured" {
+  source = "./policies/sagemaker/sagemaker-endpoint-configuration-kms-key-configured.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "sagemaker-notebook-instance-kms-key-configured" {
+  source = "./policies/sagemaker/sagemaker-notebook-instance-kms-key-configured.sentinel"
+  enforcement_level = "advisory"
+}
+
+policy "secretsmanager-secrets-encrypted-using-cmk" {
+  source = "./policies/secretsmanager/secretsmanager-secrets-encrypted-using-cmk.sentinel"
   enforcement_level = "advisory"
 }

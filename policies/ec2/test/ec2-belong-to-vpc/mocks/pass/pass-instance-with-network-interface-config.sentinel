@@ -1,0 +1,70 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+import "strings"
+
+providers = {
+	"aws": {
+		"alias": "",
+		"config": {
+			"region": {
+				"constant_value": "us-east-1",
+			},
+		},
+		"full_name":           "registry.terraform.io/hashicorp/aws",
+		"module_address":      "",
+		"name":                "aws",
+		"provider_config_key": "aws",
+		"version_constraint":  "",
+	},
+}
+
+resources = {
+	"aws_instance.example": {
+		"address":             "aws_instance.example",
+		"mode":                "managed",
+		"type":                "aws_instance",
+		"name":                "example",
+		"provider_config_key": "aws",
+		"module_address":      "",
+		"config": {
+			"ami": {
+				"constant_value": "ami-0c55b159cbfafe1f0",
+			},
+			"instance_type": {
+				"constant_value": "t2.micro",
+			},
+			"network_interface": [
+				{
+					"device_index": {
+						"constant_value": 0,
+					},
+					"network_interface_id": {
+						"constant_value": "eni-0123456789abcdef0",
+					},
+				},
+			],
+		},
+		"count":        {},
+		"depends_on":   [],
+		"for_each":     {},
+		"provisioners": [],
+	},
+}
+
+provisioners = {}
+
+variables = {}
+
+outputs = {}
+
+module_calls = {}
+
+strip_index = func(addr) {
+	s = strings.split(addr, ".")
+	for s as i, v {
+		s[i] = strings.split(v, "[")[0]
+	}
+
+	return strings.join(s, ".")
+}

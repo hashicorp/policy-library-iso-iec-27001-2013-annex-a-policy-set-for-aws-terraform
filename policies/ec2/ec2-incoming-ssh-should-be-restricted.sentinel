@@ -1,0 +1,93 @@
+# This policy ensures that AWS security groups do not allow unrestricted SSH access from the internet (0.0.0.0/0 or ::/0).
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfplan/v2" as tfplan
+import "tfresources" as tf
+import "report" as report
+import "collection/maps" as maps
+
+# Constants
+const = {
+	"policy_name":                  "ec2-incoming-ssh-should-be-restricted",
+	"resource_vpc_sg_ingress_rule": "aws_vpc_security_group_ingress_rule",
+	"ssh_port":                     22,
+	"unrestricted_ipv4":            "0.0.0.0/0",
+	"unrestricted_ipv6":            "::/0",
+}
+
+# Functions
+generate_violation_message = func(resource_type) {
+	return "Security group allows unrestricted SSH access (0.0.0.0/0 or ::/0) on port 22. The rule is COMPLIANT if the IP addresses of the incoming SSH traffic in the security groups are restricted (CIDR other than 0.0.0.0/0 or ::/0). Resource type: " + resource_type + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/restricted-ssh.html for more details."
+}
+
+# Check if a CIDR block is unrestricted
+is_unrestricted_cidr = func(cidr) {
+	return cidr is const.unrestricted_ipv4 or cidr is const.unrestricted_ipv6
+}
+
+# Check aws_vpc_security_group_ingress_rule resources for unrestricted SSH ingress
+# This is the recommended resource type per AWS best practices
+is_vpc_sg_ingress_rule_compliant = func(rule_res) {
+	# Get the IP protocol - for SSH we need TCP (protocol number 6)
+	ip_protocol = maps.get(rule_res.values, "ip_protocol", "")
+
+	# Check if protocol is TCP (6) or all protocols (-1)
+	protocol_is_tcp = ip_protocol is "tcp" or ip_protocol is "6"
+	protocol_is_all = ip_protocol is "-1" or ip_protocol is "all"
+
+	# Get port range
+	from_port = maps.get(rule_res.values, "from_port", 0)
+	to_port = maps.get(rule_res.values, "to_port", 0)
+
+	# Check if SSH port is covered
+	ssh_port_covered = false
+	if protocol_is_tcp {
+		ssh_port_covered = from_port <= const.ssh_port and to_port >= const.ssh_port
+	} else if protocol_is_all {
+		ssh_port_covered = true
+	}
+
+	if ssh_port_covered {
+		# Check for unrestricted CIDR (this resource type uses single CIDR per rule)
+		cidr_ipv4 = maps.get(rule_res.values, "cidr_ipv4", "")
+		cidr_ipv6 = maps.get(rule_res.values, "cidr_ipv6", "")
+
+		if is_unrestricted_cidr(cidr_ipv4) or is_unrestricted_cidr(cidr_ipv6) {
+			return false
+		}
+	}
+
+	return true
+}
+
+# Variables
+vpc_sg_ingress_rule_resources = tf.plan(tfplan.planned_values.resources).type(const.resource_vpc_sg_ingress_rule).resources
+
+violations = filter vpc_sg_ingress_rule_resources as _, res {
+	is_vpc_sg_ingress_rule_compliant(res) is false
+}
+
+all_violations = []
+for violations as _, v {
+	all_violations += [{
+		"address":        v.address,
+		"module_address": v.module_address,
+		"message":        generate_violation_message(const.resource_vpc_sg_ingress_rule),
+	}]
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations":  all_violations,
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

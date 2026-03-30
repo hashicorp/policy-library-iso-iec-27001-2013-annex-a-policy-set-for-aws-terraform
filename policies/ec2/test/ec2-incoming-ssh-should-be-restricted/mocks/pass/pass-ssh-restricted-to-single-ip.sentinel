@@ -1,0 +1,28 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+planned_values = {
+	"outputs": {},
+	"resources": {
+		"aws_vpc_security_group_ingress_rule.ssh_single_ip": {
+			"address":        "aws_vpc_security_group_ingress_rule.ssh_single_ip",
+			"depends_on":     [],
+			"deposed_key":    "",
+			"index":          null,
+			"mode":           "managed",
+			"module_address": "",
+			"name":           "ssh_single_ip",
+			"provider_name":  "registry.terraform.io/hashicorp/aws",
+			"tainted":        false,
+			"type":           "aws_vpc_security_group_ingress_rule",
+			"values": {
+				"cidr_ipv4":         "203.0.113.5/32",
+				"description":       "SSH from single IP",
+				"from_port":         22,
+				"ip_protocol":       "tcp",
+				"security_group_id": "sg-12345678",
+				"to_port":           22,
+			},
+		},
+	},
+}

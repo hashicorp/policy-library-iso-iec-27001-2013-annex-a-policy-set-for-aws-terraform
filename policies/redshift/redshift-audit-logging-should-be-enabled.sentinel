@@ -1,0 +1,208 @@
+# This policy verifies that Amazon Redshift clusters have audit logging enabled via aws_redshift_logging resource
+# and optionally validates S3 bucket names.
+
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+# Imports
+import "tfconfig/v2" as tfconfig
+import "tfresources" as tf
+import "report" as report
+import "collection" as collection
+import "strings"
+
+# Parameters
+# bucketNames: Comma-separated list of allowed S3 bucket names for storing audit logs
+param bucketNames default ""
+
+# Constants
+const = {
+	"policy_name":             "redshift-audit-logging-should-be-enabled",
+	"cluster_resource_type":   "aws_redshift_cluster",
+	"logging_resource_type":   "aws_redshift_logging",
+	"bucket_name_attribute":   "bucket_name",
+	"cluster_identifier_attr": "cluster_identifier",
+	"log_destination_type":    "log_destination_type",
+}
+
+# Helper Functions
+# Parse CSV parameter into a list
+parse_bucket_names = func(csv_string) {
+	if csv_string is "" {
+		return []
+	}
+	buckets = strings.split(csv_string, ",")
+	# Trim whitespace from each bucket name
+	trimmed_buckets = map buckets as b {
+		strings.trim_space(b)
+	}
+	return collection.reject(trimmed_buckets, func(b) { return b is "" })
+}
+
+# Helper function to get config value
+get_config_value = func(res, attr_name, default_value) {
+	if "config" in res and attr_name in res.config {
+		attr = res.config[attr_name]
+		if "constant_value" in attr {
+			return attr.constant_value
+		}
+	}
+	return default_value
+}
+
+# Check if a cluster has associated aws_redshift_logging resource
+# Uses tfconfig to trace resource references
+has_logging_resource = func(cluster_address, tfconfig_resources) {
+	cluster_id = null
+
+	# Try to get cluster identifier from the cluster resource config
+	for tfconfig_resources as addr, cfg_res {
+		if addr is cluster_address {
+			cluster_id = get_config_value(cfg_res, const.cluster_identifier_attr, null)
+			break
+		}
+	}
+
+	# Check if any logging resource references this cluster via tfconfig
+	for tfconfig_resources as addr, cfg_res {
+		if cfg_res.type is const.logging_resource_type {
+			if "config" in cfg_res and const.cluster_identifier_attr in cfg_res.config {
+				cluster_ref_expr = cfg_res.config[const.cluster_identifier_attr]
+
+				# Check if logging resource references the cluster resource
+				if "references" in cluster_ref_expr {
+					for cluster_ref_expr.references as ref {
+						if strings.has_prefix(ref, cluster_address) {
+							return {"resource": cfg_res, "found": true, "address": addr}
+						}
+					}
+				}
+
+				# Check by cluster identifier value match
+				if "constant_value" in cluster_ref_expr and cluster_id is not null {
+					if cluster_ref_expr.constant_value is cluster_id {
+						return {"resource": cfg_res, "found": true, "address": addr}
+					}
+				}
+			}
+		}
+	}
+
+	return {"resource": null, "found": false, "address": null}
+}
+
+# Check if bucket name is in allowed list
+is_bucket_allowed = func(bucket_name, allowed_buckets) {
+	if length(allowed_buckets) is 0 {
+		return true # No restriction if list is empty
+	}
+
+	for allowed_buckets as allowed {
+		if bucket_name is allowed {
+			return true
+		}
+	}
+	return false
+}
+
+# Validation Functions
+generate_violation_message = func(cluster_res, logging_result, allowed_buckets) {
+	# Check for aws_redshift_logging resource
+	if not logging_result.found {
+		return "Redshift cluster must have audit logging configured via aws_redshift_logging resource. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
+	}
+
+	log_res = logging_result.resource
+	log_dest_type = get_config_value(log_res, const.log_destination_type, "")
+	bucket_name = get_config_value(log_res, const.bucket_name_attribute, "")
+
+	# If logging to S3, bucket_name must be specified and validated
+	if log_dest_type is "s3" or (log_dest_type is "" and bucket_name is not "") {
+		if bucket_name is "" {
+			return "Redshift logging resource must have a valid S3 bucket name specified. The 'bucket_name' attribute cannot be empty when logging to S3. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
+		}
+
+		if not is_bucket_allowed(bucket_name, allowed_buckets) {
+			return "Redshift cluster must log audits to one of the allowed buckets: [" + strings.join(allowed_buckets, ", ") + "], but is configured to use '" + bucket_name + "'. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
+		}
+	}
+
+	return "" # Compliant
+}
+
+is_logging_compliant = func(cluster_res, logging_result, allowed_buckets) {
+	# Check for aws_redshift_logging resource
+	if not logging_result.found {
+		return false
+	}
+
+	log_res = logging_result.resource
+	log_dest_type = get_config_value(log_res, const.log_destination_type, "")
+	bucket_name = get_config_value(log_res, const.bucket_name_attribute, "")
+
+	# CloudWatch logging is acceptable
+	if log_dest_type is "cloudwatch" {
+		return true
+	}
+
+	# If logging to S3, bucket_name must be specified and allowed
+	if log_dest_type is "s3" or (log_dest_type is "" and bucket_name is not "") {
+		if bucket_name is "" {
+			return false
+		}
+
+		if not is_bucket_allowed(bucket_name, allowed_buckets) {
+			return false
+		}
+	}
+
+	return true
+}
+
+# Get cluster resources from tfconfig
+get_cluster_resources = func(resources) {
+	clusters = {}
+	for resources as addr, res {
+		if res.type is const.cluster_resource_type {
+			clusters[addr] = res
+		}
+	}
+	return clusters
+}
+
+# Variables
+allowed_buckets = parse_bucket_names(bucketNames)
+tfconfig_resources = tfconfig.resources
+cluster_resources = get_cluster_resources(tfconfig_resources)
+
+# Helper function to create violation entry
+create_violation_entry = func(addr, res, tfconfig_resources, allowed_buckets) {
+	logging_result = has_logging_resource(addr, tfconfig_resources)
+	module_addr = res.module_address else ""
+	return {
+		"address":        addr,
+		"module_address": module_addr,
+		"message":        generate_violation_message(res, logging_result, allowed_buckets),
+	}
+}
+
+violations = []
+for cluster_resources as addr, res {
+	logging_result = has_logging_resource(addr, tfconfig_resources)
+	if not is_logging_compliant(res, logging_result, allowed_buckets) {
+		violations = violations + [create_violation_entry(addr, res, tfconfig_resources, allowed_buckets)]
+	}
+}
+
+summary = {
+	"policy_name": const.policy_name,
+	"violations":  violations,
+}
+
+# Outputs
+print(report.generate_policy_report(summary))
+
+# Rules
+main = rule {
+	violations is empty
+}

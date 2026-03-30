@@ -1,0 +1,84 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+import "strings"
+
+providers = {
+	"aws": {
+		"alias": "",
+		"config": {
+			"region": {
+				"constant_value": "us-east-1",
+			},
+		},
+		"full_name":           "registry.terraform.io/hashicorp/aws",
+		"module_address":      "",
+		"name":                "aws",
+		"provider_config_key": "aws",
+		"version_constraint":  "",
+	},
+}
+
+resources = {
+	"aws_internet_gateway.igw_authorized": {
+		"address":             "aws_internet_gateway.igw_authorized",
+		"mode":                "managed",
+		"type":                "aws_internet_gateway",
+		"name":                "igw_authorized",
+		"provider_config_key": "aws",
+		"module_address":      "",
+		"config": {
+			"vpc_id": {
+				"constant_value": "vpc-authorized456",
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "igw-authorized",
+				},
+			},
+		},
+		"count":        {},
+		"depends_on":   [],
+		"for_each":     {},
+		"provisioners": [],
+	},
+	"aws_internet_gateway.igw_unauthorized": {
+		"address":             "aws_internet_gateway.igw_unauthorized",
+		"mode":                "managed",
+		"type":                "aws_internet_gateway",
+		"name":                "igw_unauthorized",
+		"provider_config_key": "aws",
+		"module_address":      "",
+		"config": {
+			"vpc_id": {
+				"constant_value": "vpc-notauthorized789",
+			},
+			"tags": {
+				"constant_value": {
+					"Name": "igw-unauthorized",
+				},
+			},
+		},
+		"count":        {},
+		"depends_on":   [],
+		"for_each":     {},
+		"provisioners": [],
+	},
+}
+
+provisioners = {}
+
+variables = {}
+
+outputs = {}
+
+module_calls = {}
+
+strip_index = func(addr) {
+	s = strings.split(addr, ".")
+	for s as i, v {
+		s[i] = strings.split(v, "[")[0]
+	}
+
+	return strings.join(s, ".")
+}
