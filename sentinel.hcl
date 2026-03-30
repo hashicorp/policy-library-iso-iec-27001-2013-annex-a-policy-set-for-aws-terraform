@@ -597,7 +597,7 @@ policy "ebs-volumes-should-be-in-a-backup-plan" {
 }
 
 policy "network-firewall-should-be-deployed-across-multiple-azs" {
-  source = "./policies/networkfirewall/network-firewall-should-be-deployed-across-multiple-azs.sentinel"
+  source = "./policies/network-firewall/network-firewall-should-be-deployed-across-multiple-azs.sentinel"
   enforcement_level = "advisory"
 }
 
