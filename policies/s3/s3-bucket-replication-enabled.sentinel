@@ -230,23 +230,27 @@ violations = collection.reject(s3_buckets, bucket_has_valid_replication)
 # Build violations list with detailed messages
 # Generate summary directly from violations
 violation_list = []
-for violations as address, v {
-	replication_config = collection.find(replication_configs, func(rc) {
-		return replication_targets_bucket(rc, v.address)
-	})
 
-	reason = "no replication configuration found"
-	if replication_config is defined {
-		result = has_valid_replication_rules(replication_config)
-		reason = result.reason
-	}
+# Check if violations is defined and not empty before iterating
+if violations is defined and violations is not null {
+	for violations as address, v {
+		replication_config = collection.find(replication_configs, func(rc) {
+			return replication_targets_bucket(rc, v.address)
+		})
 
-	violation_details = {
-		"address":        v.address,
-		"module_address": v.module_address,
-		"message":        generate_violation_message(v.address, reason),
+		reason = "no replication configuration found"
+		if replication_config is defined {
+			result = has_valid_replication_rules(replication_config)
+			reason = result.reason
+		}
+
+		violation_details = {
+			"address":        v.address,
+			"module_address": v.module_address,
+			"message":        generate_violation_message(v.address, reason),
+		}
+		violation_list = append(violation_list, violation_details)
 	}
-	violation_list = append(violation_list, violation_details)
 }
 
 summary = {
@@ -259,5 +263,5 @@ print(report.generate_policy_report(summary))
 
 # Rules
 main = rule {
-	length(violations) is 0
+	length(violations else {}) is 0
 }
