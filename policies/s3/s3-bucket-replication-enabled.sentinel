@@ -228,9 +228,8 @@ bucket_has_valid_replication = func(bucket_res) {
 violations = collection.reject(s3_buckets, bucket_has_valid_replication)
 
 # Build violations list with detailed messages
-# Generate summary directly from violations
 violation_list = []
-for violations as address, v {
+for violations as _, v {
 	replication_config = collection.find(replication_configs, func(rc) {
 		return replication_targets_bucket(rc, v.address)
 	})
@@ -246,7 +245,8 @@ for violations as address, v {
 		"module_address": v.module_address,
 		"message":        generate_violation_message(v.address, reason),
 	}
-	violation_list = append(violation_list, violation_details)
+
+	append(violation_list, violation_details)
 }
 
 summary = {
