@@ -247,7 +247,7 @@ create_violation = func(bucket_res) {
 
 summary = {
 	"policy_name": const.policy_name,
-	"violations":  map violations as _, v {
+	"violations": map violations as _, v {
 		create_violation(v)
 	},
 }
