@@ -249,7 +249,7 @@ if violations is defined and violations is not null {
 			"module_address": v.module_address,
 			"message":        generate_violation_message(v.address, reason),
 		}
-		violation_list = append(violation_list, violation_details)
+		append(violation_list, violation_details)
 	}
 }
 
