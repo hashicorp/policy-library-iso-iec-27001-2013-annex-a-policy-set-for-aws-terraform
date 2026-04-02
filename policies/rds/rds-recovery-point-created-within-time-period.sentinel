@@ -248,9 +248,21 @@ get_backup_selections = func(backup_selection_resources, backup_plan_resources, 
 			}
 		}
 
-		# Get selection tags
+		# Get selection tags - handle both map and list cases
 		selection_tag_config = maps.get(sel.config, "selection_tag", {})
-		selection_tags = maps.get(selection_tag_config, "constant_value", [])
+		selection_tags = []
+
+		# Check if selection_tag_config is a map with constant_value or a list itself
+		if selection_tag_config is not null and selection_tag_config is not {} {
+			# Try to get constant_value if it's a map
+			constant_tags = maps.get(selection_tag_config, "constant_value", null)
+			if constant_tags is not null {
+				selection_tags = constant_tags
+			} else {
+				# selection_tag_config might be the list itself
+				selection_tags = selection_tag_config
+			}
+		}
 
 		selection = {
 			"resources":      resources_list,

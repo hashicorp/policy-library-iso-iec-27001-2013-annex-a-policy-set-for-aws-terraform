@@ -227,7 +227,12 @@ bucket_has_valid_replication = func(bucket_res) {
 # Find violations
 violations = collection.reject(s3_buckets, bucket_has_valid_replication)
 
+
 create_violation = func(bucket_res) {
+
+# Build violations list with detailed messages
+violation_list = []
+for violations as _, v {
 	replication_config = collection.find(replication_configs, func(rc) {
 		return replication_targets_bucket(rc, bucket_res.address)
 	})
@@ -243,6 +248,8 @@ create_violation = func(bucket_res) {
 		"module_address": bucket_res.module_address,
 		"message":        generate_violation_message(bucket_res.address, reason),
 	}
+
+	append(violation_list, violation_details)
 }
 
 summary = {
