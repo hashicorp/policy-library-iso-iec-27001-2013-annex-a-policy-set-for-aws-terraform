@@ -6,7 +6,6 @@
 
 ## Description
 
-
 DISCLAIMER - This policy works when all resources are present in root module
 
 This control checks whether Amazon EBS volumes are configured with AWS Backup coverage that can create recovery points within a specified time period. In Terraform, the policy treats a volume as compliant when an aws_backup_selection includes it directly by ARN or Terraform reference, through wildcard EBS volume resource patterns, through matching selection_tag values, or through matching condition filters, and that selection points to an aws_backup_plan whose rule.schedule is at least as frequent as the configured recovery-point age threshold.

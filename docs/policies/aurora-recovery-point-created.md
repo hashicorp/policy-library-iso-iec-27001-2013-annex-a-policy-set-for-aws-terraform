@@ -6,7 +6,6 @@
 
 ## Description
 
-
 DISCLAIMER - This policy works when all resources are present in root module
 
 This control checks if Amazon Aurora DB clusters have recovery points created through automated backups or through a compliant AWS Backup plan. This control fails if the Aurora cluster is not covered by either protection path.

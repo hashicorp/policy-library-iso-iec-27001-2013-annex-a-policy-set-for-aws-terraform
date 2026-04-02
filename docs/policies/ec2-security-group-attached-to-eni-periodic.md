@@ -6,7 +6,6 @@
 
 ## Description
 
-
 DISCLAIMER - This policy works when all resources are present in root module
 
 This control checks if non-default Amazon EC2 security groups are attached to elastic network interfaces (ENIs). This control fails if a managed non-default security group is not associated with any ENI.
