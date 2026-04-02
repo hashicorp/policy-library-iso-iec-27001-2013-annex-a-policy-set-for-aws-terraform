@@ -42,9 +42,14 @@ resources = {
 				"constant_value": "03:00-04:00",
 			},
 			"tags": {
-				"constant_value": {
-					"Name":        "ProductionDB",
-					"Environment": "production",
+				"Name": {
+					"constant_value": "ProductionDB",
+				},
+				"Environment": {
+					"constant_value": "production",
+				},
+				"Backup": {
+					"constant_value": "true",
 				},
 			},
 		},
@@ -160,15 +165,17 @@ resources = {
 					"aws_iam_role.backup",
 				],
 			},
-			"selection_tag": {
-				"constant_value": [
-					{
-						"type":  "STRINGEQUALS",
-						"key":   "Environment",
-						"value": "production",
-					},
-				],
-			},
+			"selection_tag": [{
+				"type": {
+					"constant_value": "STRINGEQUALS",
+				},
+				"key": {
+					"constant_value": "Backup",
+				},
+				"value": {
+					"constant_value": "true",
+				},
+			}],
 		},
 		"count":               {},
 		"depends_on":          [],
