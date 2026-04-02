@@ -45,7 +45,7 @@ check_basic_management_event_selectors = func(selectors) {
 		}
 
 		exclude_sources = maps.get(selector, "exclude_management_event_sources", [])
-		if length(exclude_sources) > 0 {
+		if exclude_sources != null and length(exclude_sources) > 0 {
 			continue
 		}
 
