@@ -100,7 +100,7 @@ has_public_read_policy_violation = func(res) {
 	}
 
 	statements = datasource[0].values.statement
-	if statements is undefined {
+	if statements is not defined {
 		return false
 	}
 	for statements as _, statement {
