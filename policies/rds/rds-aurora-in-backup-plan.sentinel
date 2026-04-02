@@ -149,7 +149,7 @@ get_backup_selections = func(backup_selection_resources, backup_plan_resources, 
 		# Check if selection_tag_config is a map with constant_value or a list itself
 		if selection_tag_config is not null and selection_tag_config is not {} {
 			# Try to get constant_value if it's a map
-			constant_tags = maps.get(selection_tag_config, "constant_value", null)
+			constant_tags = maps.get(selection_tag_config[0], "constant_value", null)
 			if constant_tags is not null {
 				selection_tags = constant_tags
 			} else {
@@ -182,7 +182,7 @@ check_tag_match = func(rds_tags, selection_tags) {
 		tag_value = maps.get(tag_condition, "value", "")
 
 		# Get the RDS instance tag value
-		rds_tag_value = maps.get(rds_tags, tag_key, "")
+		rds_tag_value = maps.get(rds_tags, tag_key.constant_value, "")
 
 		# Check based on type
 		if tag_type == "STRINGEQUALS" {

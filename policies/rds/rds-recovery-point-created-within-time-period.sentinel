@@ -255,7 +255,7 @@ get_backup_selections = func(backup_selection_resources, backup_plan_resources, 
 		# Check if selection_tag_config is a map with constant_value or a list itself
 		if selection_tag_config is not null and selection_tag_config is not {} {
 			# Try to get constant_value if it's a map
-			constant_tags = maps.get(selection_tag_config, "constant_value", null)
+			constant_tags = maps.get(selection_tag_config[0], "constant_value", null)
 			if constant_tags is not null {
 				selection_tags = constant_tags
 			} else {
@@ -300,15 +300,22 @@ is_rds_in_backup_selection = func(rds_res, backup_selections) {
 		selection_tags = selection.selection_tags
 		if length(selection_tags) > 0 {
 			tags_config = maps.get(rds_res.config, "tags", {})
+			print("RDS resource tags:", tags_config)
 			rds_tags = maps.get(tags_config, "constant_value", {})
 			matches_all_tags = true
 
 			for selection_tags as _, tag_condition {
 				tag_key = maps.get(tag_condition, "key", "")
+				print("Checking tag key:", tag_key)
 				tag_value = maps.get(tag_condition, "value", "")
-				rds_tag_value = maps.get(rds_tags, tag_key, "")
-
-				if rds_tag_value != tag_value {
+				tag_key_value = maps.get(tag_key, "constant_value", tag_key)
+				tag_value_value = maps.get(tag_value, "constant_value", tag_value)
+				rds_tag_value = maps.get(rds_tags, tag_key_value, "")
+				print("rds tags", rds_tags)
+				print("tag Condition:", tag_condition)
+				print("RDS Tag Value:", rds_tag_value)
+				print("Tag Value:", tag_value_value)
+				if rds_tag_value != tag_value_value {
 					matches_all_tags = false
 					break
 				}

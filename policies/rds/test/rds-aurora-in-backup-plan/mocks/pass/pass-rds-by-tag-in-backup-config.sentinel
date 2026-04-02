@@ -104,15 +104,21 @@ resources = {
 					"aws_iam_role.backup",
 				],
 			},
-			"selection_tag": {
+			"selection_tag": [{
 				"constant_value": [
 					{
-						"type":  "STRINGEQUALS",
-						"key":   "Backup",
-						"value": "true",
+						"type": {
+							"constant_value": "STRINGEQUALS",
+						},
+						"key": {
+							"constant_value": "Backup",
+						},
+						"value": {
+							"constant_value": "true",
+						},
 					},
 				],
-			},
+			}],
 		},
 		"count":               {},
 		"depends_on":          [],
