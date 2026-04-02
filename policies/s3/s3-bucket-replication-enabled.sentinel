@@ -227,9 +227,11 @@ bucket_has_valid_replication = func(bucket_res) {
 # Find violations
 violations = collection.reject(s3_buckets, bucket_has_valid_replication)
 
-create_violation = func(bucket_res) {
+# Build violations list with detailed messages
+violation_list = []
+for violations as _, v {
 	replication_config = collection.find(replication_configs, func(rc) {
-		return replication_targets_bucket(rc, bucket_res.address)
+		return replication_targets_bucket(rc, v.address)
 	})
 
 	reason = "no replication configuration found"
@@ -238,18 +240,18 @@ create_violation = func(bucket_res) {
 		reason = result.reason
 	}
 
-	return {
-		"address":        bucket_res.address,
-		"module_address": bucket_res.module_address,
-		"message":        generate_violation_message(bucket_res.address, reason),
+	violation_details = {
+		"address":        v.address,
+		"module_address": v.module_address,
+		"message":        generate_violation_message(v.address, reason),
 	}
+
+	append(violation_list, violation_details)
 }
 
 summary = {
 	"policy_name": const.policy_name,
-	"violations": map violations as _, v {
-		create_violation(v)
-	},
+	"violations":  violation_list,
 }
 
 # Outputs
