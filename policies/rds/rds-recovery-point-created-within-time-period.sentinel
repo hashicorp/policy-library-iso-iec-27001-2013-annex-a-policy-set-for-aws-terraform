@@ -311,7 +311,7 @@ is_rds_in_backup_selection = func(rds_res, backup_selections) {
 				tag_key_value = maps.get(tag_key, "constant_value", tag_key)
 				tag_value_value = maps.get(tag_value, "constant_value", tag_value)
 				rds_tag_value = maps.get(rds_tags, tag_key_value, "")
-				
+
 				if rds_tag_value != tag_value_value {
 					matches_all_tags = false
 					break
