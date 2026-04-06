@@ -300,15 +300,18 @@ is_rds_in_backup_selection = func(rds_res, backup_selections) {
 		selection_tags = selection.selection_tags
 		if length(selection_tags) > 0 {
 			tags_config = maps.get(rds_res.config, "tags", {})
+
 			rds_tags = maps.get(tags_config, "constant_value", {})
 			matches_all_tags = true
 
 			for selection_tags as _, tag_condition {
 				tag_key = maps.get(tag_condition, "key", "")
+
 				tag_value = maps.get(tag_condition, "value", "")
 				tag_key_value = maps.get(tag_key, "constant_value", tag_key)
 				tag_value_value = maps.get(tag_value, "constant_value", tag_value)
 				rds_tag_value = maps.get(rds_tags, tag_key_value, "")
+
 				if rds_tag_value != tag_value_value {
 					matches_all_tags = false
 					break
