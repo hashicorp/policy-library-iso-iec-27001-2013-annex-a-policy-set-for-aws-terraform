@@ -8,7 +8,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: API Gateway
-    description: "This policy checks if 'aws_apigatewayv2_stage' have access logging configured."
+    description: "This policy checks if `aws_apigatewayv2_stage` have access logging configured."
     type: sentinel
   api-gateway-cache-enabled-and-encrypted:
     path: policies/api-gateway/api-gateway-cache-enabled-and-encrypted.sentinel
@@ -30,7 +30,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: API Gateway
-    description: "This policy checks for resource type of 'aws_api_gateway_method_settings' whether all stages of an Amazon API Gateway REST or WebSocket API have logging enabled."
+    description: "This policy checks for resource type of `aws_api_gateway_method_settings` whether all stages of an Amazon API Gateway REST or WebSocket API have logging enabled."
     type: sentinel
   api-gateway-rest-configure-ssl-certificates:
     path: policies/api-gateway/api-gateway-rest-configure-ssl-certificates.sentinel
@@ -41,7 +41,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: API Gateway
-    description: "This policy checks whether 'aws_api_gateway_stage' have SSL certificates configured."
+    description: "This policy checks whether `aws_api_gateway_stage` have SSL certificates configured."
     type: sentinel
   appsync-field-level-logging-should-be-enabled:
     path: policies/appsync/appsync-field-level-logging-should-be-enabled.sentinel
@@ -85,7 +85,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Backup
-    description: "This policy checks if resources of type 'aws_backup_framework' have the attribute 'control' value set to 'BACKUP_RECOVERY_POINT_ENCRYPTED'"
+    description: "This policy checks if resources of type `aws_backup_framework` have the attribute `control` value set to `BACKUP_RECOVERY_POINT_ENCRYPTED`"
     type: sentinel
   backup-recovery-point-manual-deletion-disabled:
     path: policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel
@@ -96,7 +96,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Backup
-    description: "This policy checks if AWS Backup vaults have resource-based policies that prevent manual deletion of recovery points. The rule is NON_COMPLIANT if the Backup Vault does not have resource-based policies or has policies without a suitable 'Deny' statement with backup:DeleteRecoveryPoint, backup:UpdateRecoveryPointLifecycle, and backup:PutBackupVaultAccessPolicy permissions."
+    description: "This policy checks if AWS Backup vaults have resource-based policies that prevent manual deletion of recovery points. The rule is NON_COMPLIANT if the Backup Vault does not have resource-based policies or has policies without a suitable `Deny` statement with backup:DeleteRecoveryPoint, backup:UpdateRecoveryPointLifecycle, and backup:PutBackupVaultAccessPolicy permissions."
     type: sentinel
   cloudfront-distributions-should-encrypt-traffic-to-custom-origins:
     path: policies/cloudfront/cloudfront-distributions-should-encrypt-traffic-to-custom-origins.sentinel
@@ -107,7 +107,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: CloudFront
-    description: "This control checks whether 'aws_cloudfront_distribution' are encrypting traffic to custom origins."
+    description: "This control checks whether `aws_cloudfront_distribution` are encrypting traffic to custom origins."
     type: sentinel
   cloudfront-distributions-should-have-logging-enabled:
     path: policies/cloudfront/cloudfront-distributions-should-have-logging-enabled.sentinel
@@ -118,7 +118,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: CloudFront
-    description: "This control checks whether server access logging is enabled on 'aws_cloudfront_distribution'."
+    description: "This control checks whether server access logging is enabled on `aws_cloudfront_distribution`."
     type: sentinel
   cloudfront-distributions-should-use-custom-ssl-tls-certificates:
     path: policies/cloudfront/cloudfront-distributions-should-use-custom-ssl-tls-certificates.sentinel
@@ -129,7 +129,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: CloudFront
-    description: "This control checks whether 'aws_cloudfront_distribution' are using the default SSL/TLS certificate CloudFront provides."
+    description: "This control checks whether `aws_cloudfront_distribution` are using the default SSL/TLS certificate CloudFront provides."
     type: sentinel
   cloudfront-should-require-encryption-in-transit:
     path: policies/cloudfront/cloudfront-should-require-encryption-in-transit.sentinel
@@ -140,7 +140,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: CloudFront
-    description: "This control checks whether an 'aws_cloudfront_distribution' requires viewers to use HTTPS directly or whether it uses redirection."
+    description: "This control checks whether an `aws_cloudfront_distribution` requires viewers to use HTTPS directly or whether it uses redirection."
     type: sentinel
   cloudtrail-log-file-validation-enabled:
     path: policies/cloudtrail/cloudtrail-log-file-validation-enabled.sentinel
@@ -239,7 +239,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: CodeBuild
-    description: "This control checks whether a 'aws_codebuild_project' has at least one log option, either to S3 or CloudWatch logs enabled."
+    description: "This control checks whether a `aws_codebuild_project` has at least one log option, either to S3 or CloudWatch logs enabled."
     type: sentinel
   codebuild-project-privileged-mode-disabled:
     path: policies/codebuild/codebuild-project-privileged-mode-disabled.sentinel
@@ -261,7 +261,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: CodeBuild
-    description: "This control checks if Amazon S3 logs for an 'aws_codebuild_project' are encrypted."
+    description: "This control checks if Amazon S3 logs for an `aws_codebuild_project` are encrypted."
     type: sentinel
   dms-endpoint-should-be-ssl-configured:
     path: policies/dms/dms-endpoint-should-be-ssl-configured.sentinel
@@ -272,7 +272,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: DMS
-    description: "This policy checks if resources of type 'aws_dms_endpoint' have the 'certificate_arn' shouldn't be empty"
+    description: "This policy checks if resources of type `aws_dms_endpoint` have the `certificate_arn` shouldn't be empty"
     type: sentinel
   dms-endpoints-should-use-ssl:
     path: policies/dms/dms-endpoints-should-use-ssl.sentinel
@@ -294,7 +294,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: DMS
-    description: "This policy checks if resources of type 'aws_dms_endpoint' have the 'ssl_security_protocol' set to 'ssl-encryption' in 'redis_settings' for engine of type 'redis'"
+    description: "This policy checks if resources of type `aws_dms_endpoint` have the `ssl_security_protocol` set to `ssl-encryption` in `redis_settings` for engine of type `redis`"
     type: sentinel
   dms-replication-task-logging-enabled:
     path: policies/dms/dms-replication-task-logging-enabled.sentinel
@@ -305,7 +305,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: DMS
-    description: "This policy checks if resources of type 'aws_dms_replication_task' have the 'replication_task_settings' have logging enabled"
+    description: "This policy checks if resources of type `aws_dms_replication_task` have the `replication_task_settings` have logging enabled"
     type: sentinel
   docdb-cluster-backup-retention-check:
     path: policies/docdb/docdb-cluster-backup-retention-check.sentinel
@@ -316,7 +316,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: DocDB
-    description: "This policy checks if resources of type 'aws_docdb_cluster' have the 'backup-retention-period' attribute set in between '7 to 35'"
+    description: "This policy checks if resources of type `aws_docdb_cluster` have the `backup-retention-period` attribute set in between `7 to 35`"
     type: sentinel
   docdb-cluster-storage-encrypted:
     path: policies/docdb/docdb-cluster-storage-encrypted.sentinel
@@ -327,7 +327,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: DocDB
-    description: "This policy checks if resources of type 'aws_docdb_cluster' have the 'storage_encrypted' attribute set to true"
+    description: "This policy checks if resources of type `aws_docdb_cluster` have the `storage_encrypted` attribute set to true"
     type: sentinel
   dynamo-db-accelerator-clusters-encryption-at-rest-enabled:
     path: policies/dynamo-db/dynamo-db-accelerator-clusters-encryption-at-rest-enabled.sentinel
@@ -404,7 +404,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: DynamoDB
-    description: "This policy requires that `aws_dynamodb_table` resources with 'billing_mode' attribute set to 'PROVISIONED' have autoscaling configured"
+    description: "This policy requires that `aws_dynamodb_table` resources with `billing_mode` attribute set to `PROVISIONED` have autoscaling configured"
     type: sentinel
   ebs-backup-recovery-point-created:
     path: policies/ec2/ebs-backup-recovery-point-created.sentinel
@@ -492,7 +492,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: EC2
-    description: "This policy checks if resources of type 'aws_ec2_client_vpn_endpoint' have the cloudwatch logs enabled in the 'connection_log_options' attribute"
+    description: "This policy checks if resources of type `aws_ec2_client_vpn_endpoint` have the cloudwatch logs enabled in the `connection_log_options` attribute"
     type: sentinel
   ec2-ebs-encryption-enabled:
     path: policies/ec2/ec2-ebs-encryption-enabled.sentinel
@@ -514,7 +514,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: EC2
-    description: "This policy requires `aws_ebs_snapshot_block_public_access` resources to have attribute state to either 'block-new-sharing' or 'block-all-sharing'."
+    description: "This policy requires `aws_ebs_snapshot_block_public_access` resources to have attribute state to either `block-new-sharing` or `block-all-sharing`."
     type: sentinel
   ec2-incoming-ssh-should-be-restricted:
     path: policies/ec2/ec2-incoming-ssh-should-be-restricted.sentinel
@@ -558,7 +558,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: EC2
-    description: "This policy checks if resources of type 'aws_launch_template' have the attribute 'associate_public_ip_address' in 'network_interfaces' set to 'false'"
+    description: "This policy checks if resources of type `aws_launch_template` have the attribute `associate_public_ip_address` in `network_interfaces` set to `false`"
     type: sentinel
   ec2-network-acl:
     path: policies/ec2/ec2-network-acl.sentinel
@@ -580,7 +580,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: EC2
-    description: "This policy requires `aws_network_acl` resources to have 'subnet_ids' present."
+    description: "This policy requires `aws_network_acl` resources to have `subnet_ids` present."
     type: sentinel
   ec2-no-public-route-to-igw:
     path: policies/ec2/ec2-no-public-route-to-igw.sentinel
@@ -646,7 +646,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: ECR
-    description: "This policy checks if resources of type 'aws_ecr_repository' have image scanning configuration enabled"
+    description: "This policy checks if resources of type `aws_ecr_repository` have image scanning configuration enabled"
     type: sentinel
   ecs-task-definition-log-configuration-present:
     path: policies/ecs/ecs-task-definition-log-configuration-present.sentinel
@@ -657,7 +657,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: ECS
-    description: "This policy checks if all container definitions of a given 'aws_ecs_task_definition' resource contains a non empty value for the logConfiguration.logDriver attribute."
+    description: "This policy checks if all container definitions of a given `aws_ecs_task_definition` resource contains a non empty value for the logConfiguration.logDriver attribute."
     type: sentinel
   ecs-task-definition-no-secrets-as-environment-variables:
     path: policies/ecs/ecs-task-definition-no-secrets-as-environment-variables.sentinel
@@ -679,7 +679,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: ECS
-    description: "This policy requires that ECS task definitions specify a non-root user for container execution. Each container definition in the task definition must have a 'user' attribute that specifies a non-root user (not '0' or 'root')."
+    description: "This policy requires that ECS task definitions specify a non-root user for container execution. Each container definition in the task definition must have a `user` attribute that specifies a non-root user (not `0` or `root`)."
     type: sentinel
   efs-access-point-should-enforce-user-identity:
     path: policies/efs/efs-access-point-should-enforce-user-identity.sentinel
@@ -701,7 +701,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: EFS
-    description: "This policy requires resources of type `aws_efs_file_system` should have 'encrypted' set to true and 'kms_key_id' should not be empty."
+    description: "This policy requires resources of type `aws_efs_file_system` should have `encrypted` set to true and `kms_key_id` should not be empty."
     type: sentinel
   efs-recovery-point-compliance:
     path: policies/efs/efs-recovery-point-compliance.sentinel
@@ -723,7 +723,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: EKS
-    description: "This policy checks if 'aws_eks_cluster' resources have their unrestricted public endpoint access"
+    description: "This policy checks if `aws_eks_cluster` resources have their unrestricted public endpoint access"
     type: sentinel
   eks-cluster-logging-enabled:
     path: policies/eks/eks-cluster-logging-enabled.sentinel
@@ -778,7 +778,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Elasticsearch
-    description: "This policy requires resources of type `aws_elasticsearch_domain` have the `encrypt_at_rest` should have 'enabled' attribute set to `true`."
+    description: "This policy requires resources of type `aws_elasticsearch_domain` have the `encrypt_at_rest` should have `enabled` attribute set to `true`."
     type: sentinel
   elasticsearch-in-vpc-only:
     path: policies/elasticsearch/elasticsearch-in-vpc-only.sentinel
@@ -789,7 +789,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Elasticsearch
-    description: "This policy requires resources of type `aws_elasticsearch_domain` have the `subnet_ids` should not be empty inside 'vpc_options'."
+    description: "This policy requires resources of type `aws_elasticsearch_domain` have the `subnet_ids` should not be empty inside `vpc_options`."
     type: sentinel
   elasticsearch-node-to-node-encryption-check:
     path: policies/elasticsearch/elasticsearch-node-to-node-encryption-check.sentinel
@@ -800,7 +800,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Elasticsearch
-    description: "This policy requires resources of type `aws_elasticsearch_domain` have the `enabled` value set to 'true' for `node_to_node_encrytion` attribute."
+    description: "This policy requires resources of type `aws_elasticsearch_domain` have the `enabled` value set to `true` for `node_to_node_encrytion` attribute."
     type: sentinel
   elb-cross-zone-load-balancing-enabled:
     path: policies/elb/elb-cross-zone-load-balancing-enabled.sentinel
@@ -811,7 +811,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: ELB
-    description: "This policy checks if resources of type 'aws_elb' have the attribute 'cross_zone_load_balancing' set to true"
+    description: "This policy checks if resources of type `aws_elb` have the attribute `cross_zone_load_balancing` set to true"
     type: sentinel
   elb-ensure-access-logging-enabled:
     path: policies/elb/elb-ensure-access-logging-enabled.sentinel
@@ -822,7 +822,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: ELB
-    description: "This policy checks if resources of type 'aws_lb' and 'aws_elb' have 'access_logging' enabled."
+    description: "This policy checks if resources of type `aws_lb` and `aws_elb` have `access_logging` enabled."
     type: sentinel
   elb-ensure-http-request-redirection:
     path: policies/elb/elb-ensure-http-request-redirection.sentinel
@@ -844,7 +844,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: ELB
-    description: "This policy checks if resources of type 'aws_elb' have HTTPS/SSL listeners configured with certs from acm."
+    description: "This policy checks if resources of type `aws_elb` have HTTPS/SSL listeners configured with certs from acm."
     type: sentinel
   elb-ensure-valid-desync-mitigation-mode:
     path: policies/elb/elb-ensure-valid-desync-mitigation-mode.sentinel
@@ -855,7 +855,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: ELB
-    description: "This policy checks if load_balancer resources have the 'desync_mitigation_mode' attribute set to either 'defensive' or 'strictest'"
+    description: "This policy checks if load_balancer resources have the `desync_mitigation_mode` attribute set to either `defensive` or `strictest`"
     type: sentinel
   elb-multiple-az:
     path: policies/elb/elb-multiple-az.sentinel
@@ -932,7 +932,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: EventBridge
-    description: "This policy requires that AWS EventBridge schema registries have a resource policy attached. It checks that 'aws_schemas_registry_policy' resources are defined for 'aws_schemas_registry' resources."
+    description: "This policy requires that AWS EventBridge schema registries have a resource policy attached. It checks that `aws_schemas_registry_policy` resources are defined for `aws_schemas_registry` resources."
     type: sentinel
   iam-managed-policy-should-be-attached-to-role:
     path: policies/iam/iam-managed-policy-should-be-attached-to-role.sentinel
@@ -1009,7 +1009,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Kinesis
-    description: "This policy checks if resources of type 'kinesis-stream-encrypted' have the 'encryption_type' set to 'KMS'"
+    description: "This policy checks if resources of type `kinesis-stream-encrypted` have the `encryption_type` set to `KMS`"
     type: sentinel
   kms-restrict-iam-inline-policies-decrypt-all-kms-keys:
     path: policies/kms/kms-restrict-iam-inline-policies-decrypt-all-kms-keys.sentinel
@@ -1020,7 +1020,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: KMS
-    description: "This policy checks if resources of type 'aws_iam_policy_document' contain blocked action patterns such as 'kms:ReEncryptFrom' and 'kms:Decrypt'"
+    description: "This policy checks if resources of type `aws_iam_policy_document` contain blocked action patterns such as `kms:ReEncryptFrom` and `kms:Decrypt`"
     type: sentinel
   lambda-function-public-access-prohibited:
     path: policies/lambda/lambda-function-public-access-prohibited.sentinel
@@ -1031,7 +1031,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Lambda
-    description: "This control checks whether the 'aws_lambda_function' resource-based policy prohibits public access outside of your account."
+    description: "This control checks whether the `aws_lambda_function` resource-based policy prohibits public access outside of your account."
     type: sentinel
   mq-cloudwatch-audit-log-enabled:
     path: policies/mq/mq-cloudwatch-audit-log-enabled.sentinel
@@ -1042,7 +1042,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: MQ
-    description: "This policy checks if resources of type 'aws_mq_broker' have the attribute 'logs' with parameter 'audit' set to true"
+    description: "This policy checks if resources of type `aws_mq_broker` have the attribute `logs` with parameter `audit` set to true"
     type: sentinel
   mq-should-have-audit-logging-enabled:
     path: policies/mq/mq-should-have-audit-logging-enabled.sentinel
@@ -1064,7 +1064,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: MSK
-    description: "This policy checks if resources of type 'aws_msk_cluster' have the 'in_cluster' attribute set to true in encryption_in_transit of encryption_info attribute"
+    description: "This policy checks if resources of type `aws_msk_cluster` have the `in_cluster` attribute set to true in encryption_in_transit of encryption_info attribute"
     type: sentinel
   neptune-cluster-automated-backups-enabled:
     path: policies/neptune/neptune-cluster-automated-backups-enabled.sentinel
@@ -1075,7 +1075,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Neptune
-    description: "This policy requires attribute 'backup_retention_period' to be greater than or equal to 7 for 'aws_neptune_cluster' resources"
+    description: "This policy requires attribute `backup_retention_period` to be greater than or equal to 7 for `aws_neptune_cluster` resources"
     type: sentinel
   neptune-cluster-db-auth-enabled:
     path: policies/neptune/neptune-cluster-db-auth-enabled.sentinel
@@ -1086,7 +1086,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Neptune
-    description: "This policy requires attribute 'iam_database_authentication_enabled' to be set to true for 'aws_neptune_cluster' resources"
+    description: "This policy requires attribute `iam_database_authentication_enabled` to be set to true for `aws_neptune_cluster` resources"
     type: sentinel
   neptune-cluster-encryption-at-rest-enabled:
     path: policies/neptune/neptune-cluster-encryption-at-rest-enabled.sentinel
@@ -1097,7 +1097,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Neptune
-    description: "This policy requires attribute 'storage_encrypted' to be set to true for 'aws_neptune_cluster' resources"
+    description: "This policy requires attribute `storage_encrypted` to be set to true for `aws_neptune_cluster` resources"
     type: sentinel
   neptune-cluster-snapshot-encryption-at-rest-enabled:
     path: policies/neptune/neptune-cluster-snapshot-encryption-at-rest-enabled.sentinel
@@ -1108,7 +1108,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Neptune
-    description: "This policy requires attribute 'snapshot_identifier' to be set and 'storage_encrypted' to be set to true for 'aws_neptune_cluster' resources"
+    description: "This policy requires attribute `snapshot_identifier` to be set and `storage_encrypted` to be set to true for `aws_neptune_cluster` resources"
     type: sentinel
   network-firewall-logging-enabled:
     path: policies/network-firewall/network-firewall-logging-enabled.sentinel
@@ -1119,7 +1119,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Network Firewall
-    description: "This policy ensures that resources of type 'aws_networkfirewall_firewall' have logging enabled"
+    description: "This policy ensures that resources of type `aws_networkfirewall_firewall` have logging enabled"
     type: sentinel
   network-firewall-policy-default-action-fragmented-packets:
     path: policies/network-firewall/network-firewall-policy-default-action-fragmented-packets.sentinel
@@ -1130,7 +1130,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Network Firewall
-    description: "This policy ensures that resources of type 'aws_networkfirewall_firewall_policy' have default stateless action should be 'aws:drop' or 'aws:forward_to_sfe' for fragmented packets"
+    description: "This policy ensures that resources of type `aws_networkfirewall_firewall_policy` have default stateless action should be `aws:drop` or `aws:forward_to_sfe` for fragmented packets"
     type: sentinel
   network-firewall-policy-default-action-full-packets:
     path: policies/network-firewall/network-firewall-policy-default-action-full-packets.sentinel
@@ -1141,7 +1141,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Network Firewall
-    description: "This policy ensures that resources of type 'aws_networkfirewall_firewall_policy' have default stateless action should be 'aws:drop' or 'aws:forward_to_sfe' for full packets"
+    description: "This policy ensures that resources of type `aws_networkfirewall_firewall_policy` have default stateless action should be `aws:drop` or `aws:forward_to_sfe` for full packets"
     type: sentinel
   network-firewall-policy-rule-group-associated:
     path: policies/network-firewall/network-firewall-policy-rule-group-associated.sentinel
@@ -1152,7 +1152,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Network Firewall
-    description: "This policy requires atleast 1 rule group to be enabled for 'aws_networkfirewall_firewall_policy' resources"
+    description: "This policy requires atleast 1 rule group to be enabled for `aws_networkfirewall_firewall_policy` resources"
     type: sentinel
   network-firewall-should-be-deployed-across-multiple-azs:
     path: policies/network-firewall/network-firewall-should-be-deployed-across-multiple-azs.sentinel
@@ -1163,7 +1163,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Network Firewall
-    description: "This policy checks whether a resource 'aws_networkfirewall_firewall' has been deployed across multiple availability zones."
+    description: "This policy checks whether a resource `aws_networkfirewall_firewall` has been deployed across multiple availability zones."
     type: sentinel
   network-firewall-stateless-rule-group:
     path: policies/network-firewall/network-firewall-stateless-rule-group.sentinel
@@ -1174,7 +1174,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Network Firewall
-    description: "This policy checks if a stateless rule group in 'aws_networkfirewall_rule_group' contains rules"
+    description: "This policy checks if a stateless rule group in `aws_networkfirewall_rule_group` contains rules"
     type: sentinel
   opensearch-access-control-enabled:
     path: policies/opensearch/opensearch-access-control-enabled.sentinel
@@ -1185,7 +1185,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: OpenSearch
-    description: "This policy checks if resources of type 'aws_opensearch_domain' have the 'anonymous_auth_enabled' attribute set to true in the 'advanced_security_options' block and the 'advanced_security_options' block is enabled"
+    description: "This policy checks if resources of type `aws_opensearch_domain` have the `anonymous_auth_enabled` attribute set to true in the `advanced_security_options` block and the `advanced_security_options` block is enabled"
     type: sentinel
   opensearch-encrypted-at-rest:
     path: policies/opensearch/opensearch-encrypted-at-rest.sentinel
@@ -1196,7 +1196,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: OpenSearch
-    description: "This policy checks if resources of type 'aws_opensearch_domain' have the 'enable' attribute set to true in the 'encrypt_at_rest' block"
+    description: "This policy checks if resources of type `aws_opensearch_domain` have the `enable` attribute set to true in the `encrypt_at_rest` block"
     type: sentinel
   opensearch-https-required:
     path: policies/opensearch/opensearch-https-required.sentinel
@@ -1207,7 +1207,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: OpenSearch
-    description: "This policy requires resources of type `aws_opensearch_domain` have the `tls_security_policy` set to latest policy that is 'Policy-Min-TLS-1-2-PFS-2023-10' and 'enforce_https' set to true for `domain_endpoint_options` attribute."
+    description: "This policy requires resources of type `aws_opensearch_domain` have the `tls_security_policy` set to latest policy that is `Policy-Min-TLS-1-2-PFS-2023-10` and `enforce_https` set to true for `domain_endpoint_options` attribute."
     type: sentinel
   opensearch-in-vpc-only:
     path: policies/opensearch/opensearch-in-vpc-only.sentinel
@@ -1229,7 +1229,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: OpenSearch
-    description: "This policy checks if resources of type 'aws_opensearch_domain' have the 'enable' attribute set to true in the 'node_to_node_encryption' block"
+    description: "This policy checks if resources of type `aws_opensearch_domain` have the `enable` attribute set to true in the `node_to_node_encryption` block"
     type: sentinel
   rds-aurora-in-backup-plan:
     path: policies/rds/rds-aurora-in-backup-plan.sentinel
@@ -1262,7 +1262,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: RDS
-    description: "This policy checks if resources of type 'aws_rds_cluster' have the 'storage_encrypted' attribute set to true"
+    description: "This policy checks if resources of type `aws_rds_cluster` have the `storage_encrypted` attribute set to true"
     type: sentinel
   rds-encryption-at-rest-enabled:
     path: policies/rds/rds-encryption-at-rest-enabled.sentinel
@@ -1361,7 +1361,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Redshift
-    description: "This policy checks if resources of type 'aws_redshift_cluster' have the 'automated-snapshot-retention-period' attribute set in between '7 to 35'"
+    description: "This policy checks if resources of type `aws_redshift_cluster` have the `automated-snapshot-retention-period` attribute set in between `7 to 35`"
     type: sentinel
   redshift-cluster-encryption-audit-logging-enabled:
     path: policies/redshift/redshift-cluster-encryption-audit-logging-enabled.sentinel
@@ -1383,7 +1383,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Redshift
-    description: "This policy checks if resources of type 'aws_redshift_cluster' have the 'publicly_accessible' attribute set to false"
+    description: "This policy checks if resources of type `aws_redshift_cluster` have the `publicly_accessible` attribute set to false"
     type: sentinel
   redshift-cluster-should-be-encrypted-at-rest:
     path: policies/redshift/redshift-cluster-should-be-encrypted-at-rest.sentinel
@@ -1394,7 +1394,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Redshift
-    description: "This policy checks if resources of type 'aws_redshift_cluster' have the 'encrypted' attribute set to true"
+    description: "This policy checks if resources of type `aws_redshift_cluster` have the `encrypted` attribute set to true"
     type: sentinel
   redshift-cluster-should-be-encrypted-at-transit:
     path: policies/redshift/redshift-cluster-should-be-encrypted-at-transit.sentinel
@@ -1405,7 +1405,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: Redshift
-    description: "This policy checks if resources of type 'aws_redshift_cluster' referenced to the resources of type 'aws_redshift_parameter_group' and having the 'require_ssl' set to 'true'"
+    description: "This policy checks if resources of type `aws_redshift_cluster` referenced to the resources of type `aws_redshift_parameter_group` and having the `require_ssl` set to `true`"
     type: sentinel
   route-53-public-hosted-zones-should-log-dns-queries:
     path: policies/route53/route-53-public-hosted-zones-should-log-dns-queries.sentinel
@@ -1438,7 +1438,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: S3
-    description: "This policy verifies if the attributes of the 'aws_s3_account_public_access_block' resource are in accordance to AWS standards for S3 Account-Level Public Access Block Settings."
+    description: "This policy verifies if the attributes of the `aws_s3_account_public_access_block` resource are in accordance to AWS standards for S3 Account-Level Public Access Block Settings."
     type: sentinel
   s3-block-public-access-account-level:
     path: policies/s3/s3-block-public-access-account-level.sentinel
@@ -1449,7 +1449,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: S3
-    description: "This policy verifies if the attributes of the 'aws_s3_account_public_access_block' resource (if present) are in accordance to AWS FSBP standards."
+    description: "This policy verifies if the attributes of the `aws_s3_account_public_access_block` resource (if present) are in accordance to AWS FSBP standards."
     type: sentinel
   s3-block-public-access-bucket-level:
     path: policies/s3/s3-block-public-access-bucket-level.sentinel
@@ -1460,7 +1460,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: S3
-    description: "This policy verifies if the attributes of the 'aws_s3_bucket_public_access_block' resource (if present) block public access of an S3 general purpose bucket."
+    description: "This policy verifies if the attributes of the `aws_s3_bucket_public_access_block` resource (if present) block public access of an S3 general purpose bucket."
     type: sentinel
   s3-bucket-blacklisted-actions-prohibited:
     path: policies/s3/s3-bucket-blacklisted-actions-prohibited.sentinel
@@ -1581,7 +1581,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: SageMaker
-    description: "This policy checks if resources of type 'aws_sagemaker_notebook_instance' have the 'root_access' attribute set to \"Disabled\""
+    description: "This policy checks if resources of type `aws_sagemaker_notebook_instance` have the `root_access` attribute set to \"Disabled\""
     type: sentinel
   sagemaker-notebook-no-direct-internet-access:
     path: policies/sagemaker/sagemaker-notebook-no-direct-internet-access.sentinel
@@ -1592,7 +1592,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: SageMaker
-    description: "This policy checks if resources of type 'aws_sagemaker_notebook_instance' have the 'direct_internet_access' attribute set to \"Disabled\""
+    description: "This policy checks if resources of type `aws_sagemaker_notebook_instance` have the `direct_internet_access` attribute set to \"Disabled\""
     type: sentinel
   secretsmanager-secrets-encrypted-using-cmk:
     path: policies/secretsmanager/secretsmanager-secrets-encrypted-using-cmk.sentinel
@@ -1647,7 +1647,7 @@ policies:
       - name: ISO/IEC 27001 Annex A
         version: 2013
     service: WAF
-    description: "This policy checks whether logging is enabled for an 'aws_waf_web_acl'."
+    description: "This policy checks whether logging is enabled for an `aws_waf_web_acl`."
     type: sentinel
   wafv2-webacl-should-have-logging-enabled:
     path: policies/waf/wafv2-webacl-should-have-logging-enabled.sentinel
