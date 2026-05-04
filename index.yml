@@ -1,1520 +1,1675 @@
 policies:
   api-gateway-access-logging-should-be-configured:
-    path: "policies/api-gateway/api-gateway-access-logging-should-be-configured.sentinel"
-    governed_resources: ["aws_apigatewayv2_stage"]
-    provider: "AWS"
+    path: policies/api-gateway/api-gateway-access-logging-should-be-configured.sentinel
+    sha: 066b4bb4d0068e5ce7b3187697606f2d4efb7790fc6ce4b3ce58346f2d00e005
+    governed_resources: [aws_apigatewayv2_stage]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "API Gateway"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: API Gateway
     description: "This policy checks if 'aws_apigatewayv2_stage' have access logging configured."
-    type: "sentinel"
+    type: sentinel
   api-gateway-cache-enabled-and-encrypted:
-    path: "policies/api-gateway/api-gateway-cache-enabled-and-encrypted.sentinel"
-    governed_resources: ["aws_api_gateway_method_settings", "aws_api_gateway_stage"]
-    provider: "AWS"
+    path: policies/api-gateway/api-gateway-cache-enabled-and-encrypted.sentinel
+    sha: 2a448c30da89615b0a2c5238fdbf1cea43bd23dcb6c543b2f65f892dbb8f7881
+    governed_resources: [aws_api_gateway_method_settings, aws_api_gateway_stage]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "API Gateway"
-    description: "This policy verifies that all methods in Amazon API Gateway stages have cache enabled and encrypted. It checks both aws_api_gateway_stage and aws_api_gateway_method_settings resources."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: API Gateway
+    description: This policy verifies that all methods in Amazon API Gateway stages have cache enabled and encrypted. It checks both aws_api_gateway_stage and aws_api_gateway_method_settings resources.
+    type: sentinel
   api-gateway-rest-and-websocket-api-logging-enabled:
-    path: "policies/api-gateway/api-gateway-rest-and-websocket-api-logging-enabled.sentinel"
-    governed_resources: ["aws_api_gateway_method_settings"]
-    provider: "AWS"
+    path: policies/api-gateway/api-gateway-rest-and-websocket-api-logging-enabled.sentinel
+    sha: 419a08c93e8b4699f39aa5176e3652e5653d4e1a58a69b517f4634fb8ff189b0
+    governed_resources: [aws_api_gateway_method_settings]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "API Gateway"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: API Gateway
     description: "This policy checks for resource type of 'aws_api_gateway_method_settings' whether all stages of an Amazon API Gateway REST or WebSocket API have logging enabled."
-    type: "sentinel"
+    type: sentinel
   api-gateway-rest-configure-ssl-certificates:
-    path: "policies/api-gateway/api-gateway-rest-configure-ssl-certificates.sentinel"
-    governed_resources: ["aws_api_gateway_stage"]
-    provider: "AWS"
+    path: policies/api-gateway/api-gateway-rest-configure-ssl-certificates.sentinel
+    sha: 406b895c6ebf1ead5de48bc947973bfd6f2e679aaef9e168ab10b3e4883f9684
+    governed_resources: [aws_api_gateway_stage]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "API Gateway"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: API Gateway
     description: "This policy checks whether 'aws_api_gateway_stage' have SSL certificates configured."
-    type: "sentinel"
+    type: sentinel
   appsync-field-level-logging-should-be-enabled:
-    path: "policies/appsync/appsync-field-level-logging-should-be-enabled.sentinel"
-    governed_resources: ["aws_appsync_graphql_api"]
-    provider: "AWS"
+    path: policies/appsync/appsync-field-level-logging-should-be-enabled.sentinel
+    sha: 97bd58e1eef30f36e7b352c915835e877d7136e3c85f0bace269e81b05eea62b
+    governed_resources: [aws_appsync_graphql_api]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "AppSync"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: AppSync
     description: "This policy requires resources of type `aws_appsync_graphql_api` have attribute `log_config` with `field_log_level` set to `ERROR` or `ALL`."
-    type: "sentinel"
+    type: sentinel
   athena-workgroup-encrypted-at-rest:
-    path: "policies/athena/athena-workgroup-encrypted-at-rest.sentinel"
-    governed_resources: ["aws_athena_workgroup"]
-    provider: "AWS"
+    path: policies/athena/athena-workgroup-encrypted-at-rest.sentinel
+    sha: acbd61726a585a6262a9c7ae7b154cfe71fc94ba876c37586eed07c063c03d12
+    governed_resources: [aws_athena_workgroup]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Athena"
-    description: "This policy ensures that Amazon Athena workgroups are encrypted at rest."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Athena
+    description: This policy ensures that Amazon Athena workgroups are encrypted at rest.
+    type: sentinel
   aurora-recovery-point-created:
-    path: "policies/aurora/aurora-recovery-point-created.sentinel"
-    governed_resources: ["aws_backup_plan", "aws_backup_selection", "aws_rds_cluster"]
-    provider: "AWS"
+    path: policies/aurora/aurora-recovery-point-created.sentinel
+    sha: 9e54334e014cea3479ed03af9c78b8ee89e36bad960e83fb6499737f69564c8b
+    governed_resources: [aws_backup_plan, aws_backup_selection, aws_rds_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Aurora"
-    description: "This policy ensures that a recovery point was created for Amazon Aurora DB clusters within the specified time period to enable backup and disaster recovery capabilities."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Aurora
+    description: This policy ensures that a recovery point was created for Amazon Aurora DB clusters within the specified time period to enable backup and disaster recovery capabilities.
+    type: sentinel
   backup-recovery-point-encrypted:
-    path: "policies/backup/backup-recovery-point-encrypted.sentinel"
-    governed_resources: ["aws_backup_framework"]
-    provider: "AWS"
+    path: policies/backup/backup-recovery-point-encrypted.sentinel
+    sha: 78d5458db29eea2d041711e7924125dac4939b49462321d1f5230860e41c67bb
+    governed_resources: [aws_backup_framework]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Backup"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Backup
     description: "This policy checks if resources of type 'aws_backup_framework' have the attribute 'control' value set to 'BACKUP_RECOVERY_POINT_ENCRYPTED'"
-    type: "sentinel"
+    type: sentinel
   backup-recovery-point-manual-deletion-disabled:
-    path: "policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel"
-    governed_resources: ["aws_backup_vault", "aws_backup_vault_policy"]
-    provider: "AWS"
+    path: policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel
+    sha: 2e4a877357d339ee9f6af144a8b48befdc4cb9d771b6b2228059c84dc33577b2
+    governed_resources: [aws_backup_vault, aws_backup_vault_policy]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Backup"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Backup
     description: "This policy checks if AWS Backup vaults have resource-based policies that prevent manual deletion of recovery points. The rule is NON_COMPLIANT if the Backup Vault does not have resource-based policies or has policies without a suitable 'Deny' statement with backup:DeleteRecoveryPoint, backup:UpdateRecoveryPointLifecycle, and backup:PutBackupVaultAccessPolicy permissions."
-    type: "sentinel"
+    type: sentinel
   cloudfront-distributions-should-encrypt-traffic-to-custom-origins:
-    path: "policies/cloudfront/cloudfront-distributions-should-encrypt-traffic-to-custom-origins.sentinel"
-    governed_resources: ["aws_cloudfront_distribution"]
-    provider: "AWS"
+    path: policies/cloudfront/cloudfront-distributions-should-encrypt-traffic-to-custom-origins.sentinel
+    sha: 8dc58d6fb2bcde591115ae143558d50d4c27ab9a83ac390cc3e447a8a1dad84a
+    governed_resources: [aws_cloudfront_distribution]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudFront"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudFront
     description: "This control checks whether 'aws_cloudfront_distribution' are encrypting traffic to custom origins."
-    type: "sentinel"
+    type: sentinel
   cloudfront-distributions-should-have-logging-enabled:
-    path: "policies/cloudfront/cloudfront-distributions-should-have-logging-enabled.sentinel"
-    governed_resources: ["aws_cloudfront_distribution"]
-    provider: "AWS"
+    path: policies/cloudfront/cloudfront-distributions-should-have-logging-enabled.sentinel
+    sha: 8f0a83fca68849060b3dd629d4d2ab290513bf64c1573dff005bcc0111799671
+    governed_resources: [aws_cloudfront_distribution]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudFront"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudFront
     description: "This control checks whether server access logging is enabled on 'aws_cloudfront_distribution'."
-    type: "sentinel"
+    type: sentinel
   cloudfront-distributions-should-use-custom-ssl-tls-certificates:
-    path: "policies/cloudfront/cloudfront-distributions-should-use-custom-ssl-tls-certificates.sentinel"
-    governed_resources: ["aws_cloudfront_distribution"]
-    provider: "AWS"
+    path: policies/cloudfront/cloudfront-distributions-should-use-custom-ssl-tls-certificates.sentinel
+    sha: 25a9aebae9faaf19e5c5d07435961e9ae6427e21fd05645970caf42d676dc624
+    governed_resources: [aws_cloudfront_distribution]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudFront"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudFront
     description: "This control checks whether 'aws_cloudfront_distribution' are using the default SSL/TLS certificate CloudFront provides."
-    type: "sentinel"
+    type: sentinel
   cloudfront-should-require-encryption-in-transit:
-    path: "policies/cloudfront/cloudfront-should-require-encryption-in-transit.sentinel"
-    governed_resources: ["aws_cloudfront_distribution"]
-    provider: "AWS"
+    path: policies/cloudfront/cloudfront-should-require-encryption-in-transit.sentinel
+    sha: 2dfd08469d14e82f18438a627cec88befa3842e5e5071340bd21137977465ac8
+    governed_resources: [aws_cloudfront_distribution]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudFront"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudFront
     description: "This control checks whether an 'aws_cloudfront_distribution' requires viewers to use HTTPS directly or whether it uses redirection."
-    type: "sentinel"
+    type: sentinel
   cloudtrail-log-file-validation-enabled:
-    path: "policies/cloudtrail/cloudtrail-log-file-validation-enabled.sentinel"
-    governed_resources: ["aws_cloudtrail"]
-    provider: "AWS"
+    path: policies/cloudtrail/cloudtrail-log-file-validation-enabled.sentinel
+    sha: d01161ac753de15b05b001c42b04b0b9bc0221e7b3998415b4e6e7f879ebfd26
+    governed_resources: [aws_cloudtrail]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudTrail"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudTrail
     description: "This policy requires resources of type `aws_cloudtrail` to have log file validation enabled."
-    type: "sentinel"
+    type: sentinel
   cloudtrail-s3-dataevents-enabled:
-    path: "policies/cloudtrail/cloudtrail-s3-dataevents-enabled.sentinel"
-    governed_resources: ["aws_cloudtrail"]
-    provider: "AWS"
+    path: policies/cloudtrail/cloudtrail-s3-dataevents-enabled.sentinel
+    sha: 35e66d3a481d9553b5d2563fb0520378d8fa60814bbf97682a0007cc28398c80
+    governed_resources: [aws_cloudtrail]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudTrail"
-    description: "This policy verifies that at least one AWS CloudTrail trail is logging Amazon S3 data events for all S3 buckets."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudTrail
+    description: This policy verifies that at least one AWS CloudTrail trail is logging Amazon S3 data events for all S3 buckets.
+    type: sentinel
   cloudtrail-security-best-practices:
-    path: "policies/cloudtrail/cloudtrail-security-best-practices.sentinel"
-    governed_resources: ["aws_cloudtrail"]
-    provider: "AWS"
+    path: policies/cloudtrail/cloudtrail-security-best-practices.sentinel
+    sha: 8d7d06a2660642d836c7c5fb93e598ef910b595679ea0da985d08dbf09f0b8a8
+    governed_resources: [aws_cloudtrail]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudTrail"
-    description: "This policy ensures that at least one AWS CloudTrail trail is defined with security best practices according to AWS Audit Manager requirements."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudTrail
+    description: This policy ensures that at least one AWS CloudTrail trail is defined with security best practices according to AWS Audit Manager requirements.
+    type: sentinel
   cloudtrail-server-side-encryption-enabled:
-    path: "policies/cloudtrail/cloudtrail-server-side-encryption-enabled.sentinel"
-    governed_resources: ["aws_cloudtrail"]
-    provider: "AWS"
+    path: policies/cloudtrail/cloudtrail-server-side-encryption-enabled.sentinel
+    sha: 6a00ecdf028704d0041038dfdd0772d9ff3b9c1c1ea53170b6945ef899ce9c67
+    governed_resources: [aws_cloudtrail]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudTrail"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudTrail
     description: "This policy requires that resources of type `aws_cloudtrail` have server-side encryption enabled."
-    type: "sentinel"
+    type: sentinel
   cloudwatch-alarms-should-have-specified-actions-configured:
-    path: "policies/cloudwatch/cloudwatch-alarms-should-have-specified-actions-configured.sentinel"
-    governed_resources: ["aws_cloudwatch_composite_alarm", "aws_cloudwatch_metric_alarm"]
-    provider: "AWS"
+    path: policies/cloudwatch/cloudwatch-alarms-should-have-specified-actions-configured.sentinel
+    sha: 7ce4f1809fa7d6a83d5ebe12fd7f8959366108ae9cc0b6b965ff5d4024795fe4
+    governed_resources: [aws_cloudwatch_composite_alarm, aws_cloudwatch_metric_alarm]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudWatch"
-    description: "CloudWatch.15 This control checks whether an Amazon CloudWatch alarm has at least one action configured for the ALARM state."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudWatch
+    description: CloudWatch.15 This control checks whether an Amazon CloudWatch alarm has at least one action configured for the ALARM state.
+    type: sentinel
   cloudwatch-log-group-kms-encryption:
-    path: "policies/cloudwatch/cloudwatch-log-group-kms-encryption.sentinel"
-    governed_resources: ["aws_cloudwatch_log_group"]
-    provider: "AWS"
+    path: policies/cloudwatch/cloudwatch-log-group-kms-encryption.sentinel
+    sha: 05832d583b3e00e0e5ffafbf08b292d78721c12439f00f9ec7ba0955ca6afe53
+    governed_resources: [aws_cloudwatch_log_group]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudWatch"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudWatch
     description: "This policy verifies that Amazon CloudWatch Log Groups are encrypted with AWS KMS. Optionally, it can check for a specific KMS key ID if provided."
-    type: "sentinel"
+    type: sentinel
   cloudwatch-log-groups-should-be-retained-for-a-specified-time-period:
-    path: "policies/cloudwatch/cloudwatch-log-groups-should-be-retained-for-a-specified-time-period.sentinel"
-    governed_resources: ["aws_cloudwatch_log_group"]
-    provider: "AWS"
+    path: policies/cloudwatch/cloudwatch-log-groups-should-be-retained-for-a-specified-time-period.sentinel
+    sha: 046dde13a4738abbb35d3f4be490f40c92bba594f3c76bfa5cd7684c05a21d99
+    governed_resources: [aws_cloudwatch_log_group]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CloudWatch"
-    description: "CloudWatch.16 This control checks whether an Amazon CloudWatch log group has a retention period of at least the specified number of days."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CloudWatch
+    description: CloudWatch.16 This control checks whether an Amazon CloudWatch log group has a retention period of at least the specified number of days.
+    type: sentinel
   codebuild-project-artifact-encryption:
-    path: "policies/codebuild/codebuild-project-artifact-encryption.sentinel"
-    governed_resources: ["aws_codebuild_project"]
-    provider: "AWS"
+    path: policies/codebuild/codebuild-project-artifact-encryption.sentinel
+    sha: d37b0228190230b10812d67f6330dbf75101ce8cb538a9a5bcb0c96815e31507
+    governed_resources: [aws_codebuild_project]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CodeBuild"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CodeBuild
     description: "This policy verifies that AWS CodeBuild projects have encryption enabled for all artifacts. According to AWS best practices, artifacts should be encrypted to protect sensitive build outputs."
-    type: "sentinel"
+    type: sentinel
   codebuild-project-environments-should-have-a-logging-aws-configuration:
-    path: "policies/codebuild/codebuild-project-environments-should-have-a-logging-aws-configuration.sentinel"
-    governed_resources: ["aws_codebuild_project"]
-    provider: "AWS"
+    path: policies/codebuild/codebuild-project-environments-should-have-a-logging-aws-configuration.sentinel
+    sha: ec182b9045b9d1ca3e6aebffee124d224b5e28113aadda4c4075dfaed6d9672a
+    governed_resources: [aws_codebuild_project]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CodeBuild"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CodeBuild
     description: "This control checks whether a 'aws_codebuild_project' has at least one log option, either to S3 or CloudWatch logs enabled."
-    type: "sentinel"
+    type: sentinel
   codebuild-project-privileged-mode-disabled:
-    path: "policies/codebuild/codebuild-project-privileged-mode-disabled.sentinel"
-    governed_resources: ["aws_codebuild_project"]
-    provider: "AWS"
+    path: policies/codebuild/codebuild-project-privileged-mode-disabled.sentinel
+    sha: 6e0821aa2a6651c94b5fe701f7ba232fe8ff2d1e60ce4b8d42d872d2361d2684
+    governed_resources: [aws_codebuild_project]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CodeBuild"
-    description: "This policy checks if AWS CodeBuild projects have privileged mode disabled in their environment configuration."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CodeBuild
+    description: This policy checks if AWS CodeBuild projects have privileged mode disabled in their environment configuration.
+    type: sentinel
   codebuild-s3-logs-should-be-encrypted:
-    path: "policies/codebuild/codebuild-s3-logs-should-be-encrypted.sentinel"
-    governed_resources: ["aws_codebuild_project"]
-    provider: "AWS"
+    path: policies/codebuild/codebuild-s3-logs-should-be-encrypted.sentinel
+    sha: 50f2e7d8f7bf9759d9cb2ce77d486e08096bfc4171b8bc25f828071f9b6bccae
+    governed_resources: [aws_codebuild_project]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "CodeBuild"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: CodeBuild
     description: "This control checks if Amazon S3 logs for an 'aws_codebuild_project' are encrypted."
-    type: "sentinel"
+    type: sentinel
   dms-endpoint-should-be-ssl-configured:
-    path: "policies/dms/dms-endpoint-should-be-ssl-configured.sentinel"
-    governed_resources: ["aws_dms_endpoint"]
-    provider: "AWS"
+    path: policies/dms/dms-endpoint-should-be-ssl-configured.sentinel
+    sha: 1be843546ae21234aacef3b8da80cc48b9aaa4c7bd8199540c2831b86f435b74
+    governed_resources: [aws_dms_endpoint]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DMS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DMS
     description: "This policy checks if resources of type 'aws_dms_endpoint' have the 'certificate_arn' shouldn't be empty"
-    type: "sentinel"
+    type: sentinel
   dms-endpoints-should-use-ssl:
-    path: "policies/dms/dms-endpoints-should-use-ssl.sentinel"
-    governed_resources: ["aws_dms_endpoint"]
-    provider: "AWS"
+    path: policies/dms/dms-endpoints-should-use-ssl.sentinel
+    sha: b2d7672aa4a1016eeed1972f45b73853320635edbec587276e5738621a2c8968
+    governed_resources: [aws_dms_endpoint]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DMS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DMS
     description: "This policy requires resources of type `aws_dms_endpoint` have attribute \"ssl_mode\" set to one of: require, verify-ca, verify-full."
-    type: "sentinel"
+    type: sentinel
   dms-redis-tls-enabled:
-    path: "policies/dms/dms-redis-tls-enabled.sentinel"
-    governed_resources: ["aws_dms_endpoint"]
-    provider: "AWS"
+    path: policies/dms/dms-redis-tls-enabled.sentinel
+    sha: 64ed6b6d1041faf58e0c26402a8faeea5a3f361525977bee720fc2a11477d981
+    governed_resources: [aws_dms_endpoint]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DMS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DMS
     description: "This policy checks if resources of type 'aws_dms_endpoint' have the 'ssl_security_protocol' set to 'ssl-encryption' in 'redis_settings' for engine of type 'redis'"
-    type: "sentinel"
+    type: sentinel
   dms-replication-task-logging-enabled:
-    path: "policies/dms/dms-replication-task-logging-enabled.sentinel"
-    governed_resources: ["aws_dms_replication_task"]
-    provider: "AWS"
+    path: policies/dms/dms-replication-task-logging-enabled.sentinel
+    sha: 02e090493d873a4f4223b2073a767635c209d652c115c2740b6f90bc98ed872f
+    governed_resources: [aws_dms_replication_task]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DMS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DMS
     description: "This policy checks if resources of type 'aws_dms_replication_task' have the 'replication_task_settings' have logging enabled"
-    type: "sentinel"
+    type: sentinel
   docdb-cluster-backup-retention-check:
-    path: "policies/docdb/docdb-cluster-backup-retention-check.sentinel"
-    governed_resources: ["aws_docdb_cluster"]
-    provider: "AWS"
+    path: policies/docdb/docdb-cluster-backup-retention-check.sentinel
+    sha: d5545bac791864f008130ffd0439241cc5946584fce47d81ad1d917bc7c0d5ed
+    governed_resources: [aws_docdb_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DocDB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DocDB
     description: "This policy checks if resources of type 'aws_docdb_cluster' have the 'backup-retention-period' attribute set in between '7 to 35'"
-    type: "sentinel"
+    type: sentinel
   docdb-cluster-storage-encrypted:
-    path: "policies/docdb/docdb-cluster-storage-encrypted.sentinel"
-    governed_resources: ["aws_docdb_cluster"]
-    provider: "AWS"
+    path: policies/docdb/docdb-cluster-storage-encrypted.sentinel
+    sha: 3add941219b192fd614b8ad5321389740efdafdfe345e4ff25f010034163ed85
+    governed_resources: [aws_docdb_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DocDB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DocDB
     description: "This policy checks if resources of type 'aws_docdb_cluster' have the 'storage_encrypted' attribute set to true"
-    type: "sentinel"
+    type: sentinel
   dynamo-db-accelerator-clusters-encryption-at-rest-enabled:
-    path: "policies/dynamo-db/dynamo-db-accelerator-clusters-encryption-at-rest-enabled.sentinel"
-    governed_resources: ["aws_dax_cluster"]
-    provider: "AWS"
+    path: policies/dynamo-db/dynamo-db-accelerator-clusters-encryption-at-rest-enabled.sentinel
+    sha: d918a1d124c064db0859838674444609fa332bda998fc1cffd788847a266cbf6
+    governed_resources: [aws_dax_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DynamoDB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DynamoDB
     description: "This policy requires that `server_side_encryption` attribute of the `aws_dax_cluster` resource has `enabled` set to true"
-    type: "sentinel"
+    type: sentinel
   dynamo-db-accelerator-clusters-encryption-in-transit-enabled:
-    path: "policies/dynamo-db/dynamo-db-accelerator-clusters-encryption-in-transit-enabled.sentinel"
-    governed_resources: ["aws_dax_cluster"]
-    provider: "AWS"
+    path: policies/dynamo-db/dynamo-db-accelerator-clusters-encryption-in-transit-enabled.sentinel
+    sha: 903ce19041b07e3b511298af78f56ac16d4746d09527a186a2e924bc15f6f303
+    governed_resources: [aws_dax_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DynamoDB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DynamoDB
     description: "This policy requires that the `aws_dax_cluster` resource has `cluster_endpoint_encryption_type` attribute set to `TLS`"
-    type: "sentinel"
+    type: sentinel
   dynamo-db-recovery-point-created:
-    path: "policies/dynamo-db/dynamo-db-recovery-point-created.sentinel"
-    governed_resources: ["aws_backup_plan", "aws_backup_selection", "aws_dynamodb_table"]
-    provider: "AWS"
+    path: policies/dynamo-db/dynamo-db-recovery-point-created.sentinel
+    sha: 0d50244ba23598893734acf003cea9bcb96d1969ab5ec18299462a572c4a924e
+    governed_resources: [aws_backup_plan, aws_backup_selection, aws_dynamodb_table]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DynamoDB"
-    description: "This policy verifies that Amazon DynamoDB tables have backup recovery points created within a specified period to support disaster recovery requirements."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DynamoDB
+    description: This policy verifies that Amazon DynamoDB tables have backup recovery points created within a specified period to support disaster recovery requirements.
+    type: sentinel
   dynamo-db-table-encrypted-kms:
-    path: "policies/dynamo-db/dynamo-db-table-encrypted-kms.sentinel"
-    governed_resources: ["aws_dynamodb_table"]
-    provider: "AWS"
+    path: policies/dynamo-db/dynamo-db-table-encrypted-kms.sentinel
+    sha: 93e7208f285fc899d3272c49380c9083239fe4b41eb605883f76d230d038051d
+    governed_resources: [aws_dynamodb_table]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DynamoDB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DynamoDB
     description: "This policy verifies that AWS DynamoDB tables are encrypted with AWS KMS. It checks the `server_side_encryption` block to ensure KMS encryption is enabled."
-    type: "sentinel"
+    type: sentinel
   dynamo-db-table-encryption-enabled:
-    path: "policies/dynamo-db/dynamo-db-table-encryption-enabled.sentinel"
-    governed_resources: ["aws_dynamodb_table"]
-    provider: "AWS"
+    path: policies/dynamo-db/dynamo-db-table-encryption-enabled.sentinel
+    sha: 218333ec6652b4d04f62dabc50965d90be8ca5563235e477b770725da5467ac5
+    governed_resources: [aws_dynamodb_table]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DynamoDB"
-    description: "This policy verifies that Amazon DynamoDB tables have encryption enabled to protect data at rest in accordance with AWS Audit Manager requirements."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DynamoDB
+    description: This policy verifies that Amazon DynamoDB tables have encryption enabled to protect data at rest in accordance with AWS Audit Manager requirements.
+    type: sentinel
   dynamo-db-tables-point-in-time-recovery-enabled:
-    path: "policies/dynamo-db/dynamo-db-tables-point-in-time-recovery-enabled.sentinel"
-    governed_resources: ["aws_dynamodb_table"]
-    provider: "AWS"
+    path: policies/dynamo-db/dynamo-db-tables-point-in-time-recovery-enabled.sentinel
+    sha: 2cad9be481a115cc7fd4889be479dfefccf0697c1a3b7cc0edf091d09062dc5c
+    governed_resources: [aws_dynamodb_table]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DynamoDB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DynamoDB
     description: "This policy requires that `point_in_time_recovery` attribute of the `aws_dynamodb_table` resource has `enabled` set to true"
-    type: "sentinel"
+    type: sentinel
   dynamo-db-tables-scales-capacity-with-demand:
-    path: "policies/dynamo-db/dynamo-db-tables-scales-capacity-with-demand.sentinel"
-    governed_resources: ["aws_appautoscaling_policy", "aws_appautoscaling_target", "aws_dynamodb_table"]
-    provider: "AWS"
+    path: policies/dynamo-db/dynamo-db-tables-scales-capacity-with-demand.sentinel
+    sha: 564af8fc5b6b7569d7bfaf757e6402f9ca657a2e353de711ecedb75f0fa7c9d3
+    governed_resources: [aws_appautoscaling_policy, aws_appautoscaling_target, aws_dynamodb_table]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "DynamoDB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: DynamoDB
     description: "This policy requires that `aws_dynamodb_table` resources with 'billing_mode' attribute set to 'PROVISIONED' have autoscaling configured"
-    type: "sentinel"
+    type: sentinel
   ebs-backup-recovery-point-created:
-    path: "policies/ec2/ebs-backup-recovery-point-created.sentinel"
-    governed_resources: ["aws_backup_plan", "aws_backup_selection", "aws_ebs_volume"]
-    provider: "AWS"
+    path: policies/ec2/ebs-backup-recovery-point-created.sentinel
+    sha: 93659d4d3dec480fbc4640368e0ae188217f977d18882caa2b2e5ea19cb6e869
+    governed_resources: [aws_backup_plan, aws_backup_selection, aws_ebs_volume]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "This policy ensures that Amazon EBS volumes are configured with AWS Backup coverage that can create recovery points within the specified time period."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: This policy ensures that Amazon EBS volumes are configured with AWS Backup coverage that can create recovery points within the specified time period.
+    type: sentinel
   ebs-volumes-backup-plan-protection:
-    path: "policies/ec2/ebs-volumes-backup-plan-protection.sentinel"
-    governed_resources: ["aws_backup_selection", "aws_ebs_volume"]
-    provider: "AWS"
+    path: policies/ec2/ebs-volumes-backup-plan-protection.sentinel
+    sha: 4605b43b47b38505e4e6ca8bf7edbe16b5195765be36d84e65054a8bee8628f8
+    governed_resources: [aws_backup_selection, aws_ebs_volume]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "This policy checks if Amazon Elastic Block Store (Amazon EBS) volumes are protected by a backup plan. EBS volumes should be included in AWS Backup plans to ensure data protection and disaster recovery."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: This policy checks if Amazon Elastic Block Store (Amazon EBS) volumes are protected by a backup plan. EBS volumes should be included in AWS Backup plans to ensure data protection and disaster recovery.
+    type: sentinel
   ebs-volumes-should-be-in-a-backup-plan:
-    path: "policies/ec2/ebs-volumes-should-be-in-a-backup-plan.sentinel"
-    governed_resources: ["aws_backup_plan", "aws_backup_selection", "aws_ebs_volume"]
-    provider: "AWS"
+    path: policies/ec2/ebs-volumes-should-be-in-a-backup-plan.sentinel
+    sha: 2d5b7a06a7f58a13331a8ef974d3a787caaf25fe55f44693896d4094065a7793
+    governed_resources: [aws_backup_plan, aws_backup_selection, aws_ebs_volume]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "EC2.28 This control evaluates if an Amazon EBS volume in in-use state is covered by a backup plan."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: EC2.28 This control evaluates if an Amazon EBS volume in in-use state is covered by a backup plan.
+    type: sentinel
   ec2-attached-ebs-volumes-encrypted-at-rest:
-    path: "policies/ec2/ec2-attached-ebs-volumes-encrypted-at-rest.sentinel"
-    governed_resources: ["aws_ebs_volume", "aws_volume_attachment"]
-    provider: "AWS"
+    path: policies/ec2/ec2-attached-ebs-volumes-encrypted-at-rest.sentinel
+    sha: fd7d5dbb468e02a5912c47d016874b35062ce28ab9bab79f5f0f1fca3ef60c9e
+    governed_resources: [aws_ebs_volume, aws_volume_attachment]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
     description: "This policy requires `aws_ebs_volume` resources to be encrypted and in attached state."
-    type: "sentinel"
+    type: sentinel
   ec2-autoscaling-capacity-rebalancing-enabled:
-    path: "policies/ec2/ec2-autoscaling-capacity-rebalancing-enabled.sentinel"
-    governed_resources: ["aws_autoscaling_group"]
-    provider: "AWS"
+    path: policies/ec2/ec2-autoscaling-capacity-rebalancing-enabled.sentinel
+    sha: 7fc5fe5c317c131e5277d22b40e3ce467e7891b0dc09fd4d9c1677244493a520
+    governed_resources: [aws_autoscaling_group]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "This policy requires that Capacity Rebalancing is enabled for Amazon EC2 Auto Scaling groups that use multiple instance types."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: This policy requires that Capacity Rebalancing is enabled for Amazon EC2 Auto Scaling groups that use multiple instance types.
+    type: sentinel
   ec2-backup-recovery-point-time-period:
-    path: "policies/ec2/ec2-backup-recovery-point-time-period.sentinel"
-    governed_resources: ["aws_backup_plan", "aws_backup_selection", "aws_ebs_volume"]
-    provider: "AWS"
+    path: policies/ec2/ec2-backup-recovery-point-time-period.sentinel
+    sha: 901dac496499810a9fac27cb4eef9fb40a08cd556ee3cdbe30b3a77a5bdebaec
+    governed_resources: [aws_backup_plan, aws_backup_selection, aws_ebs_volume]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "This policy verifies that Amazon EBS volumes are covered by AWS Backup plans that can create recovery points within the specified time period."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: This policy verifies that Amazon EBS volumes are covered by AWS Backup plans that can create recovery points within the specified time period.
+    type: sentinel
   ec2-belong-to-vpc:
-    path: "policies/ec2/ec2-belong-to-vpc.sentinel"
-    governed_resources: ["aws_instance", "aws_network_interface", "aws_subnet"]
-    provider: "AWS"
+    path: policies/ec2/ec2-belong-to-vpc.sentinel
+    sha: af69bb002d539d1187443d8e84e79ee51b8689e11a28863bb010f50de866e24a
+    governed_resources: [aws_instance, aws_network_interface, aws_subnet]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "This policy verifies that EC2 instances belong to a virtual private cloud (VPC)."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: This policy verifies that EC2 instances belong to a virtual private cloud (VPC).
+    type: sentinel
   ec2-client-vpn-connection-log-enabled:
-    path: "policies/ec2/ec2-client-vpn-connection-log-enabled.sentinel"
-    governed_resources: ["aws_ec2_client_vpn_endpoint"]
-    provider: "AWS"
+    path: policies/ec2/ec2-client-vpn-connection-log-enabled.sentinel
+    sha: 386e76f0b2541e491ab40bb59de449da51e5f836421f2890fe0bb6313095533f
+    governed_resources: [aws_ec2_client_vpn_endpoint]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
     description: "This policy checks if resources of type 'aws_ec2_client_vpn_endpoint' have the cloudwatch logs enabled in the 'connection_log_options' attribute"
-    type: "sentinel"
+    type: sentinel
   ec2-ebs-encryption-enabled:
-    path: "policies/ec2/ec2-ebs-encryption-enabled.sentinel"
-    governed_resources: ["aws_ebs_volume"]
-    provider: "AWS"
+    path: policies/ec2/ec2-ebs-encryption-enabled.sentinel
+    sha: ac91987edc836340fff99c7a5f00459541441a8da6a6e6630aa1113d33883f50
+    governed_resources: [aws_ebs_volume]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
     description: "This policy requires resources of type `aws_ebs_volume` have the `encrypted` attribute set to `true`."
-    type: "sentinel"
+    type: sentinel
   ec2-ebs-snapshot-public-restorable-check-account-level:
-    path: "policies/ec2/ec2-ebs-snapshot-public-restorable-check-account-level.sentinel"
-    governed_resources: ["aws_ebs_snapshot_block_public_access"]
-    provider: "AWS"
+    path: policies/ec2/ec2-ebs-snapshot-public-restorable-check-account-level.sentinel
+    sha: d944ee575f6f996bb78233cf2720cbcf180e57d26cba9f10320e3cdd0ef7f09a
+    governed_resources: [aws_ebs_snapshot_block_public_access]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
     description: "This policy requires `aws_ebs_snapshot_block_public_access` resources to have attribute state to either 'block-new-sharing' or 'block-all-sharing'."
-    type: "sentinel"
+    type: sentinel
   ec2-incoming-ssh-should-be-restricted:
-    path: "policies/ec2/ec2-incoming-ssh-should-be-restricted.sentinel"
-    governed_resources: ["aws_vpc_security_group_ingress_rule"]
-    provider: "AWS"
+    path: policies/ec2/ec2-incoming-ssh-should-be-restricted.sentinel
+    sha: b62126066e611f39a3e38b12b2c1a68a23e8887d14fd297deb437f67fa6cb391
+    governed_resources: [aws_vpc_security_group_ingress_rule]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
     description: "This policy ensures that AWS security groups do not allow unrestricted SSH access from the internet (0.0.0.0/0 or ::/0)."
-    type: "sentinel"
+    type: sentinel
   ec2-instance-profile-required:
-    path: "policies/ec2/ec2-instance-profile-required.sentinel"
-    governed_resources: ["aws_instance"]
-    provider: "AWS"
+    path: policies/ec2/ec2-instance-profile-required.sentinel
+    sha: 0e380c08c3c998d7ee48b85608bdcfed941709fc0103523373006a35e1cf1185
+    governed_resources: [aws_instance]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "This policy requires that EC2 instances have an IAM instance profile attached. This ensures proper identity and access management for EC2 instances."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: This policy requires that EC2 instances have an IAM instance profile attached. This ensures proper identity and access management for EC2 instances.
+    type: sentinel
   ec2-internet-gateway-allow-authorized-vpc-only:
-    path: "policies/ec2/ec2-internet-gateway-allow-authorized-vpc-only.sentinel"
-    governed_resources: ["aws_internet_gateway", "aws_internet_gateway_attachment"]
-    provider: "AWS"
+    path: policies/ec2/ec2-internet-gateway-allow-authorized-vpc-only.sentinel
+    sha: 9b25d444b0c36c069937d05e4f25a6969dc96febb342fa7a24c57f93d465f30f
+    governed_resources: [aws_internet_gateway, aws_internet_gateway_attachment]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "This policy verifies that internet gateways are only attached to authorized VPCs. The rule is NON_COMPLIANT if internet gateways are attached to unauthorized VPCs."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: This policy verifies that internet gateways are only attached to authorized VPCs. The rule is NON_COMPLIANT if internet gateways are attached to unauthorized VPCs.
+    type: sentinel
   ec2-launch-template-public-ip-disabled:
-    path: "policies/ec2/ec2-launch-template-public-ip-disabled.sentinel"
-    governed_resources: ["aws_launch_template"]
-    provider: "AWS"
+    path: policies/ec2/ec2-launch-template-public-ip-disabled.sentinel
+    sha: 54011c1e25d67b22f7486aa0784b1943d8974d2b4c9929f94eab62e0faa6289f
+    governed_resources: [aws_launch_template]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
     description: "This policy checks if resources of type 'aws_launch_template' have the attribute 'associate_public_ip_address' in 'network_interfaces' set to 'false'"
-    type: "sentinel"
+    type: sentinel
   ec2-network-acl:
-    path: "policies/ec2/ec2-network-acl.sentinel"
-    governed_resources: ["aws_network_acl", "aws_network_acl_rule"]
-    provider: "AWS"
+    path: policies/ec2/ec2-network-acl.sentinel
+    sha: fc3de7b2236c7224687de40e206b46bacb834a577a3c448930073fa6ee8b0d1c
+    governed_resources: [aws_network_acl, aws_network_acl_rule]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
     description: "This policy requires resources of type `aws_network_acl` and `aws_network_acl_rule` to block ingress traffic from unknown sources to the configured ports"
-    type: "sentinel"
+    type: sentinel
   ec2-network-acl-should-have-subnet-ids:
-    path: "policies/ec2/ec2-network-acl-should-have-subnet-ids.sentinel"
-    governed_resources: ["aws_network_acl", "aws_network_acl_association"]
-    provider: "AWS"
+    path: policies/ec2/ec2-network-acl-should-have-subnet-ids.sentinel
+    sha: 17807e610ec1991fe9aa9dffe9490ebc294d78bafc218e4e1a733e866dc43676
+    governed_resources: [aws_network_acl, aws_network_acl_association]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
     description: "This policy requires `aws_network_acl` resources to have 'subnet_ids' present."
-    type: "sentinel"
+    type: sentinel
   ec2-no-public-route-to-igw:
-    path: "policies/ec2/ec2-no-public-route-to-igw.sentinel"
-    governed_resources: ["aws_route_table"]
-    provider: "AWS"
+    path: policies/ec2/ec2-no-public-route-to-igw.sentinel
+    sha: 83726082c9c8475dde38c3b2f25fa6b3eacd3960f440442791cd0af7f18665d7
+    governed_resources: [aws_route_table]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
     description: "This policy checks if there are public routes in the route table to an Internet Gateway (IGW) with unrestricted access (0.0.0.0/0 or ::/0)."
-    type: "sentinel"
+    type: sentinel
   ec2-non-default-security-groups-attached-to-eni:
-    path: "policies/ec2/ec2-non-default-security-groups-attached-to-eni.sentinel"
-    governed_resources: ["aws_instance", "aws_network_interface", "aws_network_interface_sg_attachment", "aws_security_group"]
-    provider: "AWS"
+    path: policies/ec2/ec2-non-default-security-groups-attached-to-eni.sentinel
+    sha: a0b649a014c07ebb2c0dbea421a69cd57f1d6a4a0883030dfab0f755adbdc948
+    governed_resources: [aws_instance, aws_network_interface, aws_network_interface_sg_attachment, aws_security_group]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "This policy ensures that managed non-default security groups are attached to elastic network interfaces."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: This policy ensures that managed non-default security groups are attached to elastic network interfaces.
+    type: sentinel
   ec2-security-group-attached-to-eni-periodic:
-    path: "policies/ec2/ec2-security-group-attached-to-eni-periodic.sentinel"
-    governed_resources: ["aws_instance", "aws_network_interface", "aws_network_interface_sg_attachment", "aws_security_group"]
-    provider: "AWS"
+    path: policies/ec2/ec2-security-group-attached-to-eni-periodic.sentinel
+    sha: 6eb36a0ffa9a96632c885bd8222b247956feb6a4ce646a2d097cce88e50221ba
+    governed_resources: [aws_instance, aws_network_interface, aws_network_interface_sg_attachment, aws_security_group]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "This policy ensures that managed non-default security groups are attached to elastic network interfaces."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: This policy ensures that managed non-default security groups are attached to elastic network interfaces.
+    type: sentinel
   ec2-security-group-ingress-traffic-restriction-to-unauthorized-ports:
-    path: "policies/ec2/ec2-security-group-ingress-traffic-restriction-to-unauthorized-ports.sentinel"
-    governed_resources: ["aws_security_group", "aws_security_group_rule", "aws_vpc_security_group_ingress_rule"]
-    provider: "AWS"
+    path: policies/ec2/ec2-security-group-ingress-traffic-restriction-to-unauthorized-ports.sentinel
+    sha: f9559f1e18dfc5632db5f695c9c6be46b18a4b09443efd69cc727cbb031b918a
+    governed_resources: [aws_security_group, aws_security_group_rule, aws_vpc_security_group_ingress_rule]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
-    description: "Security groups should only allow unrestricted incoming traffic for authorized ports"
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
+    description: Security groups should only allow unrestricted incoming traffic for authorized ports
+    type: sentinel
   ec2-vpc-flow-logging-enabled:
-    path: "policies/ec2/ec2-vpc-flow-logging-enabled.sentinel"
-    governed_resources: ["aws_default_vpc", "aws_flow_log", "aws_vpc"]
-    provider: "AWS"
+    path: policies/ec2/ec2-vpc-flow-logging-enabled.sentinel
+    sha: 2d9d7c29ddaa108d4946b661d68d2c0318a15ebae8f25d57eefca472b1a98c2c
+    governed_resources: [aws_default_vpc, aws_flow_log, aws_vpc]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EC2"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EC2
     description: "This policy requires resources of type `aws_vpc` and `aws_default_vpc` to have flow logs enabled."
-    type: "sentinel"
+    type: sentinel
   ecr-image-scanning-enabled:
-    path: "policies/ecr/ecr-image-scanning-enabled.sentinel"
-    governed_resources: ["aws_ecr_repository"]
-    provider: "AWS"
+    path: policies/ecr/ecr-image-scanning-enabled.sentinel
+    sha: b90d67deb958be571be26909cbe093181f093310a0484527937a411088f2536b
+    governed_resources: [aws_ecr_repository]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ECR"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ECR
     description: "This policy checks if resources of type 'aws_ecr_repository' have image scanning configuration enabled"
-    type: "sentinel"
+    type: sentinel
   ecs-task-definition-log-configuration-present:
-    path: "policies/ecs/ecs-task-definition-log-configuration-present.sentinel"
-    governed_resources: ["aws_ecs_task_definition"]
-    provider: "AWS"
+    path: policies/ecs/ecs-task-definition-log-configuration-present.sentinel
+    sha: f62bef1a08991832d9c002fb029cd310a5ad95343fa399b43a3f71e66996331c
+    governed_resources: [aws_ecs_task_definition]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ECS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ECS
     description: "This policy checks if all container definitions of a given 'aws_ecs_task_definition' resource contains a non empty value for the logConfiguration.logDriver attribute."
-    type: "sentinel"
+    type: sentinel
   ecs-task-definition-no-secrets-as-environment-variables:
-    path: "policies/ecs/ecs-task-definition-no-secrets-as-environment-variables.sentinel"
-    governed_resources: ["aws_ecs_task_definition"]
-    provider: "AWS"
+    path: policies/ecs/ecs-task-definition-no-secrets-as-environment-variables.sentinel
+    sha: 55d90c24399ac2f2cade5f706a1769261db4c6145c266d0b527e649b2f804c26
+    governed_resources: [aws_ecs_task_definition]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ECS"
-    description: "This policy checks if the container definitions contain non allow listed secrets as environment variables"
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ECS
+    description: This policy checks if the container definitions contain non allow listed secrets as environment variables
+    type: sentinel
   ecs-task-definition-nonroot-user:
-    path: "policies/ecs/ecs-task-definition-nonroot-user.sentinel"
-    governed_resources: ["aws_ecs_task_definition"]
-    provider: "AWS"
+    path: policies/ecs/ecs-task-definition-nonroot-user.sentinel
+    sha: 3cdd2899c3c4a25727af5aef7815be299c3737547bd98797c0f46245c59c723c
+    governed_resources: [aws_ecs_task_definition]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ECS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ECS
     description: "This policy requires that ECS task definitions specify a non-root user for container execution. Each container definition in the task definition must have a 'user' attribute that specifies a non-root user (not '0' or 'root')."
-    type: "sentinel"
+    type: sentinel
   efs-access-point-should-enforce-user-identity:
-    path: "policies/efs/efs-access-point-should-enforce-user-identity.sentinel"
-    governed_resources: ["aws_efs_access_point"]
-    provider: "AWS"
+    path: policies/efs/efs-access-point-should-enforce-user-identity.sentinel
+    sha: 2b587d41f03d035dd224f22ffaffe686932570e3e9a0837472460149628d989e
+    governed_resources: [aws_efs_access_point]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EFS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EFS
     description: "This policy requires resources of type `aws_efs_access_point` have attribute `posix_user` should be defined."
-    type: "sentinel"
+    type: sentinel
   efs-file-systems-should-be-encrypted-at-rest:
-    path: "policies/efs/efs-file-systems-should-be-encrypted-at-rest.sentinel"
-    governed_resources: ["aws_efs_file_system"]
-    provider: "AWS"
+    path: policies/efs/efs-file-systems-should-be-encrypted-at-rest.sentinel
+    sha: 81b552ba1405c874e58da893bc91889584b3c217f3280a8c7a1aca2571922dd3
+    governed_resources: [aws_efs_file_system]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EFS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EFS
     description: "This policy requires resources of type `aws_efs_file_system` should have 'encrypted' set to true and 'kms_key_id' should not be empty."
-    type: "sentinel"
+    type: sentinel
   efs-recovery-point-compliance:
-    path: "policies/efs/efs-recovery-point-compliance.sentinel"
-    governed_resources: ["aws_backup_plan", "aws_backup_selection", "aws_efs_file_system"]
-    provider: "AWS"
+    path: policies/efs/efs-recovery-point-compliance.sentinel
+    sha: 1563c347df369f791414720df4db74a6f8cbb7378499c0b3f10df727bd51dc0a
+    governed_resources: [aws_backup_plan, aws_backup_selection, aws_efs_file_system]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EFS"
-    description: "This policy verifies that Amazon EFS file systems are covered by AWS Backup plans that can create recovery points within the specified time period."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EFS
+    description: This policy verifies that Amazon EFS file systems are covered by AWS Backup plans that can create recovery points within the specified time period.
+    type: sentinel
   eks-cluster-endpoints-restrict-public-access:
-    path: "policies/eks/eks-cluster-endpoints-restrict-public-access.sentinel"
-    governed_resources: ["aws_eks_cluster"]
-    provider: "AWS"
+    path: policies/eks/eks-cluster-endpoints-restrict-public-access.sentinel
+    sha: f96c5e84b0a0b1bd941d337c6c9d6ce0e7546eea0b970d97672a3c34286d2384
+    governed_resources: [aws_eks_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EKS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EKS
     description: "This policy checks if 'aws_eks_cluster' resources have their unrestricted public endpoint access"
-    type: "sentinel"
+    type: sentinel
   eks-cluster-logging-enabled:
-    path: "policies/eks/eks-cluster-logging-enabled.sentinel"
-    governed_resources: ["aws_eks_cluster"]
-    provider: "AWS"
+    path: policies/eks/eks-cluster-logging-enabled.sentinel
+    sha: 7c7f79cc86214b0eb3b72cddb7f6e3829683b82aa2d1473bd639cfe4e9f6a2f5
+    governed_resources: [aws_eks_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EKS"
-    description: "This policy requires that Amazon EKS clusters have logging enabled for all log types to provide comprehensive visibility into cluster operations and security events."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EKS
+    description: This policy requires that Amazon EKS clusters have logging enabled for all log types to provide comprehensive visibility into cluster operations and security events.
+    type: sentinel
   elasticache-redis-cluster-auto-backup-enabled:
-    path: "policies/elasticache/elasticache-redis-cluster-auto-backup-enabled.sentinel"
-    governed_resources: ["aws_elasticache_cluster", "aws_elasticache_replication_group"]
-    provider: "AWS"
+    path: policies/elasticache/elasticache-redis-cluster-auto-backup-enabled.sentinel
+    sha: 52c94f0e6024474445a63640222c52107e89551b1faf31ef4bea60e6feac583e
+    governed_resources: [aws_elasticache_cluster, aws_elasticache_replication_group]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ElastiCache"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ElastiCache
     description: "This policy requires that the `snapshot_retention_limit` attribute of the `aws_elasticache_cluster` or `aws_elasticache_replication_group` resource is greater than 0."
-    type: "sentinel"
+    type: sentinel
   elasticache-redis-replication-group-encryption-at-rest-enabled:
-    path: "policies/elasticache/elasticache-redis-replication-group-encryption-at-rest-enabled.sentinel"
-    governed_resources: ["aws_elasticache_replication_group"]
-    provider: "AWS"
+    path: policies/elasticache/elasticache-redis-replication-group-encryption-at-rest-enabled.sentinel
+    sha: 18e7a490d2d8ee2eae75dd114f2f39a3a6d5eff1e80df47a824a5b645fab4101
+    governed_resources: [aws_elasticache_replication_group]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ElastiCache"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ElastiCache
     description: "This policy requires that the `at_rest_encryption_enabled` attribute of the `aws_elasticache_replication_group` resource is true."
-    type: "sentinel"
+    type: sentinel
   elasticache-redis-replication-group-encryption-at-transit-enabled:
-    path: "policies/elasticache/elasticache-redis-replication-group-encryption-at-transit-enabled.sentinel"
-    governed_resources: ["aws_elasticache_replication_group"]
-    provider: "AWS"
+    path: policies/elasticache/elasticache-redis-replication-group-encryption-at-transit-enabled.sentinel
+    sha: 2db9e092df29c6ad37b14484670bd45b6c761d0a4b406164f6cd157ec40e184f
+    governed_resources: [aws_elasticache_replication_group]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ElastiCache"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ElastiCache
     description: "This policy requires that the `transit_encryption_enabled` attribute of the `aws_elasticache_replication_group` resource is true."
-    type: "sentinel"
+    type: sentinel
   elasticsearch-encrypted-at-rest:
-    path: "policies/elasticsearch/elasticsearch-encrypted-at-rest.sentinel"
-    governed_resources: ["aws_elasticsearch_domain"]
-    provider: "AWS"
+    path: policies/elasticsearch/elasticsearch-encrypted-at-rest.sentinel
+    sha: da1011ffa561c639d5d0d1d8c49beca42b642685b63d0005aebcf5c0d073b457
+    governed_resources: [aws_elasticsearch_domain]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Elasticsearch"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Elasticsearch
     description: "This policy requires resources of type `aws_elasticsearch_domain` have the `encrypt_at_rest` should have 'enabled' attribute set to `true`."
-    type: "sentinel"
+    type: sentinel
   elasticsearch-in-vpc-only:
-    path: "policies/elasticsearch/elasticsearch-in-vpc-only.sentinel"
-    governed_resources: ["aws_elasticsearch_domain"]
-    provider: "AWS"
+    path: policies/elasticsearch/elasticsearch-in-vpc-only.sentinel
+    sha: d8cb367b8d71be70267e27f96f806da737b6a732f89c862d7027d9c0d6d01213
+    governed_resources: [aws_elasticsearch_domain]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Elasticsearch"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Elasticsearch
     description: "This policy requires resources of type `aws_elasticsearch_domain` have the `subnet_ids` should not be empty inside 'vpc_options'."
-    type: "sentinel"
+    type: sentinel
   elasticsearch-node-to-node-encryption-check:
-    path: "policies/elasticsearch/elasticsearch-node-to-node-encryption-check.sentinel"
-    governed_resources: ["aws_elasticsearch_domain"]
-    provider: "AWS"
+    path: policies/elasticsearch/elasticsearch-node-to-node-encryption-check.sentinel
+    sha: 31ba19a3dbcf7aa333941636ca20909efe2b4ac4e064274b9b0517fc909d8d1e
+    governed_resources: [aws_elasticsearch_domain]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Elasticsearch"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Elasticsearch
     description: "This policy requires resources of type `aws_elasticsearch_domain` have the `enabled` value set to 'true' for `node_to_node_encrytion` attribute."
-    type: "sentinel"
+    type: sentinel
   elb-cross-zone-load-balancing-enabled:
-    path: "policies/elb/elb-cross-zone-load-balancing-enabled.sentinel"
-    governed_resources: ["aws_elb"]
-    provider: "AWS"
+    path: policies/elb/elb-cross-zone-load-balancing-enabled.sentinel
+    sha: a44f0232e5f22db68984c5f70bcdd050a3f727a7bebdebb58d0264815cc75eaa
+    governed_resources: [aws_elb]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ELB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ELB
     description: "This policy checks if resources of type 'aws_elb' have the attribute 'cross_zone_load_balancing' set to true"
-    type: "sentinel"
+    type: sentinel
   elb-ensure-access-logging-enabled:
-    path: "policies/elb/elb-ensure-access-logging-enabled.sentinel"
-    governed_resources: ["aws_elb", "aws_lb"]
-    provider: "AWS"
+    path: policies/elb/elb-ensure-access-logging-enabled.sentinel
+    sha: bd8c2d5e6933ac168df84c38de03b71b68ef12854701de38a0154173eb4e9851
+    governed_resources: [aws_elb, aws_lb]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ELB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ELB
     description: "This policy checks if resources of type 'aws_lb' and 'aws_elb' have 'access_logging' enabled."
-    type: "sentinel"
+    type: sentinel
   elb-ensure-http-request-redirection:
-    path: "policies/elb/elb-ensure-http-request-redirection.sentinel"
-    governed_resources: ["aws_lb", "aws_lb_listener", "aws_lb_listener_rule"]
-    provider: "AWS"
+    path: policies/elb/elb-ensure-http-request-redirection.sentinel
+    sha: 450487a8766753c7d40f783e6709d7e159713435f0c43822fb11aa8cedf74a39
+    governed_resources: [aws_lb, aws_lb_listener, aws_lb_listener_rule]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ELB"
-    description: "This policy ensures that application load balancer in the terraform configurations have a listener rule configured to redirect HTTP requests to HTTPS"
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ELB
+    description: This policy ensures that application load balancer in the terraform configurations have a listener rule configured to redirect HTTP requests to HTTPS
+    type: sentinel
   elb-ensure-ssl-listener-acm-cert-classic-load-balancer:
-    path: "policies/elb/elb-ensure-ssl-listener-acm-cert-classic-load-balancer.sentinel"
-    governed_resources: ["aws_elb"]
-    provider: "AWS"
+    path: policies/elb/elb-ensure-ssl-listener-acm-cert-classic-load-balancer.sentinel
+    sha: 12c23dc68f619714bb4af74e986d6ff9ed1fd2dbc7085dd99ffa82df83937233
+    governed_resources: [aws_elb]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ELB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ELB
     description: "This policy checks if resources of type 'aws_elb' have HTTPS/SSL listeners configured with certs from acm."
-    type: "sentinel"
+    type: sentinel
   elb-ensure-valid-desync-mitigation-mode:
-    path: "policies/elb/elb-ensure-valid-desync-mitigation-mode.sentinel"
-    governed_resources: ["aws_lb"]
-    provider: "AWS"
+    path: policies/elb/elb-ensure-valid-desync-mitigation-mode.sentinel
+    sha: 31a423288ab28890462cf9e47459f065681e4fd24e054b361c72afa17cbdf97a
+    governed_resources: [aws_lb]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ELB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ELB
     description: "This policy checks if load_balancer resources have the 'desync_mitigation_mode' attribute set to either 'defensive' or 'strictest'"
-    type: "sentinel"
+    type: sentinel
   elb-multiple-az:
-    path: "policies/elb/elb-multiple-az.sentinel"
-    governed_resources: ["aws_lb"]
-    provider: "AWS"
+    path: policies/elb/elb-multiple-az.sentinel
+    sha: cb7abe5f379fd248519f12b0a83d685309596b9897ca0dc61525fec9f7dde088
+    governed_resources: [aws_lb]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ELB"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ELB
     description: "This policy ensures that Application, Network, and Gateway Load Balancers span multiple Availability Zones"
-    type: "sentinel"
+    type: sentinel
   elb-nlb-cross-zone-load-balancing-enabled:
-    path: "policies/elb/elb-nlb-cross-zone-load-balancing-enabled.sentinel"
-    governed_resources: ["aws_lb"]
-    provider: "AWS"
+    path: policies/elb/elb-nlb-cross-zone-load-balancing-enabled.sentinel
+    sha: 323764825400ab829c0f61527cf3310baec80fbf0b1d92c48497419d4a0ea956
+    governed_resources: [aws_lb]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "ELB"
-    description: "This policy verifies that cross-zone load balancing is enabled on Network Load Balancers (NLBs)."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: ELB
+    description: This policy verifies that cross-zone load balancing is enabled on Network Load Balancers (NLBs).
+    type: sentinel
   emr-block-public-access-enabled:
-    path: "policies/emr/emr-block-public-access-enabled.sentinel"
-    governed_resources: ["aws_emr_block_public_access_configuration"]
-    provider: "AWS"
+    path: policies/emr/emr-block-public-access-enabled.sentinel
+    sha: 40f6190ef11855ddfe00d6c4bad33da9e738c8d8013be422db5d0eddff23b08c
+    governed_resources: [aws_emr_block_public_access_configuration]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EMR"
-    description: "This policy requires block public access setting is enabled and any port other than 22 should not be allowed"
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EMR
+    description: This policy requires block public access setting is enabled and any port other than 22 should not be allowed
+    type: sentinel
   emr-kerberos-should-be-enabled:
-    path: "policies/emr/emr-kerberos-should-be-enabled.sentinel"
-    governed_resources: ["aws_emr_cluster", "aws_emr_security_configuration"]
-    provider: "AWS"
+    path: policies/emr/emr-kerberos-should-be-enabled.sentinel
+    sha: b6f2e3efaec45aa766fe182ff5dd9bafc8a34ff6d467b3ba139b0848205c1bd3
+    governed_resources: [aws_emr_cluster, aws_emr_security_configuration]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EMR"
-    description: "This policy requires that Amazon EMR clusters have Kerberos authentication enabled."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EMR
+    description: This policy requires that Amazon EMR clusters have Kerberos authentication enabled.
+    type: sentinel
   eventbridge-custom-event-bus-should-have-attached-policy:
-    path: "policies/eventbridge/eventbridge-custom-event-bus-should-have-attached-policy.sentinel"
-    governed_resources: ["aws_cloudwatch_event_bus", "aws_cloudwatch_event_bus_policy"]
-    provider: "AWS"
+    path: policies/eventbridge/eventbridge-custom-event-bus-should-have-attached-policy.sentinel
+    sha: 1130678d9b38b9eb8ca87794487953d0f737e106de165f3f4144d6c881d75619
+    governed_resources: [aws_cloudwatch_event_bus, aws_cloudwatch_event_bus_policy]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EventBridge"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EventBridge
     description: "This policy requires `aws_cloudwatch_event_bus` resources to be attached to a policy."
-    type: "sentinel"
+    type: sentinel
   eventbridge-global-endpoints-should-have-event-replication-enabled:
-    path: "policies/eventbridge/eventbridge-global-endpoints-should-have-event-replication-enabled.sentinel"
-    governed_resources: ["aws_cloudwatch_event_endpoint"]
-    provider: "AWS"
+    path: policies/eventbridge/eventbridge-global-endpoints-should-have-event-replication-enabled.sentinel
+    sha: 218a96a3a9c7ba19d8f8d86eb0c791de296369f7f49aca97b34e9fe87809cfae
+    governed_resources: [aws_cloudwatch_event_endpoint]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EventBridge"
-    description: "EventBridge.4 This control checks if event replication is enabled for an Amazon EventBridge global endpoint."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EventBridge
+    description: EventBridge.4 This control checks if event replication is enabled for an Amazon EventBridge global endpoint.
+    type: sentinel
   eventbridge-schema-registry-policy-attached:
-    path: "policies/eventbridge/eventbridge-schema-registry-policy-attached.sentinel"
-    governed_resources: ["aws_schemas_registry", "aws_schemas_registry_policy"]
-    provider: "AWS"
+    path: policies/eventbridge/eventbridge-schema-registry-policy-attached.sentinel
+    sha: 109e5ac0badb95196a40c3a54838963cd514fe438942001a0333e34c5c4ffd91
+    governed_resources: [aws_schemas_registry, aws_schemas_registry_policy]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "EventBridge"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: EventBridge
     description: "This policy requires that AWS EventBridge schema registries have a resource policy attached. It checks that 'aws_schemas_registry_policy' resources are defined for 'aws_schemas_registry' resources."
-    type: "sentinel"
+    type: sentinel
   iam-managed-policy-should-be-attached-to-role:
-    path: "policies/iam/iam-managed-policy-should-be-attached-to-role.sentinel"
-    governed_resources: ["aws_iam_role", "aws_iam_role_policy_attachment"]
-    provider: "AWS"
+    path: policies/iam/iam-managed-policy-should-be-attached-to-role.sentinel
+    sha: 2897a65ece613684be53f29431ba59e1ac93ad92552c9ad85d884ff40e874603
+    governed_resources: [aws_iam_role, aws_iam_role_policy_attachment]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "IAM"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: IAM
     description: "This policy verifies that all managed policies specified in the parameter list are attached to AWS IAM roles. It handles inter-resource dependencies between aws_iam_role, aws_iam_policy, and aws_iam_role_policy_attachment resources."
-    type: "sentinel"
+    type: sentinel
   iam-no-admin-privileges-allowed-by-policies:
-    path: "policies/iam/iam-no-admin-privileges-allowed-by-policies.sentinel"
-    governed_resources: ["aws_iam_policy", "aws_iam_policy_document"]
-    provider: "AWS"
+    path: policies/iam/iam-no-admin-privileges-allowed-by-policies.sentinel
+    sha: c41f30700c45c9441c4e75c626822c36d6b64c17c618c2866301b9109d3b4164
+    governed_resources: [aws_iam_policy, aws_iam_policy_document]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "IAM"
-    description: "IAM policies should not allow administrator privileges to users/roles/groups."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: IAM
+    description: IAM policies should not allow administrator privileges to users/roles/groups.
+    type: sentinel
   iam-no-policies-attached-to-users:
-    path: "policies/iam/iam-no-policies-attached-to-users.sentinel"
-    governed_resources: ["aws_iam_user_policy", "aws_iam_user_policy_attachment"]
-    provider: "AWS"
+    path: policies/iam/iam-no-policies-attached-to-users.sentinel
+    sha: 657202d59afae73d791a5f484ede526dc9509cab377cefb55a2b5248625be4bd
+    governed_resources: [aws_iam_user_policy, aws_iam_user_policy_attachment]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "IAM"
-    description: "IAM users should not be directly attached to IAM policies."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: IAM
+    description: IAM users should not be directly attached to IAM policies.
+    type: sentinel
   iam-password-policy-strong-configuration:
-    path: "policies/iam/iam-password-policy-strong-configuration.sentinel"
-    governed_resources: ["aws_iam_account_password_policy"]
-    provider: "AWS"
+    path: policies/iam/iam-password-policy-strong-configuration.sentinel
+    sha: 7fe4363c04340c7c039c51b6ff7f6c597019b20d50c84332cc91ac5dc16f3bd3
+    governed_resources: [aws_iam_account_password_policy]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "IAM"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: IAM
     description: "This policy requires that the `aws_iam_account_password_policy` resource have the strong configurations"
-    type: "sentinel"
+    type: sentinel
   iam-policy-no-blacklisted-arn-allowed:
-    path: "policies/iam/iam-policy-no-blacklisted-arn-allowed.sentinel"
-    governed_resources: ["aws_iam_group", "aws_iam_group_policy_attachment", "aws_iam_policy", "aws_iam_role", "aws_iam_role_policy_attachment", "aws_iam_user", "aws_iam_user_policy_attachment"]
-    provider: "AWS"
+    path: policies/iam/iam-policy-no-blacklisted-arn-allowed.sentinel
+    sha: fd7b3977f916a085eccc7df2999fa14eac729b0bdd8c5eaf770174b7e235e96a
+    governed_resources: [aws_iam_group, aws_iam_group_policy_attachment, aws_iam_policy, aws_iam_role, aws_iam_role_policy_attachment, aws_iam_user, aws_iam_user_policy_attachment]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "IAM"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: IAM
     description: "This policy checks that specified IAM policy ARNs are not attached to IAM users, groups, or roles. The rule is NON_COMPLIANT if a blacklisted policy ARN is attached to any IAM resource."
-    type: "sentinel"
+    type: sentinel
   iam-policy-no-statements-with-full-access:
-    path: "policies/iam/iam-policy-no-statements-with-full-access.sentinel"
-    governed_resources: ["aws_iam_policy_document"]
-    provider: "AWS"
+    path: policies/iam/iam-policy-no-statements-with-full-access.sentinel
+    sha: cfe34ca58aa6a97afbeb6fb8af07f60d8cb083e8ca475f29fd2ba8dbd4908dee
+    governed_resources: [aws_iam_policy_document]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "IAM"
-    description: "IAM customer managed policies that you create should not allow wildcard actions for services."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: IAM
+    description: IAM customer managed policies that you create should not allow wildcard actions for services.
+    type: sentinel
   kinesis-stream-encrypted:
-    path: "policies/kinesis/kinesis-stream-encrypted.sentinel"
-    governed_resources: ["aws_kinesis_stream"]
-    provider: "AWS"
+    path: policies/kinesis/kinesis-stream-encrypted.sentinel
+    sha: 9caa1dcfb9344a28b2ee66f0878010b8ca284254c653431f8d3c0af4494d2079
+    governed_resources: [aws_kinesis_stream]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Kinesis"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Kinesis
     description: "This policy checks if resources of type 'kinesis-stream-encrypted' have the 'encryption_type' set to 'KMS'"
-    type: "sentinel"
+    type: sentinel
   kms-restrict-iam-inline-policies-decrypt-all-kms-keys:
-    path: "policies/kms/kms-restrict-iam-inline-policies-decrypt-all-kms-keys.sentinel"
-    governed_resources: ["aws_iam_policy_document"]
-    provider: "AWS"
+    path: policies/kms/kms-restrict-iam-inline-policies-decrypt-all-kms-keys.sentinel
+    sha: 5a8a8e602f263cff4bdd213934ca05fadc8539d5f69d480772381b09efc3625f
+    governed_resources: [aws_iam_policy_document]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "KMS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: KMS
     description: "This policy checks if resources of type 'aws_iam_policy_document' contain blocked action patterns such as 'kms:ReEncryptFrom' and 'kms:Decrypt'"
-    type: "sentinel"
+    type: sentinel
   lambda-function-public-access-prohibited:
-    path: "policies/lambda/lambda-function-public-access-prohibited.sentinel"
-    governed_resources: ["aws_lambda_permission"]
-    provider: "AWS"
+    path: policies/lambda/lambda-function-public-access-prohibited.sentinel
+    sha: df34c93f23fa333006122f1e039782e485bab66e57d3ada7d183bd46ca1a9bea
+    governed_resources: [aws_lambda_permission]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Lambda"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Lambda
     description: "This control checks whether the 'aws_lambda_function' resource-based policy prohibits public access outside of your account."
-    type: "sentinel"
+    type: sentinel
   mq-cloudwatch-audit-log-enabled:
-    path: "policies/mq/mq-cloudwatch-audit-log-enabled.sentinel"
-    governed_resources: ["aws_mq_broker"]
-    provider: "AWS"
+    path: policies/mq/mq-cloudwatch-audit-log-enabled.sentinel
+    sha: 1b718994e26458ca47fec6a6db9140c0c838e768638be5bd1f9ce40f97ea92a2
+    governed_resources: [aws_mq_broker]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "MQ"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: MQ
     description: "This policy checks if resources of type 'aws_mq_broker' have the attribute 'logs' with parameter 'audit' set to true"
-    type: "sentinel"
+    type: sentinel
   mq-should-have-audit-logging-enabled:
-    path: "policies/mq/mq-should-have-audit-logging-enabled.sentinel"
-    governed_resources: ["aws_mq_broker"]
-    provider: "AWS"
+    path: policies/mq/mq-should-have-audit-logging-enabled.sentinel
+    sha: 1210a57779062f7ca2d0cbc1227b1c9a9a1f5d6780a93686912719d150ede729
+    governed_resources: [aws_mq_broker]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "MQ"
-    description: "This policy verifies that Amazon MQ brokers have Amazon CloudWatch audit logging enabled."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: MQ
+    description: This policy verifies that Amazon MQ brokers have Amazon CloudWatch audit logging enabled.
+    type: sentinel
   msk-in-cluster-node-require-encrypted-in-transit:
-    path: "policies/msk/msk-in-cluster-node-require-encrypted-in-transit.sentinel"
-    governed_resources: ["aws_msk_cluster"]
-    provider: "AWS"
+    path: policies/msk/msk-in-cluster-node-require-encrypted-in-transit.sentinel
+    sha: 2b68d020ef5e050226ac40fc584d3c162c68f63fda4ed68e7c5084ce1fcf3f50
+    governed_resources: [aws_msk_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "MSK"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: MSK
     description: "This policy checks if resources of type 'aws_msk_cluster' have the 'in_cluster' attribute set to true in encryption_in_transit of encryption_info attribute"
-    type: "sentinel"
+    type: sentinel
   neptune-cluster-automated-backups-enabled:
-    path: "policies/neptune/neptune-cluster-automated-backups-enabled.sentinel"
-    governed_resources: ["aws_neptune_cluster"]
-    provider: "AWS"
+    path: policies/neptune/neptune-cluster-automated-backups-enabled.sentinel
+    sha: 5d1557970a0fa7bd1c69b1e183de284bb38889431aa83577cf460c1ff54d4941
+    governed_resources: [aws_neptune_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Neptune"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Neptune
     description: "This policy requires attribute 'backup_retention_period' to be greater than or equal to 7 for 'aws_neptune_cluster' resources"
-    type: "sentinel"
+    type: sentinel
   neptune-cluster-db-auth-enabled:
-    path: "policies/neptune/neptune-cluster-db-auth-enabled.sentinel"
-    governed_resources: ["aws_neptune_cluster"]
-    provider: "AWS"
+    path: policies/neptune/neptune-cluster-db-auth-enabled.sentinel
+    sha: 7d157eb2ec77c130e70bb3919825164dfbd3069a8eecbd480d474dba642e4edf
+    governed_resources: [aws_neptune_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Neptune"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Neptune
     description: "This policy requires attribute 'iam_database_authentication_enabled' to be set to true for 'aws_neptune_cluster' resources"
-    type: "sentinel"
+    type: sentinel
   neptune-cluster-encryption-at-rest-enabled:
-    path: "policies/neptune/neptune-cluster-encryption-at-rest-enabled.sentinel"
-    governed_resources: ["aws_neptune_cluster"]
-    provider: "AWS"
+    path: policies/neptune/neptune-cluster-encryption-at-rest-enabled.sentinel
+    sha: d3d2e531229adcc1eff0300f6861912da75def7a67a0663363eec9afcae7906c
+    governed_resources: [aws_neptune_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Neptune"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Neptune
     description: "This policy requires attribute 'storage_encrypted' to be set to true for 'aws_neptune_cluster' resources"
-    type: "sentinel"
+    type: sentinel
   neptune-cluster-snapshot-encryption-at-rest-enabled:
-    path: "policies/neptune/neptune-cluster-snapshot-encryption-at-rest-enabled.sentinel"
-    governed_resources: ["aws_neptune_cluster"]
-    provider: "AWS"
+    path: policies/neptune/neptune-cluster-snapshot-encryption-at-rest-enabled.sentinel
+    sha: 7254c2369e10efcfca9306d0d36132d981519305d63364ba90d81a63a1cf3496
+    governed_resources: [aws_neptune_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Neptune"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Neptune
     description: "This policy requires attribute 'snapshot_identifier' to be set and 'storage_encrypted' to be set to true for 'aws_neptune_cluster' resources"
-    type: "sentinel"
+    type: sentinel
   network-firewall-logging-enabled:
-    path: "policies/network-firewall/network-firewall-logging-enabled.sentinel"
-    governed_resources: ["aws_networkfirewall_firewall", "aws_networkfirewall_logging_configuration"]
-    provider: "AWS"
+    path: policies/network-firewall/network-firewall-logging-enabled.sentinel
+    sha: bf706fa08d3b397eaf859825f2d671b3789dfe61fdafdbc74a8abdc688da6be2
+    governed_resources: [aws_networkfirewall_firewall, aws_networkfirewall_logging_configuration]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Network Firewall"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Network Firewall
     description: "This policy ensures that resources of type 'aws_networkfirewall_firewall' have logging enabled"
-    type: "sentinel"
+    type: sentinel
   network-firewall-policy-default-action-fragmented-packets:
-    path: "policies/network-firewall/network-firewall-policy-default-action-fragmented-packets.sentinel"
-    governed_resources: ["aws_networkfirewall_firewall_policy"]
-    provider: "AWS"
+    path: policies/network-firewall/network-firewall-policy-default-action-fragmented-packets.sentinel
+    sha: 1ba6cbffaa22254e707f35233ae7ea1e30dc39123b3bf20f55009646bb79ef81
+    governed_resources: [aws_networkfirewall_firewall_policy]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Network Firewall"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Network Firewall
     description: "This policy ensures that resources of type 'aws_networkfirewall_firewall_policy' have default stateless action should be 'aws:drop' or 'aws:forward_to_sfe' for fragmented packets"
-    type: "sentinel"
+    type: sentinel
   network-firewall-policy-default-action-full-packets:
-    path: "policies/network-firewall/network-firewall-policy-default-action-full-packets.sentinel"
-    governed_resources: ["aws_networkfirewall_firewall_policy"]
-    provider: "AWS"
+    path: policies/network-firewall/network-firewall-policy-default-action-full-packets.sentinel
+    sha: ea48e924c8f69d554292b0848d8bbb158bc7f4d53a0e5bc924157b7a4734649c
+    governed_resources: [aws_networkfirewall_firewall_policy]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Network Firewall"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Network Firewall
     description: "This policy ensures that resources of type 'aws_networkfirewall_firewall_policy' have default stateless action should be 'aws:drop' or 'aws:forward_to_sfe' for full packets"
-    type: "sentinel"
+    type: sentinel
   network-firewall-policy-rule-group-associated:
-    path: "policies/network-firewall/network-firewall-policy-rule-group-associated.sentinel"
-    governed_resources: ["aws_networkfirewall_firewall_policy"]
-    provider: "AWS"
+    path: policies/network-firewall/network-firewall-policy-rule-group-associated.sentinel
+    sha: af88b08a1f0ce83294c70d37438e76e38c1f2e8960e6fa61a58cd4644b37db18
+    governed_resources: [aws_networkfirewall_firewall_policy]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Network Firewall"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Network Firewall
     description: "This policy requires atleast 1 rule group to be enabled for 'aws_networkfirewall_firewall_policy' resources"
-    type: "sentinel"
+    type: sentinel
   network-firewall-should-be-deployed-across-multiple-azs:
-    path: "policies/network-firewall/network-firewall-should-be-deployed-across-multiple-azs.sentinel"
-    governed_resources: ["aws_networkfirewall_firewall"]
-    provider: "AWS"
+    path: policies/network-firewall/network-firewall-should-be-deployed-across-multiple-azs.sentinel
+    sha: 427834ec3de39b83ecf1ea927d0e718b130038ee492919be4d4fc156c2cb7d34
+    governed_resources: [aws_networkfirewall_firewall]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Network Firewall"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Network Firewall
     description: "This policy checks whether a resource 'aws_networkfirewall_firewall' has been deployed across multiple availability zones."
-    type: "sentinel"
+    type: sentinel
   network-firewall-stateless-rule-group:
-    path: "policies/network-firewall/network-firewall-stateless-rule-group.sentinel"
-    governed_resources: ["aws_networkfirewall_rule_group"]
-    provider: "AWS"
+    path: policies/network-firewall/network-firewall-stateless-rule-group.sentinel
+    sha: 41965dc8751f0dbccc393b922514afefbbd8af615e089c76172272f41da82f9c
+    governed_resources: [aws_networkfirewall_rule_group]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Network Firewall"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Network Firewall
     description: "This policy checks if a stateless rule group in 'aws_networkfirewall_rule_group' contains rules"
-    type: "sentinel"
+    type: sentinel
   opensearch-access-control-enabled:
-    path: "policies/opensearch/opensearch-access-control-enabled.sentinel"
-    governed_resources: ["aws_opensearch_domain"]
-    provider: "AWS"
+    path: policies/opensearch/opensearch-access-control-enabled.sentinel
+    sha: 5cf635200e1694b4dd14f57fad65a9a94b3d7c1ae6f213ec10aed75ddd31c5cc
+    governed_resources: [aws_opensearch_domain]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "OpenSearch"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: OpenSearch
     description: "This policy checks if resources of type 'aws_opensearch_domain' have the 'anonymous_auth_enabled' attribute set to true in the 'advanced_security_options' block and the 'advanced_security_options' block is enabled"
-    type: "sentinel"
+    type: sentinel
   opensearch-encrypted-at-rest:
-    path: "policies/opensearch/opensearch-encrypted-at-rest.sentinel"
-    governed_resources: ["aws_opensearch_domain"]
-    provider: "AWS"
+    path: policies/opensearch/opensearch-encrypted-at-rest.sentinel
+    sha: f19b0bf9d01f6f10d6c04da2ecae25361550914dcdd03772250d69f5bea630ae
+    governed_resources: [aws_opensearch_domain]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "OpenSearch"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: OpenSearch
     description: "This policy checks if resources of type 'aws_opensearch_domain' have the 'enable' attribute set to true in the 'encrypt_at_rest' block"
-    type: "sentinel"
+    type: sentinel
   opensearch-https-required:
-    path: "policies/opensearch/opensearch-https-required.sentinel"
-    governed_resources: ["aws_opensearch_domain"]
-    provider: "AWS"
+    path: policies/opensearch/opensearch-https-required.sentinel
+    sha: 103c13425a1c68365d7560a30676efcb32af3542de1e8ac5f65380d175e0a345
+    governed_resources: [aws_opensearch_domain]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "OpenSearch"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: OpenSearch
     description: "This policy requires resources of type `aws_opensearch_domain` have the `tls_security_policy` set to latest policy that is 'Policy-Min-TLS-1-2-PFS-2023-10' and 'enforce_https' set to true for `domain_endpoint_options` attribute."
-    type: "sentinel"
+    type: sentinel
   opensearch-in-vpc-only:
-    path: "policies/opensearch/opensearch-in-vpc-only.sentinel"
-    governed_resources: ["aws_opensearch_domain"]
-    provider: "AWS"
+    path: policies/opensearch/opensearch-in-vpc-only.sentinel
+    sha: 46efe23f4ab3a50dc629d4be4c037cd545440d536f1f244f7bd6fc2ce477343e
+    governed_resources: [aws_opensearch_domain]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "OpenSearch"
-    description: "This policy checks whether OpenSearch domains are in a VPC. It does not evaluate the VPC subnet routing configuration to determine public access."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: OpenSearch
+    description: This policy checks whether OpenSearch domains are in a VPC. It does not evaluate the VPC subnet routing configuration to determine public access.
+    type: sentinel
   opensearch-node-to-node-encryption-check:
-    path: "policies/opensearch/opensearch-node-to-node-encryption-check.sentinel"
-    governed_resources: ["aws_opensearch_domain"]
-    provider: "AWS"
+    path: policies/opensearch/opensearch-node-to-node-encryption-check.sentinel
+    sha: ed72bdd87c184d4a1baf61bfc9bd2026519f9fd824ad7d260b805d9ebd057e73
+    governed_resources: [aws_opensearch_domain]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "OpenSearch"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: OpenSearch
     description: "This policy checks if resources of type 'aws_opensearch_domain' have the 'enable' attribute set to true in the 'node_to_node_encryption' block"
-    type: "sentinel"
+    type: sentinel
   rds-aurora-in-backup-plan:
-    path: "policies/rds/rds-aurora-in-backup-plan.sentinel"
-    governed_resources: ["aws_backup_plan", "aws_backup_selection", "aws_db_instance", "aws_iam_role"]
-    provider: "AWS"
+    path: policies/rds/rds-aurora-in-backup-plan.sentinel
+    sha: 13d2cdae2a9b1cef047d1e3b45573bd5f98ed73e305680fd16eaad5c7dc504bb
+    governed_resources: [aws_backup_plan, aws_backup_selection, aws_db_instance, aws_iam_role]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "RDS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: RDS
     description: "This policy verifies that AWS Aurora DB instances are protected by a backup plan. The rule is NON_COMPLIANT if the Aurora DB instance is not covered by a backup plan. Note: This rule only applies to Amazon Aurora DB instances. DB clusters are not supported. This policy uses tfconfig to track inter-resource dependencies."
-    type: "sentinel"
+    type: sentinel
   rds-cluster-and-db-snapshot-encrypted:
-    path: "policies/rds/rds-cluster-and-db-snapshot-encrypted.sentinel"
-    governed_resources: ["aws_db_instance", "aws_rds_cluster"]
-    provider: "AWS"
+    path: policies/rds/rds-cluster-and-db-snapshot-encrypted.sentinel
+    sha: 1ab4e9dc467f322e7bb61028b3acf75b4282bac82e9a30ad8c95465ebd667b08
+    governed_resources: [aws_db_instance, aws_rds_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "RDS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: RDS
     description: "This policy requires resources of type `aws_db_instance` and `aws_rds_cluster` have attribute \"storage_encrypted\" set to true and has kms_key_id This will make sure snapshots are encrypted"
-    type: "sentinel"
+    type: sentinel
   rds-cluster-encrypted-at-rest:
-    path: "policies/rds/rds-cluster-encrypted-at-rest.sentinel"
-    governed_resources: ["aws_rds_cluster"]
-    provider: "AWS"
+    path: policies/rds/rds-cluster-encrypted-at-rest.sentinel
+    sha: edd87832453550ac16a84dd5fc86c8eb387311aa66629ce86ec69abcfa759fff
+    governed_resources: [aws_rds_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "RDS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: RDS
     description: "This policy checks if resources of type 'aws_rds_cluster' have the 'storage_encrypted' attribute set to true"
-    type: "sentinel"
+    type: sentinel
   rds-encryption-at-rest-enabled:
-    path: "policies/rds/rds-encryption-at-rest-enabled.sentinel"
-    governed_resources: ["aws_db_instance"]
-    provider: "AWS"
+    path: policies/rds/rds-encryption-at-rest-enabled.sentinel
+    sha: 9d26ff871874bf3d0fbec3d1f8ce61ac276416d20e588147619e163bedc11001
+    governed_resources: [aws_db_instance]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "RDS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: RDS
     description: "This policy requires resources of type `aws_db_instance` have attribute \"storage_encrypted\" set to true."
-    type: "sentinel"
+    type: sentinel
   rds-ensure-automatic-backups-enabled:
-    path: "policies/rds/rds-ensure-automatic-backups-enabled.sentinel"
-    governed_resources: ["aws_db_instance"]
-    provider: "AWS"
+    path: policies/rds/rds-ensure-automatic-backups-enabled.sentinel
+    sha: d2cd60446a7e4058c8eca2a7489d553bcdea6bf28a2f4f0361d1661773aa1c64
+    governed_resources: [aws_db_instance]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "RDS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: RDS
     description: "This policy requires resources of type `aws_db_instance` have attribute \"backup_retention_period\" set to integer value between (7, 35)."
-    type: "sentinel"
+    type: sentinel
   rds-ensure-cloudwatch-logs-enabled:
-    path: "policies/rds/rds-ensure-cloudwatch-logs-enabled.sentinel"
-    governed_resources: ["aws_db_instance"]
-    provider: "AWS"
+    path: policies/rds/rds-ensure-cloudwatch-logs-enabled.sentinel
+    sha: 2cdf18007981523fbd547688a633d11c264cd605e9adb645607a59d560669425
+    governed_resources: [aws_db_instance]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "RDS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: RDS
     description: "This policy requires resources of type `aws_db_instance` to have `enabled_cloudwatch_logs_exports` set to valid array of values."
-    type: "sentinel"
+    type: sentinel
   rds-ensure-cluster-and-db-instance-iam-auth-configured:
-    path: "policies/rds/rds-ensure-cluster-and-db-instance-iam-auth-configured.sentinel"
-    governed_resources: ["aws_db_instance", "aws_rds_cluster"]
-    provider: "AWS"
+    path: policies/rds/rds-ensure-cluster-and-db-instance-iam-auth-configured.sentinel
+    sha: da933dcaed4b3f54ddbda982f61b36d8efb83e18965c440b9dce15f451e518ce
+    governed_resources: [aws_db_instance, aws_rds_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "RDS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: RDS
     description: "This policy requires resources of type `aws_db_instance` and `aws_rds_cluster` to have `iam_database_authentication_enabled` set to true"
-    type: "sentinel"
+    type: sentinel
   rds-ensure-cluster-multi-az-configured:
-    path: "policies/rds/rds-ensure-cluster-multi-az-configured.sentinel"
-    governed_resources: ["aws_rds_cluster"]
-    provider: "AWS"
+    path: policies/rds/rds-ensure-cluster-multi-az-configured.sentinel
+    sha: ccd5723170b4ec89ac1fb750f16487b1d6de71fecc1cc56ee0b5b2b402f2f583
+    governed_resources: [aws_rds_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "RDS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: RDS
     description: "This policy requires resources of type `aws_rds_cluster` to be configured for multiple availability zones"
-    type: "sentinel"
+    type: sentinel
   rds-instance-should-be-private:
-    path: "policies/rds/rds-instance-should-be-private.sentinel"
-    governed_resources: ["aws_db_instance"]
-    provider: "AWS"
+    path: policies/rds/rds-instance-should-be-private.sentinel
+    sha: e46ed3438cca7022ff89c87353ab8ce6250b3679014b9d3b2126fd96cd575be3
+    governed_resources: [aws_db_instance]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "RDS"
-    description: "This policy checks if the aws rds instances are publicly accessible"
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: RDS
+    description: This policy checks if the aws rds instances are publicly accessible
+    type: sentinel
   rds-recovery-point-created-within-time-period:
-    path: "policies/rds/rds-recovery-point-created-within-time-period.sentinel"
-    governed_resources: ["aws_backup_plan", "aws_backup_selection", "aws_db_instance", "aws_iam_role", "aws_rds_cluster"]
-    provider: "AWS"
+    path: policies/rds/rds-recovery-point-created-within-time-period.sentinel
+    sha: 8dd0398eb40b5a666e28d337ba3fe18cdc6872a23b68ee465ec16f8a47030b3e
+    governed_resources: [aws_backup_plan, aws_backup_selection, aws_db_instance, aws_iam_role, aws_rds_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "RDS"
-    description: "This policy verifies that Amazon RDS instances and clusters are configured with AWS Backup plans that ensure recovery points are created within a specified time period. It checks for proper backup configuration including backup retention period and backup window. This policy uses tfconfig to track inter-resource dependencies."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: RDS
+    description: This policy verifies that Amazon RDS instances and clusters are configured with AWS Backup plans that ensure recovery points are created within a specified time period. It checks for proper backup configuration including backup retention period and backup window. This policy uses tfconfig to track inter-resource dependencies.
+    type: sentinel
   redshift-audit-logging-should-be-enabled:
-    path: "policies/redshift/redshift-audit-logging-should-be-enabled.sentinel"
-    governed_resources: ["aws_redshift_cluster", "aws_redshift_logging"]
-    provider: "AWS"
+    path: policies/redshift/redshift-audit-logging-should-be-enabled.sentinel
+    sha: ae4f8113ffda3c0051b7e69f5d60854997fd8e47b56d85b54e25b0dcc2e31c32
+    governed_resources: [aws_redshift_cluster, aws_redshift_logging]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Redshift"
-    description: "This policy verifies that Amazon Redshift clusters have audit logging enabled via aws_redshift_logging resource and optionally validates S3 bucket names."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Redshift
+    description: This policy verifies that Amazon Redshift clusters have audit logging enabled via aws_redshift_logging resource and optionally validates S3 bucket names.
+    type: sentinel
   redshift-cluster-automated-snapshot-retention-enabled:
-    path: "policies/redshift/redshift-cluster-automated-snapshot-retention-enabled.sentinel"
-    governed_resources: ["aws_redshift_cluster"]
-    provider: "AWS"
+    path: policies/redshift/redshift-cluster-automated-snapshot-retention-enabled.sentinel
+    sha: 44086291c773ac809d72dd7c5f6551f3fffb1ab164deca38761d208bd2e21bf5
+    governed_resources: [aws_redshift_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Redshift"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Redshift
     description: "This policy checks if resources of type 'aws_redshift_cluster' have the 'automated-snapshot-retention-period' attribute set in between '7 to 35'"
-    type: "sentinel"
+    type: sentinel
   redshift-cluster-encryption-audit-logging-enabled:
-    path: "policies/redshift/redshift-cluster-encryption-audit-logging-enabled.sentinel"
-    governed_resources: ["aws_redshift_cluster", "aws_redshift_logging"]
-    provider: "AWS"
+    path: policies/redshift/redshift-cluster-encryption-audit-logging-enabled.sentinel
+    sha: 03c31aaec43222674fcbcd16c80fd0bcb63f2bc83d2be4fa3d8594d4bf8326d3
+    governed_resources: [aws_redshift_cluster, aws_redshift_logging]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Redshift"
-    description: "This policy verifies if Amazon Redshift clusters have encryption and audit logging enabled in accordance with AWS requirements. It uses the aws_redshift_logging resource instead of inline logging attributes."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Redshift
+    description: This policy verifies if Amazon Redshift clusters have encryption and audit logging enabled in accordance with AWS requirements. It uses the aws_redshift_logging resource instead of inline logging attributes.
+    type: sentinel
   redshift-cluster-public-access-check:
-    path: "policies/redshift/redshift-cluster-public-access-check.sentinel"
-    governed_resources: ["aws_redshift_cluster"]
-    provider: "AWS"
+    path: policies/redshift/redshift-cluster-public-access-check.sentinel
+    sha: eac9c20e554c06ee221b2a6161ea657c96f0943caa45913e121ba4174a229911
+    governed_resources: [aws_redshift_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Redshift"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Redshift
     description: "This policy checks if resources of type 'aws_redshift_cluster' have the 'publicly_accessible' attribute set to false"
-    type: "sentinel"
+    type: sentinel
   redshift-cluster-should-be-encrypted-at-rest:
-    path: "policies/redshift/redshift-cluster-should-be-encrypted-at-rest.sentinel"
-    governed_resources: ["aws_redshift_cluster"]
-    provider: "AWS"
+    path: policies/redshift/redshift-cluster-should-be-encrypted-at-rest.sentinel
+    sha: b7915b39e245df607ccdf537e98378cf92beaed9fbf3cf5dcc55dcb93b8e8bba
+    governed_resources: [aws_redshift_cluster]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Redshift"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Redshift
     description: "This policy checks if resources of type 'aws_redshift_cluster' have the 'encrypted' attribute set to true"
-    type: "sentinel"
+    type: sentinel
   redshift-cluster-should-be-encrypted-at-transit:
-    path: "policies/redshift/redshift-cluster-should-be-encrypted-at-transit.sentinel"
-    governed_resources: ["aws_redshift_cluster", "aws_redshift_parameter_group"]
-    provider: "AWS"
+    path: policies/redshift/redshift-cluster-should-be-encrypted-at-transit.sentinel
+    sha: b3c7a6c11c8b43246440b8d7d7c2c19a0f9d5e85425a6ebc7129b521cabdba13
+    governed_resources: [aws_redshift_cluster, aws_redshift_parameter_group]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Redshift"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Redshift
     description: "This policy checks if resources of type 'aws_redshift_cluster' referenced to the resources of type 'aws_redshift_parameter_group' and having the 'require_ssl' set to 'true'"
-    type: "sentinel"
+    type: sentinel
   route-53-public-hosted-zones-should-log-dns-queries:
-    path: "policies/route53/route-53-public-hosted-zones-should-log-dns-queries.sentinel"
-    governed_resources: ["aws_route53_query_log"]
-    provider: "AWS"
+    path: policies/route53/route-53-public-hosted-zones-should-log-dns-queries.sentinel
+    sha: d2493b75e5c5a241d57479ded397d496f7bb126ca1ac7389fb1e12e84d95b04e
+    governed_resources: [aws_route53_query_log]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Route 53"
-    description: "This control checks if DNS query logging is enabled for an Amazon Route 53 public hosted zone."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Route 53
+    description: This control checks if DNS query logging is enabled for an Amazon Route 53 public hosted zone.
+    type: sentinel
   s3-access-point-block-public-access-enabled:
-    path: "policies/s3/s3-access-point-block-public-access-enabled.sentinel"
-    governed_resources: ["aws_s3_access_point"]
-    provider: "AWS"
+    path: policies/s3/s3-access-point-block-public-access-enabled.sentinel
+    sha: 7112dc0b6f065f0bd11c00b7aff530df36537a1f7f597d414f6075b339b14f08
+    governed_resources: [aws_s3_access_point]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
     description: "This policy requires resources of type `aws_s3_access_point` to have all attributes in the `public_access_block_configuration` set to true."
-    type: "sentinel"
+    type: sentinel
   s3-account-level-public-access-configured:
-    path: "policies/s3/s3-account-level-public-access-configured.sentinel"
-    governed_resources: ["aws_s3_account_public_access_block"]
-    provider: "AWS"
+    path: policies/s3/s3-account-level-public-access-configured.sentinel
+    sha: 277ac828c00158f2cd0cfb9ae23c69fd930baee245bd39a53372f6309635def0
+    governed_resources: [aws_s3_account_public_access_block]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
     description: "This policy verifies if the attributes of the 'aws_s3_account_public_access_block' resource are in accordance to AWS standards for S3 Account-Level Public Access Block Settings."
-    type: "sentinel"
+    type: sentinel
   s3-block-public-access-account-level:
-    path: "policies/s3/s3-block-public-access-account-level.sentinel"
-    governed_resources: ["aws_s3_account_public_access_block"]
-    provider: "AWS"
+    path: policies/s3/s3-block-public-access-account-level.sentinel
+    sha: b879f3bcfb035837012daf2ca712478fdc64473d797c2c76b9452b6801c9e4e2
+    governed_resources: [aws_s3_account_public_access_block]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
     description: "This policy verifies if the attributes of the 'aws_s3_account_public_access_block' resource (if present) are in accordance to AWS FSBP standards."
-    type: "sentinel"
+    type: sentinel
   s3-block-public-access-bucket-level:
-    path: "policies/s3/s3-block-public-access-bucket-level.sentinel"
-    governed_resources: ["aws_s3_bucket", "aws_s3_bucket_public_access_block"]
-    provider: "AWS"
+    path: policies/s3/s3-block-public-access-bucket-level.sentinel
+    sha: bc31b062cec45a6ec84fdc6b8a9a7ffba8b882895f57bb0fcb7dc206a74ef7a9
+    governed_resources: [aws_s3_bucket, aws_s3_bucket_public_access_block]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
     description: "This policy verifies if the attributes of the 'aws_s3_bucket_public_access_block' resource (if present) block public access of an S3 general purpose bucket."
-    type: "sentinel"
+    type: sentinel
   s3-bucket-blacklisted-actions-prohibited:
-    path: "policies/s3/s3-bucket-blacklisted-actions-prohibited.sentinel"
-    governed_resources: ["aws_s3_bucket", "aws_s3_bucket_policy"]
-    provider: "AWS"
+    path: policies/s3/s3-bucket-blacklisted-actions-prohibited.sentinel
+    sha: 9ffa26ed987770fb40989307f1bc8e0218795724332cfb5a1bc799bd3369e8c5
+    governed_resources: [aws_s3_bucket, aws_s3_bucket_policy]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
-    description: "This policy verifies that Amazon S3 bucket policies do not allow blocklisted bucket-level and object-level actions on resources in the bucket for principals from other AWS accounts."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
+    description: This policy verifies that Amazon S3 bucket policies do not allow blocklisted bucket-level and object-level actions on resources in the bucket for principals from other AWS accounts.
+    type: sentinel
   s3-bucket-block-public-read-access:
-    path: "policies/s3/s3-bucket-block-public-read-access.sentinel"
-    governed_resources: ["aws_s3_bucket", "aws_s3_bucket_acl", "aws_s3_bucket_policy", "aws_s3_bucket_public_access_block"]
-    provider: "AWS"
+    path: policies/s3/s3-bucket-block-public-read-access.sentinel
+    sha: ea6e92b52b7d0a890884e331198d8104f8626a852c9b44dcf71f4fe51d07e424
+    governed_resources: [aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_policy, aws_s3_bucket_public_access_block]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
-    description: "S3 general purpose buckets should block public read access"
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
+    description: S3 general purpose buckets should block public read access
+    type: sentinel
   s3-bucket-block-public-write-access:
-    path: "policies/s3/s3-bucket-block-public-write-access.sentinel"
-    governed_resources: ["aws_s3_bucket", "aws_s3_bucket_acl", "aws_s3_bucket_policy", "aws_s3_bucket_public_access_block"]
-    provider: "AWS"
+    path: policies/s3/s3-bucket-block-public-write-access.sentinel
+    sha: 5ad1a62d698c16077865aa0d05aec975c45a16be038a1b9ce1fdef27ca450680
+    governed_resources: [aws_s3_bucket, aws_s3_bucket_acl, aws_s3_bucket_policy, aws_s3_bucket_public_access_block]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
-    description: "S3 general purpose buckets should block public write access"
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
+    description: S3 general purpose buckets should block public write access
+    type: sentinel
   s3-bucket-inter-account-permissions-check:
-    path: "policies/s3/s3-bucket-inter-account-permissions-check.sentinel"
-    governed_resources: ["aws_s3_bucket", "aws_s3_bucket_policy"]
-    provider: "AWS"
+    path: policies/s3/s3-bucket-inter-account-permissions-check.sentinel
+    sha: 352adcde53447565480ea94454d159d308d708095a6970d0508e0e9f49dc995e
+    governed_resources: [aws_s3_bucket, aws_s3_bucket_policy]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
-    description: "This policy verifies that S3 bucket policies do not allow other inter-account permissions than the control S3 bucket policy provided."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
+    description: This policy verifies that S3 bucket policies do not allow other inter-account permissions than the control S3 bucket policy provided.
+    type: sentinel
   s3-bucket-policy-principal-validation:
-    path: "policies/s3/s3-bucket-policy-principal-validation.sentinel"
-    governed_resources: ["aws_s3_bucket", "aws_s3_bucket_policy"]
-    provider: "AWS"
+    path: policies/s3/s3-bucket-policy-principal-validation.sentinel
+    sha: b60105399d1d2e3a6a42a6f41e058ee2fc1b6ebd371bfa87d915b9a62bea1b39
+    governed_resources: [aws_s3_bucket, aws_s3_bucket_policy]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
     description: "This policy verifies that AWS S3 buckets have appropriate access restrictions by checking bucket policies for restricted access to specific principals, IPs, or VPCs."
-    type: "sentinel"
+    type: sentinel
   s3-bucket-replication-enabled:
-    path: "policies/s3/s3-bucket-replication-enabled.sentinel"
-    governed_resources: ["aws_s3_bucket", "aws_s3_bucket_replication_configuration"]
-    provider: "AWS"
+    path: policies/s3/s3-bucket-replication-enabled.sentinel
+    sha: b05855331a2f3b1cb3ceb3033116ed976eb7683a9d790ea7ab589a003031251b
+    governed_resources: [aws_s3_bucket, aws_s3_bucket_replication_configuration]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
-    description: "This policy verifies that AWS S3 buckets have replication rules enabled by checking the aws_s3_bucket_replication_configuration resource."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
+    description: This policy verifies that AWS S3 buckets have replication rules enabled by checking the aws_s3_bucket_replication_configuration resource.
+    type: sentinel
   s3-bucket-server-side-encryption-enabled:
-    path: "policies/s3/s3-bucket-server-side-encryption-enabled.sentinel"
-    governed_resources: ["aws_kms_key", "aws_s3_bucket", "aws_s3_bucket_policy", "aws_s3_bucket_server_side_encryption_configuration"]
-    provider: "AWS"
+    path: policies/s3/s3-bucket-server-side-encryption-enabled.sentinel
+    sha: 54080fce08398dcdffb7494eca99426310b14e1d4a4c6755e7a12d8d4f9ba697
+    governed_resources: [aws_kms_key, aws_s3_bucket, aws_s3_bucket_policy, aws_s3_bucket_server_side_encryption_configuration]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
-    description: "This policy checks if your Amazon S3 bucket either has the Amazon S3 default encryption enabled or that the Amazon S3 bucket policy explicitly denies put-object requests without server side encryption that uses AES-256 or AWS Key Management Service."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
+    description: This policy checks if your Amazon S3 bucket either has the Amazon S3 default encryption enabled or that the Amazon S3 bucket policy explicitly denies put-object requests without server side encryption that uses AES-256 or AWS Key Management Service.
+    type: sentinel
   s3-bucket-should-be-encrypted-at-rest:
-    path: "policies/s3/s3-bucket-should-be-encrypted-at-rest.sentinel"
-    governed_resources: ["aws_s3_bucket", "aws_s3_bucket_server_side_encryption_configuration"]
-    provider: "AWS"
+    path: policies/s3/s3-bucket-should-be-encrypted-at-rest.sentinel
+    sha: fa8f80555e2fe64457d6ba4d0295980a7d6e216a89d308604d52a55669b3a60a
+    governed_resources: [aws_s3_bucket, aws_s3_bucket_server_side_encryption_configuration]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "S3"
-    description: "S3 Buckets should have encryption enabled at rest with AWS KMS Key"
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: S3
+    description: S3 Buckets should have encryption enabled at rest with AWS KMS Key
+    type: sentinel
   sagemaker-endpoint-configuration-kms-key-configured:
-    path: "policies/sagemaker/sagemaker-endpoint-configuration-kms-key-configured.sentinel"
-    governed_resources: ["aws_sagemaker_endpoint_configuration"]
-    provider: "AWS"
+    path: policies/sagemaker/sagemaker-endpoint-configuration-kms-key-configured.sentinel
+    sha: 19611310fdd1134686c333ba9710fba4b553c8d6ab30ff6aba545bbb4a51c708
+    governed_resources: [aws_sagemaker_endpoint_configuration]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "SageMaker"
-    description: "This policy requires that AWS SageMaker endpoint configurations have KMS key configured for encryption."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: SageMaker
+    description: This policy requires that AWS SageMaker endpoint configurations have KMS key configured for encryption.
+    type: sentinel
   sagemaker-notebook-instance-kms-key-configured:
-    path: "policies/sagemaker/sagemaker-notebook-instance-kms-key-configured.sentinel"
-    governed_resources: ["aws_iam_role", "aws_sagemaker_notebook_instance"]
-    provider: "AWS"
+    path: policies/sagemaker/sagemaker-notebook-instance-kms-key-configured.sentinel
+    sha: 860d4fc5381b51e7d1e9a05a1e0277c0f41fcba7dd2217e72a45d845f64acacb
+    governed_resources: [aws_iam_role, aws_sagemaker_notebook_instance]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "SageMaker"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: SageMaker
     description: "This policy requires that AWS SageMaker notebook instances have AWS KMS key configured for encryption. It checks that the `kms_key_id` attribute is defined and not empty for `aws_sagemaker_notebook_instance` resources. It also validates that the notebook instance properly references an IAM role in the config."
-    type: "sentinel"
+    type: sentinel
   sagemaker-notebook-instance-root-access-check:
-    path: "policies/sagemaker/sagemaker-notebook-instance-root-access-check.sentinel"
-    governed_resources: ["aws_sagemaker_notebook_instance"]
-    provider: "AWS"
+    path: policies/sagemaker/sagemaker-notebook-instance-root-access-check.sentinel
+    sha: 87a6f8537c49988219b60f0f8f04a85f196fcd3b280e9207fbb46ceec1308571
+    governed_resources: [aws_sagemaker_notebook_instance]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "SageMaker"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: SageMaker
     description: "This policy checks if resources of type 'aws_sagemaker_notebook_instance' have the 'root_access' attribute set to \"Disabled\""
-    type: "sentinel"
+    type: sentinel
   sagemaker-notebook-no-direct-internet-access:
-    path: "policies/sagemaker/sagemaker-notebook-no-direct-internet-access.sentinel"
-    governed_resources: ["aws_sagemaker_notebook_instance"]
-    provider: "AWS"
+    path: policies/sagemaker/sagemaker-notebook-no-direct-internet-access.sentinel
+    sha: 6b479bb916945a892d788025683ff58b68565945ae6d771ffe3060cd1c870093
+    governed_resources: [aws_sagemaker_notebook_instance]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "SageMaker"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: SageMaker
     description: "This policy checks if resources of type 'aws_sagemaker_notebook_instance' have the 'direct_internet_access' attribute set to \"Disabled\""
-    type: "sentinel"
+    type: sentinel
   secretsmanager-secrets-encrypted-using-cmk:
-    path: "policies/secretsmanager/secretsmanager-secrets-encrypted-using-cmk.sentinel"
-    governed_resources: ["aws_secretsmanager_secret"]
-    provider: "AWS"
+    path: policies/secretsmanager/secretsmanager-secrets-encrypted-using-cmk.sentinel
+    sha: 150ef0bdc3fb89846cdfd2cc8178b90f5e6e6868be2219dc5ccf094ccab5c2b8
+    governed_resources: [aws_secretsmanager_secret]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Secrets Manager"
-    description: "This policy checks if all secrets in AWS Secrets Manager are encrypted using customer managed keys."
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Secrets Manager
+    description: This policy checks if all secrets in AWS Secrets Manager are encrypted using customer managed keys.
+    type: sentinel
   sns-topic-should-be-encrypted-at-rest:
-    path: "policies/sns/sns-topic-should-be-encrypted-at-rest.sentinel"
-    governed_resources: ["aws_sns_topic"]
-    provider: "AWS"
+    path: policies/sns/sns-topic-should-be-encrypted-at-rest.sentinel
+    sha: 5e05fe90393ef49f479d4abfdd416a523ae224b6a928c18ee6cabd47ad8f2e0e
+    governed_resources: [aws_sns_topic]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "SNS"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: SNS
     description: "This policy requires that resources of type `aws_sns_topic` have encryption enabled with KMS key."
-    type: "sentinel"
+    type: sentinel
   ssm-documents-should-not-be-public:
-    path: "policies/ssm/ssm-documents-should-not-be-public.sentinel"
-    governed_resources: ["aws_ssm_document"]
-    provider: "AWS"
+    path: policies/ssm/ssm-documents-should-not-be-public.sentinel
+    sha: 110aa91b6251a49f75c58ee50ef7541a712b1c80546203cbc6fa4740e022af36
+    governed_resources: [aws_ssm_document]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "SSM"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: SSM
     description: "This policy requires resources of type `aws_ssm_document` to not be public."
-    type: "sentinel"
+    type: sentinel
   step-functions-state-machine-logging-enabled:
-    path: "policies/stepfunction/step-functions-state-machine-logging-enabled.sentinel"
-    governed_resources: ["aws_sfn_state_machine"]
-    provider: "AWS"
+    path: policies/stepfunction/step-functions-state-machine-logging-enabled.sentinel
+    sha: fdbffb957d2c75d60c1434ae11e18641d23161e60af5a576bd5c05d2c4c0b934
+    governed_resources: [aws_sfn_state_machine]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "Step Functions"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: Step Functions
     description: "This policy requires AWS Step Functions state machines to have logging configuration enabled with level set to \"ALL\", \"ERROR\", or \"FATAL\"."
-    type: "sentinel"
+    type: sentinel
   waf-classic-logging-enabled:
-    path: "policies/waf/waf-classic-logging-enabled.sentinel"
-    governed_resources: ["aws_waf_web_acl"]
-    provider: "AWS"
+    path: policies/waf/waf-classic-logging-enabled.sentinel
+    sha: 6fc60d3f88e1c124400923c8bb2d380c0150c08657080647d83e63eaa77a946a
+    governed_resources: [aws_waf_web_acl]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "WAF"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: WAF
     description: "This policy checks whether logging is enabled for an 'aws_waf_web_acl'."
-    type: "sentinel"
+    type: sentinel
   wafv2-webacl-should-have-logging-enabled:
-    path: "policies/waf/wafv2-webacl-should-have-logging-enabled.sentinel"
-    governed_resources: ["aws_wafv2_web_acl", "aws_wafv2_web_acl_logging_configuration"]
-    provider: "AWS"
+    path: policies/waf/wafv2-webacl-should-have-logging-enabled.sentinel
+    sha: 3542fafa01ebac2ddd296c8b7eae8b2e5e4742baf795275d13e06db4290cd299
+    governed_resources: [aws_wafv2_web_acl, aws_wafv2_web_acl_logging_configuration]
+    provider: AWS
     regulations:
-      - name: "ISO/IEC 27001 Annex A"
-        version: "2013"
-    service: "WAF"
-    description: "WAFv2 Web ACLs should have logging enabled"
-    type: "sentinel"
+      - name: ISO/IEC 27001 Annex A
+        version: 2013
+    service: WAF
+    description: WAFv2 Web ACLs should have logging enabled
+    type: sentinel
 modules:
   report:
-    path: "modules/report/report.sentinel"
+    path: modules/report/report.sentinel
+    sha: eab53c4a2769fde76e683dc082ec9e622d77dfc5e03d074827b2175ca6f1e8af
   tfconfig-functions:
-    path: "modules/tfconfig-functions/tfconfig-functions.sentinel"
+    path: modules/tfconfig-functions/tfconfig-functions.sentinel
+    sha: 5552843f5c6d532005e804a053a9560a16da560e58b772315273a963b9d3a307
   tfplan-functions:
-    path: "modules/tfplan-functions/tfplan-functions.sentinel"
+    path: modules/tfplan-functions/tfplan-functions.sentinel
+    sha: 1f4363cb128f4e82ac096d2bd388602cfac1abcd6fb964817ba8461138fcb24c
   tfresources:
-    path: "modules/tfresources/tfresources.sentinel"
+    path: modules/tfresources/tfresources.sentinel
+    sha: 546fa26fa43d4314de60f969965b1ebe7ce2c33ca2390ead4ebf6a26d6cefcad
