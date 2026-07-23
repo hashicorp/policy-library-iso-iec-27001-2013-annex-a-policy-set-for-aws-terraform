@@ -1,5 +1,6 @@
 # This policy checks that specified IAM policy ARNs are not attached to IAM users, groups, or roles.
 # The rule is NON_COMPLIANT if a blacklisted policy ARN is attached to any IAM resource.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/iam-policy-blacklisted-check.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -195,7 +196,7 @@ generate_violation_message = func(policy_arn, resource_type, resource_name) {
 	if resource_name is not "" {
 		msg += " '" + resource_name + "'"
 	}
-	msg += ". This violates the IAM policy blacklist check. Refer to https://docs.aws.amazon.com/config/latest/developerguide/iam-policy-blacklisted-check.html for more details."
+	msg += ". This violates the IAM policy blacklist check"
 	return msg
 }
 

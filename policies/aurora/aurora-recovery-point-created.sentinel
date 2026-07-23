@@ -1,5 +1,6 @@
 # This policy ensures that a recovery point was created for Amazon Aurora DB clusters
 # within the specified time period to enable backup and disaster recovery capabilities.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -43,7 +44,7 @@ param recoveryPointAgeUnit default "days"
 # Constants
 const = {
 	"policy_name":                   "aurora-recovery-point-created",
-	"message":                       "Aurora DB clusters must have automated backups enabled or be associated with a compliant AWS Backup plan to ensure recovery points are created within the required time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html for more details.",
+	"message":                       "Aurora DB clusters must have automated backups enabled or be associated with a compliant AWS Backup plan to ensure recovery points are created within the required time period",
 	"resource_aws_backup_plan":      "aws_backup_plan",
 	"resource_aws_backup_selection": "aws_backup_selection",
 	"resource_aws_rds_cluster":      "aws_rds_cluster",
@@ -308,10 +309,10 @@ generate_violation_message = func(violation) {
 	age_description = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
 
 	if backup_retention is 0 {
-		return "Aurora DB cluster '" + violation.address + "' must have either automated backups enabled with a backup_retention_period of at least " + string(required_retention) + " day(s) (equivalent to " + age_description + ") or a compliant AWS Backup plan that creates recovery points within the required time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html for more details."
+		return "Aurora DB cluster '" + violation.address + "' must have either automated backups enabled with a backup_retention_period of at least " + string(required_retention) + " day(s) (equivalent to " + age_description + ") or a compliant AWS Backup plan that creates recovery points within the required time period"
 	}
 
-	return "Aurora DB cluster '" + violation.address + "' must have automated backups configured with a backup_retention_period of at least " + string(required_retention) + " day(s) (equivalent to " + age_description + ") or be associated with a compliant AWS Backup plan. Current backup_retention_period: " + string(backup_retention) + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html for more details."
+	return "Aurora DB cluster '" + violation.address + "' must have automated backups configured with a backup_retention_period of at least " + string(required_retention) + " day(s) (equivalent to " + age_description + ") or be associated with a compliant AWS Backup plan. Current backup_retention_period: " + string(backup_retention) + ""
 }
 
 # Variables

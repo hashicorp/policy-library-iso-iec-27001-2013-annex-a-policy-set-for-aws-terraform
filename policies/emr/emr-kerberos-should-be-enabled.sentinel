@@ -1,4 +1,5 @@
 # This policy requires that Amazon EMR clusters have Kerberos authentication enabled.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/emr-kerberos-enabled.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -23,7 +24,7 @@ const = {
 
 # Functions
 generate_violation_message = func(violation) {
-	return "Amazon EMR cluster must have Kerberos authentication enabled with valid configuration. Either the 'kerberos_attributes' block must be properly configured or a 'security_configuration' with Kerberos must be attached. " + violation.details + " Refer to https://docs.aws.amazon.com/config/latest/developerguide/emr-kerberos-enabled.html for more details."
+	return "Amazon EMR cluster must have Kerberos authentication enabled with valid configuration. Either the 'kerberos_attributes' block must be properly configured or a 'security_configuration' with Kerberos must be attached. " + violation.details + ""
 }
 
 # Validate Kerberos parameters in kerberos_attributes

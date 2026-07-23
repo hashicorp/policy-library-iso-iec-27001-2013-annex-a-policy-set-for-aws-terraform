@@ -1,6 +1,7 @@
 # This policy requires that ECS task definitions specify a non-root user for container execution.
 # Each container definition in the task definition must have a 'user' attribute that specifies
 # a non-root user (not '0' or 'root').
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -17,7 +18,7 @@ import "strings"
 # Constants
 const = {
 	"policy_name":                      "ecs-task-definition-nonroot-user",
-	"message":                          "ECS task definitions used for the EC2 launch type must specify a non-root user for all container definitions. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details.",
+	"message":                          "ECS task definitions used for the EC2 launch type must specify a non-root user for all container definitions",
 	"resource_aws_ecs_task_definition": "aws_ecs_task_definition",
 	"container_definitions":            "container_definitions",
 	"requires_compatibilities":         "requires_compatibilities",
@@ -88,7 +89,7 @@ check_container_definitions = func(res) {
 }
 
 generate_violation_message = func(violation) {
-	return "ECS task definition '" + violation.address + "' must specify a non-root user for all EC2 launch type container definitions. Each applicable container must have a 'user' attribute set to a non-root user (not '0' or 'root'). Refer to https://docs.aws.amazon.com/config/latest/developerguide/ecs-task-definition-nonroot-user.html for more details."
+	return "ECS task definition '" + violation.address + "' must specify a non-root user for all EC2 launch type container definitions. Each applicable container must have a 'user' attribute set to a non-root user (not '0' or 'root')"
 }
 
 # Variables

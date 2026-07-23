@@ -1,4 +1,5 @@
 # This policy ensures that Amazon Athena workgroups are encrypted at rest.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/athena-workgroup-encrypted-at-rest.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -19,7 +20,7 @@ const = {
 	"encryption_option":             "encryption_option",
 	"kms_key":                       "kms_key",
 	"kms_key_arn":                   "kms_key_arn",
-	"message":                       "Amazon Athena workgroup must have encryption enabled at rest. Refer to https://docs.aws.amazon.com/config/latest/developerguide/athena-workgroup-encrypted-at-rest.html for more details.",
+	"message":                       "Amazon Athena workgroup must have encryption enabled at rest",
 	"managed_query_results_configuration": "managed_query_results_configuration",
 	"result_configuration":                "result_configuration",
 }

@@ -1,5 +1,6 @@
 # This policy ensures that managed non-default security groups are attached to
 # elastic network interfaces.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-security-group-attached-to-eni.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -24,7 +25,7 @@ const = {
 	"security_group_id":                         "security_group_id",
 	"security_groups":                           "security_groups",
 	"vpc_security_group_ids":                    "vpc_security_group_ids",
-	"message":                                   "Non-default security groups must be attached to an elastic network interface. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-security-group-attached-to-eni.html for more details.",
+	"message":                                   "Non-default security groups must be attached to an elastic network interface",
 }
 
 # Functions

@@ -1,4 +1,5 @@
 # This policy verifies that internet gateways are only attached to authorized VPCs. The rule is NON_COMPLIANT if internet gateways are attached to unauthorized VPCs.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/internet-gateway-authorized-vpc-only.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -48,9 +49,9 @@ trimmed_authorized_vpc_ids = parse_authorized_vpc_ids(authorized_vpc_ids)
 generate_violation_message = func(violation) {
 	vpc_id = violation.vpc_id
 	if length(trimmed_authorized_vpc_ids) is 0 {
-		return "Internet gateway '" + violation.address + "' is attached to VPC '" + string(vpc_id) + "'. No authorized VPCs are configured. Please configure the 'authorized_vpc_ids' parameter with a comma-separated list of authorized VPC IDs. Refer to https://docs.aws.amazon.com/config/latest/developerguide/internet-gateway-authorized-vpc-only.html for more details."
+		return "Internet gateway '" + violation.address + "' is attached to VPC '" + string(vpc_id) + "'. No authorized VPCs are configured. Please configure the 'authorized_vpc_ids' parameter with a comma-separated list of authorized VPC IDs"
 	}
-	return "Internet gateway '" + violation.address + "' is attached to unauthorized VPC '" + string(vpc_id) + "'. Authorized VPCs are: " + string(trimmed_authorized_vpc_ids) + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/internet-gateway-authorized-vpc-only.html for more details."
+	return "Internet gateway '" + violation.address + "' is attached to unauthorized VPC '" + string(vpc_id) + "'. Authorized VPCs are: " + string(trimmed_authorized_vpc_ids) + ""
 }
 
 # Helper function to check if a VPC ID matches the authorized list

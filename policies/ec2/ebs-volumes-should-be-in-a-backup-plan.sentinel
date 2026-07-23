@@ -1,5 +1,6 @@
 # EC2.28
 # This control evaluates if an Amazon EBS volume in in-use state is covered by a backup plan.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html8 for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -14,7 +15,7 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":                   "ebs-volumes-should-be-in-a-backup-plan",
-	"message":                       "EBS volumes should be included in AWS Backup plans. Refer to https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html8 for more details.",
+	"message":                       "EBS volumes should be included in AWS Backup plans",
 	"resource_aws_ebs_volume":       "aws_ebs_volume",
 	"resource_aws_backup_plan":      "aws_backup_plan",
 	"resource_aws_backup_selection": "aws_backup_selection",

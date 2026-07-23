@@ -1,4 +1,5 @@
 # This policy verifies that cross-zone load balancing is enabled on Network Load Balancers (NLBs).
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/nlb-cross-zone-load-balancing-enabled.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -24,10 +25,10 @@ generate_violation_message = func(violation) {
 	cross_zone_value = maps.get(violation.values, const.enable_cross_zone_load_balancing, null)
 
 	if cross_zone_value is null {
-		return "Network Load Balancer '" + violation.address + "' does not have 'enable_cross_zone_load_balancing' attribute set. Cross-zone load balancing must be enabled for Network Load Balancers. Refer to https://docs.aws.amazon.com/config/latest/developerguide/nlb-cross-zone-load-balancing-enabled.html for more details."
+		return "Network Load Balancer '" + violation.address + "' does not have 'enable_cross_zone_load_balancing' attribute set. Cross-zone load balancing must be enabled for Network Load Balancers"
 	}
 
-	return "Network Load Balancer '" + violation.address + "' has 'enable_cross_zone_load_balancing' set to " + string(cross_zone_value) + ". Cross-zone load balancing must be enabled for Network Load Balancers. Refer to https://docs.aws.amazon.com/config/latest/developerguide/nlb-cross-zone-load-balancing-enabled.html for more details."
+	return "Network Load Balancer '" + violation.address + "' has 'enable_cross_zone_load_balancing' set to " + string(cross_zone_value) + ". Cross-zone load balancing must be enabled for Network Load Balancers"
 }
 
 is_network_load_balancer = func(res) {

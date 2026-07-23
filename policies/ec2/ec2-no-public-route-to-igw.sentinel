@@ -1,5 +1,6 @@
 # This policy checks if there are public routes in the route table to an Internet Gateway (IGW)
 # with unrestricted access (0.0.0.0/0 or ::/0).
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -115,7 +116,7 @@ check_route_table_routes = func(route_table_res, allowed_ids) {
 
 generate_route_table_violation_message = func(violation) {
 	route_table_id = maps.get(violation, "config.id.constant_value", violation.address)
-	return "Route table '" + route_table_id + "' contains routes with unrestricted access (0.0.0.0/0 or ::/0) to an Internet Gateway. This creates public routes with unrestricted access. Refer to https://docs.aws.amazon.com/config/latest/developerguide/no-unrestricted-route-to-igw.html for more details."
+	return "Route table '" + route_table_id + "' contains routes with unrestricted access (0.0.0.0/0 or ::/0) to an Internet Gateway. This creates public routes with unrestricted access"
 }
 
 # Variables

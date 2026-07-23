@@ -1,5 +1,6 @@
 # EventBridge.4
 # This control checks if event replication is enabled for an Amazon EventBridge global endpoint.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/global-endpoint-event-replication-enabled.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -16,7 +17,7 @@ import "collection/maps" as maps
 
 const = {
 	"policy_name": "eventbridge-global-endpoints-should-have-event-replication-enabled",
-	"message":     "EventBridge Global Endpoints should have event replication enabled. Set 'replication_config.state' to 'ENABLED'. https://docs.aws.amazon.com/config/latest/developerguide/global-endpoint-event-replication-enabled.html",
+	"message":     "EventBridge Global Endpoints should have event replication enabled. Set 'replication_config.state' to 'ENABLED'.",
 	"resource_aws_cloudwatch_event_endpoint": "aws_cloudwatch_event_endpoint",
 	"replication_config":                     "replication_config",
 	"state":                                  "state",

@@ -2,6 +2,7 @@
 # The rule is NON_COMPLIANT if the Aurora DB instance is not covered by a backup plan.
 # Note: This rule only applies to Amazon Aurora DB instances. DB clusters are not supported.
 # This policy uses tfconfig to track inter-resource dependencies.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-in-backup-plan.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -21,7 +22,7 @@ const = {
 	"resource_aws_backup_selection": "aws_backup_selection",
 	"resource_aws_backup_plan":      "aws_backup_plan",
 	"resource_aws_iam_role":         "aws_iam_role",
-	"message":                       "Aurora DB instance is not covered by a backup plan. Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-in-backup-plan.html for more details.",
+	"message":                       "Aurora DB instance is not covered by a backup plan",
 	"aurora_engines": [
 		"aurora",
 		"aurora-mysql",
@@ -230,7 +231,7 @@ is_rds_protected = func(rds_resource, backup_selections) {
 }
 
 generate_violation_message = func(rds_address, engine) {
-	return "Aurora DB instance '" + rds_address + "' (engine: " + engine + ") is not covered by an AWS Backup plan. Ensure the instance is included in a backup selection resource with proper dependencies (aws_backup_plan, aws_iam_role). Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-in-backup-plan.html for more details."
+	return "Aurora DB instance '" + rds_address + "' (engine: " + engine + ") is not covered by an AWS Backup plan. Ensure the instance is included in a backup selection resource with proper dependencies (aws_backup_plan, aws_iam_role)"
 }
 
 # Variables

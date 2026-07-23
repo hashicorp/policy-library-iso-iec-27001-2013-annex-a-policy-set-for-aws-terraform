@@ -1,5 +1,6 @@
 # This policy verifies that all methods in Amazon API Gateway stages have cache enabled and encrypted.
 # It checks both aws_api_gateway_stage and aws_api_gateway_method_settings resources.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -15,7 +16,7 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":                              "api-gateway-cache-enabled-and-encrypted",
-	"message":                                  "API Gateway stages must have cache enabled and encrypted. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details.",
+	"message":                                  "API Gateway stages must have cache enabled and encrypted",
 	"resource_aws_api_gateway_stage":           "aws_api_gateway_stage",
 	"resource_aws_api_gateway_method_settings": "aws_api_gateway_method_settings",
 	"cache_cluster_enabled":                    "cache_cluster_enabled",
@@ -72,22 +73,22 @@ generate_stage_violation_message = func(violation, method_settings_resources) {
 	matching_method_settings = get_matching_method_settings(violation, method_settings_resources)
 
 	if not cache_enabled {
-		return "API Gateway stage must have cache cluster enabled. Attribute 'cache_cluster_enabled' must be set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
+		return "API Gateway stage must have cache cluster enabled. Attribute 'cache_cluster_enabled' must be set to true"
 	}
 	if length(matching_method_settings) is 0 {
-		return "API Gateway stage must have associated aws_api_gateway_method_settings with caching enabled and cache encrypted. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
+		return "API Gateway stage must have associated aws_api_gateway_method_settings with caching enabled and cache encrypted"
 	}
-	return "API Gateway stage must have cache cluster enabled and all associated method settings must enable caching and cache encryption. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
+	return "API Gateway stage must have cache cluster enabled and all associated method settings must enable caching and cache encryption"
 }
 
 generate_method_settings_violation_message = func(violation) {
 	settings = maps.get(violation, "config." + const.settings, [])
 
 	if length(settings) == 0 {
-		return "API Gateway method settings must have caching enabled and cache encrypted. Settings block is missing or empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
+		return "API Gateway method settings must have caching enabled and cache encrypted. Settings block is missing or empty"
 	}
 
-	return "API Gateway method settings must have caching enabled and cache encrypted in the settings block. Refer to https://docs.aws.amazon.com/config/latest/developerguide/api-gw-cache-enabled-and-encrypted.html for more details."
+	return "API Gateway method settings must have caching enabled and cache encrypted in the settings block"
 }
 
 is_method_settings_compliant = func(res) {

@@ -1,5 +1,6 @@
 # This policy verifies that Amazon EFS file systems are covered by AWS Backup
 # plans that can create recovery points within the specified time period.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/efs-last-backup-recovery-point-created.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -33,7 +34,7 @@ param recoveryPointAgeUnit default "days"
 # Constants
 const = {
 	"policy_name":                   "efs-recovery-point-compliance",
-	"message":                       "Amazon EFS file systems must be associated with a compliant AWS Backup plan that can create recovery points within the specified time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/efs-last-backup-recovery-point-created.html for more details.",
+	"message":                       "Amazon EFS file systems must be associated with a compliant AWS Backup plan that can create recovery points within the specified time period",
 	"resource_aws_backup_plan":      "aws_backup_plan",
 	"resource_aws_backup_selection": "aws_backup_selection",
 	"resource_aws_efs_file_system":  "aws_efs_file_system",
@@ -489,7 +490,7 @@ has_compliant_backup_plan = func(efs_res, backup_selections, backup_plans, all_e
 generate_violation_message = func(violation) {
 	required_hours = get_required_hours()
 	age_description = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
-	return "Amazon EFS file system '" + violation.address + "' is not associated with a compliant AWS Backup plan scheduled within " + string(required_hours) + " hour(s) (equivalent to " + age_description + "). Refer to https://docs.aws.amazon.com/config/latest/developerguide/efs-last-backup-recovery-point-created.html for more details."
+	return "Amazon EFS file system '" + violation.address + "' is not associated with a compliant AWS Backup plan scheduled within " + string(required_hours) + " hour(s) (equivalent to " + age_description + ")"
 }
 
 # Variables

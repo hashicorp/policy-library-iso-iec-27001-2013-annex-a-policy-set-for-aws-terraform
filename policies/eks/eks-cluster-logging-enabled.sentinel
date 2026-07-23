@@ -1,5 +1,6 @@
 # This policy requires that Amazon EKS clusters have logging enabled for all log types
 # to provide comprehensive visibility into cluster operations and security events.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/eks-cluster-logging-enabled.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -14,7 +15,7 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":   "eks-cluster-logging-enabled",
-	"message":       "EKS cluster must have all log types enabled (api, audit, authenticator, controllerManager, scheduler). Refer to https://docs.aws.amazon.com/config/latest/developerguide/eks-cluster-logging-enabled.html for more details.",
+	"message":       "EKS cluster must have all log types enabled (api, audit, authenticator, controllerManager, scheduler)",
 	"resource_type": "aws_eks_cluster",
 	"required_log_types": [
 		"api",
@@ -28,7 +29,7 @@ const = {
 # Functions
 generate_violation_message = func(res, missing_log_types) {
 	if length(missing_log_types) is 0 {
-		return "EKS cluster must have all log types enabled (api, audit, authenticator, controllerManager, scheduler). No enabled_cluster_log_types configuration found. Refer to https://docs.aws.amazon.com/config/latest/developerguide/eks-cluster-logging-enabled.html for more details."
+		return "EKS cluster must have all log types enabled (api, audit, authenticator, controllerManager, scheduler). No enabled_cluster_log_types configuration found"
 	}
 	missing_types_str = ""
 	for missing_log_types as log_type {
@@ -38,7 +39,7 @@ generate_violation_message = func(res, missing_log_types) {
 			missing_types_str = missing_types_str + ", " + log_type
 		}
 	}
-	return "EKS cluster is missing the following required log types: " + missing_types_str + ". All log types (api, audit, authenticator, controllerManager, scheduler) must be enabled. Refer to https://docs.aws.amazon.com/config/latest/developerguide/eks-cluster-logging-enabled.html for more details."
+	return "EKS cluster is missing the following required log types: " + missing_types_str + ". All log types (api, audit, authenticator, controllerManager, scheduler) must be enabled"
 }
 
 # Get missing log types for a resource

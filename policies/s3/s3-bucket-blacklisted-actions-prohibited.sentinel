@@ -1,5 +1,6 @@
 # This policy verifies that Amazon S3 bucket policies do not allow blocklisted
 # bucket-level and object-level actions on resources in the bucket for principals from other AWS accounts.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-blacklisted-actions-prohibited.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -261,7 +262,7 @@ has_blocklisted_cross_account_access = func(policy_res, bucket_config_resources)
 
 # generate_violation_message generates a detailed violation message
 generate_violation_message = func(violation) {
-	return const.message_prefix + ". Ensure that the bucket policy does not allow blocklisted actions (e.g., s3:DeleteBucket, s3:DeleteObject, s3:PutBucketPolicy) for cross-account principals. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-blacklisted-actions-prohibited.html for more details."
+	return const.message_prefix + ". Ensure that the bucket policy does not allow blocklisted actions (e.g., s3:DeleteBucket, s3:DeleteObject, s3:PutBucketPolicy) for cross-account principals"
 }
 
 # Variables
