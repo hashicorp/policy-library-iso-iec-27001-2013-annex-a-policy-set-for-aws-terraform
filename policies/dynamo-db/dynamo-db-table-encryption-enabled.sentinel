@@ -1,5 +1,6 @@
 # This policy verifies that Amazon DynamoDB tables have encryption enabled
 # to protect data at rest in accordance with AWS Audit Manager requirements.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encryption-enabled.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -14,7 +15,7 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":                 "dynamo-db-table-encryption-enabled",
-	"message":                     "DynamoDB table must have encryption enabled at rest. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encryption-enabled.html for more details.",
+	"message":                     "DynamoDB table must have encryption enabled at rest",
 	"resource_aws_dynamodb_table": "aws_dynamodb_table",
 	"server_side_encryption":      "server_side_encryption",
 	"enabled":                     "enabled",
@@ -28,7 +29,7 @@ generate_violation_message = func(violation) {
 		return "DynamoDB table '" + violation.address + "' relies on DynamoDB's default encryption at rest and is compliant. This message should not be emitted for compliant resources."
 	}
 
-	return "DynamoDB table '" + violation.address + "' must have encryption enabled. The 'enabled' attribute in the server_side_encryption block must be set to true. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encryption-enabled.html for more details."
+	return "DynamoDB table '" + violation.address + "' must have encryption enabled. The 'enabled' attribute in the server_side_encryption block must be set to true"
 }
 
 is_encryption_enabled = func(res) {

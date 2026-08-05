@@ -1,5 +1,6 @@
 # This policy verifies if Amazon Redshift clusters have encryption and audit logging enabled in accordance with AWS requirements.
 # It uses the aws_redshift_logging resource instead of inline logging attributes.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-cluster-configuration-check.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -140,7 +141,7 @@ generate_violation_message = func(violation, encryption_compliant, logging_compl
 	}
 
 	base_message = "Amazon Redshift cluster '" + violation.address + "' does not meet Audit Manager requirements: "
-	return base_message + strings.join(messages, ", ") + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-cluster-configuration-check.html for more details."
+	return base_message + strings.join(messages, ", ") + ""
 }
 
 is_encryption_compliant = func(res) {

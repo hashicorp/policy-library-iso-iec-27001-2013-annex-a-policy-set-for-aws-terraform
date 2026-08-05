@@ -1,5 +1,6 @@
 # This policy requires that Capacity Rebalancing is enabled for Amazon EC2 Auto Scaling groups
 # that use multiple instance types.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/autoscaling-capacity-rebalancing.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -14,11 +15,11 @@ import "collection/maps" as maps
 # Constants
 const = {
 	"policy_name":                        "ec2-autoscaling-capacity-rebalancing-enabled",
-	"message":                            "Capacity Rebalancing must be enabled for Auto Scaling groups that use multiple instance types. Refer to https://docs.aws.amazon.com/config/latest/developerguide/autoscaling-capacity-rebalancing.html for more details.",
+	"message":                            "Capacity Rebalancing must be enabled for Auto Scaling groups that use multiple instance types",
 	"resource_aws_autoscaling_group":     "aws_autoscaling_group",
 	"capacity_rebalance":                 "capacity_rebalance",
 	"mixed_instances_policy":             "mixed_instances_policy",
-	"message_capacity_rebalance_not_set": "Capacity Rebalancing must be enabled (capacity_rebalance = true) for Auto Scaling groups that use multiple instance types. Refer to https://docs.aws.amazon.com/config/latest/developerguide/autoscaling-capacity-rebalancing.html for more details.",
+	"message_capacity_rebalance_not_set": "Capacity Rebalancing must be enabled (capacity_rebalance = true) for Auto Scaling groups that use multiple instance types",
 }
 
 # Functions

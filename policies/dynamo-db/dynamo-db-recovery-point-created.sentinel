@@ -1,5 +1,6 @@
 # This policy verifies that Amazon DynamoDB tables have backup recovery points
 # created within a specified period to support disaster recovery requirements.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-last-backup-recovery-point-created.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -43,7 +44,7 @@ param recoveryPointAgeUnit default "days"
 # Constants
 const = {
 	"policy_name":               "dynamo-db-recovery-point-created",
-	"message":                   "DynamoDB tables must have point-in-time recovery enabled or be associated with a compliant AWS Backup plan that is scheduled within the required time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-last-backup-recovery-point-created.html for more details.",
+	"message":                   "DynamoDB tables must have point-in-time recovery enabled or be associated with a compliant AWS Backup plan that is scheduled within the required time period",
 	"resource_dynamodb_table":   "aws_dynamodb_table",
 	"resource_backup_plan":      "aws_backup_plan",
 	"resource_backup_selection": "aws_backup_selection",
@@ -126,7 +127,7 @@ generate_violation_message = func(violation) {
 	required_hours = get_required_hours()
 	age_description = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
 
-	return "DynamoDB table '" + violation.address + "' does not have point-in-time recovery enabled and is not associated with a compliant AWS Backup plan scheduled within " + string(required_hours) + " hour(s) (equivalent to " + age_description + "). Refer to https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-last-backup-recovery-point-created.html for more details."
+	return "DynamoDB table '" + violation.address + "' does not have point-in-time recovery enabled and is not associated with a compliant AWS Backup plan scheduled within " + string(required_hours) + " hour(s) (equivalent to " + age_description + ")"
 }
 
 # Check if point-in-time recovery is enabled for the DynamoDB table

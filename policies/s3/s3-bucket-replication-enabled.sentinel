@@ -1,5 +1,6 @@
 # This policy verifies that AWS S3 buckets have replication rules enabled
 # by checking the aws_s3_bucket_replication_configuration resource.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-replication-enabled.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -28,7 +29,7 @@ const = {
 
 # Functions
 generate_violation_message = func(bucket_address, reason) {
-	return "S3 bucket '" + bucket_address + "' does not meet replication requirements: " + reason + ". Configure aws_s3_bucket_replication_configuration with enabled rules to meet AWS Audit Manager compliance requirements. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-replication-enabled.html for more details."
+	return "S3 bucket '" + bucket_address + "' does not meet replication requirements: " + reason + ". Configure aws_s3_bucket_replication_configuration with enabled rules to meet AWS Audit Manager compliance requirements"
 }
 
 # Prefixes the referenced s3 bucket's address with

@@ -1,5 +1,6 @@
 # This policy verifies that Amazon EBS volumes are covered by AWS Backup plans
 # that can create recovery points within the specified time period.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -44,7 +45,7 @@ param recoveryPointAgeUnit default "days"
 # Constants
 const = {
 	"policy_name":                   "ec2-backup-recovery-point-time-period",
-	"message":                       "Amazon EBS volumes must be associated with a compliant AWS Backup plan that creates recovery points within the specified time period. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details.",
+	"message":                       "Amazon EBS volumes must be associated with a compliant AWS Backup plan that creates recovery points within the specified time period",
 	"resource_aws_backup_plan":      "aws_backup_plan",
 	"resource_aws_backup_selection": "aws_backup_selection",
 	"resource_aws_ebs_volume":       "aws_ebs_volume",
@@ -497,7 +498,7 @@ has_compliant_backup_plan = func(volume_res, backup_selections, backup_plans, al
 generate_violation_message = func(violation) {
 	required_hours = get_required_hours()
 	age_description = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
-	return "Amazon EBS volume '" + violation.address + "' is not associated with a compliant AWS Backup plan scheduled within " + string(required_hours) + " hour(s) (equivalent to " + age_description + "). Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-last-backup-recovery-point-created.html for more details."
+	return "Amazon EBS volume '" + violation.address + "' is not associated with a compliant AWS Backup plan scheduled within " + string(required_hours) + " hour(s) (equivalent to " + age_description + ")"
 }
 
 # Variables

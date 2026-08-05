@@ -1,4 +1,5 @@
 # This policy verifies that S3 bucket policies do not allow other inter-account permissions than the control S3 bucket policy provided.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy-not-more-permissive.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -276,7 +277,7 @@ has_bucket_reference_in_config = func(policy_address, bucket_config_resources) {
 
 # Generate violation message
 generate_violation_message = func(violation) {
-	return const.message_prefix + " Resource: " + violation.address + ". Ensure bucket policies only allow authorized inter-account access as defined in the control policy. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy-not-more-permissive.html for more details."
+	return const.message_prefix + " Resource: " + violation.address + ". Ensure bucket policies only allow authorized inter-account access as defined in the control policy"
 }
 
 # Variables

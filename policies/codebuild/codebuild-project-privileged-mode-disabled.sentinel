@@ -1,5 +1,6 @@
 # This policy checks if AWS CodeBuild projects have privileged mode disabled
 # in their environment configuration.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-environment-privileged-check.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -21,7 +22,7 @@ param exemptedProjects default ""
 # Constants
 const = {
 	"policy_name":                    "codebuild-project-privileged-mode-disabled",
-	"message":                        "AWS CodeBuild project should have privileged mode disabled unless required for specific use cases. Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-environment-privileged-check.html for more details.",
+	"message":                        "AWS CodeBuild project should have privileged mode disabled unless required for specific use cases",
 	"resource_aws_codebuild_project": "aws_codebuild_project",
 	"environment":                    "environment",
 	"privileged_mode":                "privileged_mode",
@@ -65,10 +66,10 @@ generate_violation_message = func(violation) {
 	if length(environment_blocks) > 0 {
 		privileged_value = maps.get(environment_blocks[0], const.privileged_mode, false)
 		if privileged_value is true {
-			return "AWS CodeBuild project has privileged mode enabled. Privileged mode should be disabled unless required for specific use cases like Docker builds. Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-environment-privileged-check.html for more details."
+			return "AWS CodeBuild project has privileged mode enabled. Privileged mode should be disabled unless required for specific use cases like Docker builds"
 		}
 	}
-	return "AWS CodeBuild project environment configuration is non-compliant with privileged mode settings. Refer to https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-environment-privileged-check.html for more details."
+	return "AWS CodeBuild project environment configuration is non-compliant with privileged mode settings"
 }
 
 is_privileged_mode_disabled = func(res) {

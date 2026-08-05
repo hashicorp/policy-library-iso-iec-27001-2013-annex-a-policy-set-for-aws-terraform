@@ -2,6 +2,7 @@
 # The rule is NON_COMPLIANT if the Backup Vault does not have resource-based policies or has policies without
 # a suitable 'Deny' statement with backup:DeleteRecoveryPoint, backup:UpdateRecoveryPointLifecycle,
 # and backup:PutBackupVaultAccessPolicy permissions.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/backup-recovery-point-manual-deletion-disabled.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -37,7 +38,7 @@ const = {
 	],
 	"message": "Backup vault must have a resource-based policy with Deny statements for backup:DeleteRecoveryPoint, " +
 		"backup:UpdateRecoveryPointLifecycle, and backup:PutBackupVaultAccessPolicy to prevent manual deletion of recovery points. " +
-		"Refer to https://docs.aws.amazon.com/config/latest/developerguide/backup-recovery-point-manual-deletion-disabled.html for more details.",
+		"",
 }
 
 # Functions
@@ -223,7 +224,7 @@ generate_violation_message = func(vault) {
 	return "Backup vault '" + vault.address + "' (name: " + vault_name + ") does not have a compliant resource-based policy. " +
 		"Backup vault must have a resource-based policy with Deny statements for backup:DeleteRecoveryPoint, " +
 		"backup:UpdateRecoveryPointLifecycle, and backup:PutBackupVaultAccessPolicy to prevent manual deletion of recovery points. " +
-		"Refer to https://docs.aws.amazon.com/config/latest/developerguide/backup-recovery-point-manual-deletion-disabled.html for more details."
+		""
 }
 
 summary = {

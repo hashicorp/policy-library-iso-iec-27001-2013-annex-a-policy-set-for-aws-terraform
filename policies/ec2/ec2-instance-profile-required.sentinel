@@ -1,5 +1,6 @@
 # This policy requires that EC2 instances have an IAM instance profile attached.
 # This ensures proper identity and access management for EC2 instances.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -21,7 +22,7 @@ param IamInstanceProfileArnList default ""
 # Constants
 const = {
 	"policy_name":          "ec2-instance-profile-required",
-	"message":              "EC2 instance must have an IAM instance profile attached for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details.",
+	"message":              "EC2 instance must have an IAM instance profile attached for proper identity and access management",
 	"resource_type":        "aws_instance",
 	"iam_instance_profile": "iam_instance_profile",
 }
@@ -94,26 +95,26 @@ generate_violation_message = func(violation) {
 	if profile is null {
 		if length(allowed_arns) > 0 {
 			arns_list = strings.join(allowed_arns, ", ")
-			return "EC2 instance '" + violation.address + "' must have an IAM instance profile from the allowed list: " + arns_list + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+			return "EC2 instance '" + violation.address + "' must have an IAM instance profile from the allowed list: " + arns_list + ""
 		}
-		return "EC2 instance '" + violation.address + "' must have an IAM instance profile attached. The 'iam_instance_profile' attribute is required for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+		return "EC2 instance '" + violation.address + "' must have an IAM instance profile attached. The 'iam_instance_profile' attribute is required for proper identity and access management"
 	}
 
 	if profile is "" {
 		if length(allowed_arns) > 0 {
 			arns_list = strings.join(allowed_arns, ", ")
-			return "EC2 instance '" + violation.address + "' has an empty 'iam_instance_profile' attribute. Must use one of the allowed profiles: " + arns_list + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+			return "EC2 instance '" + violation.address + "' has an empty 'iam_instance_profile' attribute. Must use one of the allowed profiles: " + arns_list + ""
 		}
-		return "EC2 instance '" + violation.address + "' has an empty 'iam_instance_profile' attribute. A valid IAM instance profile must be specified for proper identity and access management. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+		return "EC2 instance '" + violation.address + "' has an empty 'iam_instance_profile' attribute. A valid IAM instance profile must be specified for proper identity and access management"
 	}
 
 	# Profile exists but not in allowed list
 	if length(allowed_arns) > 0 {
 		arns_list = strings.join(allowed_arns, ", ")
-		return "EC2 instance '" + violation.address + "' is using IAM instance profile '" + profile + "' which is not in the allowed list. Allowed profiles: " + arns_list + ". Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+		return "EC2 instance '" + violation.address + "' is using IAM instance profile '" + profile + "' which is not in the allowed list. Allowed profiles: " + arns_list + ""
 	}
 
-	return "EC2 instance '" + violation.address + "' IAM instance profile validation failed. Refer to https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html for more details."
+	return "EC2 instance '" + violation.address + "' IAM instance profile validation failed"
 }
 
 # Variables

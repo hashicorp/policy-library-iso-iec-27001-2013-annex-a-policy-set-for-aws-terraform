@@ -2,6 +2,7 @@
 # AWS Backup plans that ensure recovery points are created within a specified time period.
 # It checks for proper backup configuration including backup retention period and backup window.
 # This policy uses tfconfig to track inter-resource dependencies.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-last-backup-recovery-point-created.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -348,10 +349,10 @@ generate_violation_message = func(resource_address, resource_type, has_backup_se
 	max_age = string(recoveryPointAgeValue) + " " + recoveryPointAgeUnit
 
 	if not has_backup_selection {
-		return "RDS resource '" + resource_address + "' is not included in any AWS Backup selection. Recovery points must be created within " + max_age + ". Configure AWS Backup with proper dependencies (aws_backup_plan, aws_iam_role) to ensure timely recovery points. Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-last-backup-recovery-point-created.html for more details."
+		return "RDS resource '" + resource_address + "' is not included in any AWS Backup selection. Recovery points must be created within " + max_age + ". Configure AWS Backup with proper dependencies (aws_backup_plan, aws_iam_role) to ensure timely recovery points"
 	}
 
-	return "RDS resource '" + resource_address + "' does not have adequate backup configuration to ensure recovery points are created within " + max_age + ". Ensure backup_retention_period is set and automated backups are enabled. Refer to https://docs.aws.amazon.com/config/latest/developerguide/rds-last-backup-recovery-point-created.html for more details."
+	return "RDS resource '" + resource_address + "' does not have adequate backup configuration to ensure recovery points are created within " + max_age + ". Ensure backup_retention_period is set and automated backups are enabled"
 }
 
 # Variables

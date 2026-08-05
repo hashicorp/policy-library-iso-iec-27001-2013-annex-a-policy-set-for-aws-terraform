@@ -1,5 +1,6 @@
 # This policy verifies that Amazon Redshift clusters have audit logging enabled via aws_redshift_logging resource
 # and optionally validates S3 bucket names.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -109,7 +110,7 @@ is_bucket_allowed = func(bucket_name, allowed_buckets) {
 generate_violation_message = func(cluster_res, logging_result, allowed_buckets) {
 	# Check for aws_redshift_logging resource
 	if not logging_result.found {
-		return "Redshift cluster must have audit logging configured via aws_redshift_logging resource. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
+		return "Redshift cluster must have audit logging configured via aws_redshift_logging resource"
 	}
 
 	log_res = logging_result.resource
@@ -119,11 +120,11 @@ generate_violation_message = func(cluster_res, logging_result, allowed_buckets) 
 	# If logging to S3, bucket_name must be specified and validated
 	if log_dest_type is "s3" or (log_dest_type is "" and bucket_name is not "") {
 		if bucket_name is "" {
-			return "Redshift logging resource must have a valid S3 bucket name specified. The 'bucket_name' attribute cannot be empty when logging to S3. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
+			return "Redshift logging resource must have a valid S3 bucket name specified. The 'bucket_name' attribute cannot be empty when logging to S3"
 		}
 
 		if not is_bucket_allowed(bucket_name, allowed_buckets) {
-			return "Redshift cluster must log audits to one of the allowed buckets: [" + strings.join(allowed_buckets, ", ") + "], but is configured to use '" + bucket_name + "'. Refer to https://docs.aws.amazon.com/config/latest/developerguide/redshift-audit-logging-enabled.html for more details."
+			return "Redshift cluster must log audits to one of the allowed buckets: [" + strings.join(allowed_buckets, ", ") + "], but is configured to use '" + bucket_name + "'"
 		}
 	}
 

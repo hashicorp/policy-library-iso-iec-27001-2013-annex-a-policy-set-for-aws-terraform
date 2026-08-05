@@ -1,5 +1,6 @@
 # This policy verifies that AWS S3 buckets have appropriate access restrictions
 # by checking bucket policies for restricted access to specific principals, IPs, or VPCs.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy-grantee-check.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -403,7 +404,7 @@ has_bucket_reference_in_config = func(policy_address, bucket_config_resources) {
 }
 
 generate_violation_message = func(violation) {
-	return "S3 bucket policy '" + violation.address + "' does not have sufficient access restrictions. Bucket policies must restrict access by AWS principals, federated users, service principals, IP addresses, or VPCs that you provide. Each statement in the bucket policy is evaluated against this rule. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy-grantee-check.html for more details."
+	return "S3 bucket policy '" + violation.address + "' does not have sufficient access restrictions. Bucket policies must restrict access by AWS principals, federated users, service principals, IP addresses, or VPCs that you provide. Each statement in the bucket policy is evaluated against this rule"
 }
 
 # Parse CSV parameters

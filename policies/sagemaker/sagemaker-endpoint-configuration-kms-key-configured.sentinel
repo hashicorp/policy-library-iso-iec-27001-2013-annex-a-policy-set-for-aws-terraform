@@ -1,4 +1,5 @@
 # This policy requires that AWS SageMaker endpoint configurations have KMS key configured for encryption.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-endpoint-configuration-kms-key-configured.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -25,15 +26,15 @@ const = {
 generate_violation_message = func(violation, allowed_arns) {
 	kms_key_arn = maps.get(violation.values, const.kms_key_arn, null)
 	if kms_key_arn is null {
-		return "SageMaker endpoint configuration '" + violation.address + "' must have KMS key configured for encryption. The 'kms_key_arn' attribute must be set. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-endpoint-configuration-kms-key-configured.html for more details."
+		return "SageMaker endpoint configuration '" + violation.address + "' must have KMS key configured for encryption. The 'kms_key_arn' attribute must be set"
 	}
 	if kms_key_arn is "" {
-		return "SageMaker endpoint configuration '" + violation.address + "' must have a valid KMS key configured for encryption. The 'kms_key_arn' attribute cannot be empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-endpoint-configuration-kms-key-configured.html for more details."
+		return "SageMaker endpoint configuration '" + violation.address + "' must have a valid KMS key configured for encryption. The 'kms_key_arn' attribute cannot be empty"
 	}
 	if length(allowed_arns) > 0 {
-		return "SageMaker endpoint configuration '" + violation.address + "' has KMS key '" + kms_key_arn + "' which is not in the allowed list: [" + strings.join(allowed_arns, ", ") + "]. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-endpoint-configuration-kms-key-configured.html for more details."
+		return "SageMaker endpoint configuration '" + violation.address + "' has KMS key '" + kms_key_arn + "' which is not in the allowed list: [" + strings.join(allowed_arns, ", ") + "]"
 	}
-	return "SageMaker endpoint configuration '" + violation.address + "' must have a valid KMS key configured for encryption. The 'kms_key_arn' attribute cannot be empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-endpoint-configuration-kms-key-configured.html for more details."
+	return "SageMaker endpoint configuration '" + violation.address + "' must have a valid KMS key configured for encryption. The 'kms_key_arn' attribute cannot be empty"
 }
 
 is_kms_key_configured = func(res, allowed_arns) {

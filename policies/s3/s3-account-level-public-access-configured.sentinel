@@ -1,5 +1,6 @@
 # This policy verifies if the attributes of the 'aws_s3_account_public_access_block'
 # resource are in accordance to AWS standards for S3 Account-Level Public Access Block Settings.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-account-level-public-access-blocks.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -56,7 +57,7 @@ generate_violation_message = func(res) {
 	if length(violations_list) > 0 {
 		message += "Issues: " + strings.join(violations_list, ", ")
 	}
-	message += ". All settings (IgnorePublicAcls, BlockPublicPolicy, BlockPublicAcls, RestrictPublicBuckets) must be enabled to prevent unintended public access to S3 buckets and objects. Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-account-level-public-access-blocks.html for more details."
+	message += ". All settings (IgnorePublicAcls, BlockPublicPolicy, BlockPublicAcls, RestrictPublicBuckets) must be enabled to prevent unintended public access to S3 buckets and objects"
 
 	return message
 }

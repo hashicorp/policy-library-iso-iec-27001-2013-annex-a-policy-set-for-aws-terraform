@@ -1,6 +1,7 @@
 # This policy requires that AWS SageMaker notebook instances have AWS KMS key configured for encryption.
 # It checks that the `kms_key_id` attribute is defined and not empty for `aws_sagemaker_notebook_instance` resources.
 # It also validates that the notebook instance properly references an IAM role in the config.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-notebook-instance-kms-key-configured.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -34,15 +35,15 @@ generate_violation_message = func(violation, allowed_arns) {
 	kms_references = maps.get(kms_key_config, "references", [])
 
 	if kms_key_id is null and length(kms_references) == 0 {
-		return "SageMaker notebook instance '" + violation.address + "' must have KMS key configured for encryption. The 'kms_key_id' attribute must be set. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-notebook-instance-kms-key-configured.html for more details."
+		return "SageMaker notebook instance '" + violation.address + "' must have KMS key configured for encryption. The 'kms_key_id' attribute must be set"
 	}
 	if kms_key_id is "" {
-		return "SageMaker notebook instance '" + violation.address + "' must have a valid KMS key configured for encryption. The 'kms_key_id' attribute cannot be empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-notebook-instance-kms-key-configured.html for more details."
+		return "SageMaker notebook instance '" + violation.address + "' must have a valid KMS key configured for encryption. The 'kms_key_id' attribute cannot be empty"
 	}
 	if length(allowed_arns) > 0 and kms_key_id is not null {
-		return "SageMaker notebook instance '" + violation.address + "' has KMS key '" + kms_key_id + "' which is not in the allowed list: [" + strings.join(allowed_arns, ", ") + "]. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-notebook-instance-kms-key-configured.html for more details."
+		return "SageMaker notebook instance '" + violation.address + "' has KMS key '" + kms_key_id + "' which is not in the allowed list: [" + strings.join(allowed_arns, ", ") + "]"
 	}
-	return "SageMaker notebook instance '" + violation.address + "' must have a valid KMS key configured for encryption. The 'kms_key_id' attribute cannot be empty. Refer to https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-notebook-instance-kms-key-configured.html for more details."
+	return "SageMaker notebook instance '" + violation.address + "' must have a valid KMS key configured for encryption. The 'kms_key_id' attribute cannot be empty"
 }
 
 # has_role_reference_in_config checks if notebook instance properly references an IAM role in config

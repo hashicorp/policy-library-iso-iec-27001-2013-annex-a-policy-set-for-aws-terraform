@@ -1,5 +1,6 @@
 # This policy ensures that at least one AWS CloudTrail trail is defined with security best practices
 # according to AWS Audit Manager requirements.
+# Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-security-trail-enabled.html for more details.
 
 # Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
@@ -14,8 +15,8 @@ import "collection/maps" as maps
 const = {
 	"policy_name":           "cloudtrail-security-best-practices",
 	"resource_cloudtrail":   "aws_cloudtrail",
-	"message_no_compliant":  "No AWS CloudTrail trail found that meets all security best practices. At least one trail must: have logging enabled, record global service events, be multi-region, have log file validation enabled, be encrypted with a KMS key, and log all management events for both reads and writes without exclusions. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-security-trail-enabled.html for more details.",
-	"message_non_compliant": "CloudTrail trail does not meet all security best practices requirements. Refer to https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-security-trail-enabled.html for more details.",
+	"message_no_compliant":  "No AWS CloudTrail trail found that meets all security best practices. At least one trail must: have logging enabled, record global service events, be multi-region, have log file validation enabled, be encrypted with a KMS key, and log all management events for both reads and writes without exclusions",
+	"message_non_compliant": "CloudTrail trail does not meet all security best practices requirements",
 }
 
 # Functions
