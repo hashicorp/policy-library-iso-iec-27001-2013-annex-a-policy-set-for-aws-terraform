@@ -1,7 +1,7 @@
 # Security groups should only allow unrestricted incoming traffic for authorized ports
 # Refer to https://docs.aws.amazon.com/config/latest/developerguide/ebs-snapshot-public-restorable-check.html8 for more details.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

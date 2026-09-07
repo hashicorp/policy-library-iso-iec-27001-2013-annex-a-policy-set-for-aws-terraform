@@ -2,7 +2,7 @@
 # set to 'ssl-encryption' in 'redis_settings' for engine of type 'redis'
 # Refer to https://docs.aws.amazon.com/config/latest/developerguide/dms-replication-not-public.html2 for more details.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 import "tfplan/v2" as tfplan
