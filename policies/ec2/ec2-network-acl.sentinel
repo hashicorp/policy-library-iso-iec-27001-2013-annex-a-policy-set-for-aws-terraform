@@ -2,7 +2,7 @@
 # to block ingress traffic from unknown sources to the configured ports
 # Refer to https://docs.aws.amazon.com/config/latest/developerguide/vpc-default-security-group-closed.html1 for more details.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports
