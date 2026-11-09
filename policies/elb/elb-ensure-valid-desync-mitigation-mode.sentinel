@@ -4,7 +4,7 @@
 # Refer to https://docs.aws.amazon.com/config/latest/developerguide/alb-http-to-https-redirection-check.html4 for more details.
 # Refer to https://docs.aws.amazon.com/config/latest/developerguide/alb-http-to-https-redirection-check.html2 for more details.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 import "tfplan/v2" as tfplan

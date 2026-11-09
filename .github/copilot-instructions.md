@@ -143,7 +143,7 @@ Check every new or modified `.sentinel` file for all of the following, in order:
 ```sentinel
 # [One-line description of what the policy checks]
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 import "tfplan/v2" as tfplan        # or tfconfig/v2 or tfstate/v2
@@ -174,7 +174,7 @@ main = rule {
 ```
 
 **Blocking checks:**
-- Copyright header must be `# Copyright IBM Corp. 2024, 2025` or `# Copyright IBM Corp. 2025`
+- Copyright header must be `# Copyright IBM Corp. 2024, 2026`
 - SPDX line must be `# SPDX-License-Identifier: BUSL-1.1`
 - `import "report" as report` must be present
 - `const.policy_name` value must match the `.sentinel` filename exactly — using hyphens, not underscores, not equals signs. Example: a file named `s3-bucket-should-be-encrypted-at-rest.sentinel` must have `"policy_name": "s3-bucket-should-be-encrypted-at-rest"`, not `"s3-bucket=should-be-encrypted-at-rest"`
@@ -223,7 +223,7 @@ For every new policy, both success and failure test cases are required.
 
 **Structure of each `.hcl` test file:**
 ```hcl
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 mock "tfplan/v2" {                          # matches the import in the .sentinel file

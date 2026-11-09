@@ -2,7 +2,7 @@
 # resource (if present) are in accordance to AWS FSBP standards.
 # Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-account-level-public-access-blocks-periodic.html for more details.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

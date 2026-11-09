@@ -2,7 +2,7 @@
 # in the 'advanced_security_options' block and the 'advanced_security_options' block is enabled
 # Refer to https://docs.aws.amazon.com/config/latest/developerguide/opensearch-access-control-enabled.html for more details.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 import "tfplan/v2" as tfplan
