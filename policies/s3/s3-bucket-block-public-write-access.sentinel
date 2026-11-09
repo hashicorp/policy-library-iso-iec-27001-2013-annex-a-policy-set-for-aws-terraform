@@ -1,7 +1,7 @@
 # S3 general purpose buckets should block public write access
 # Refer to https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-public-write-prohibited.html for more details.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 # Imports

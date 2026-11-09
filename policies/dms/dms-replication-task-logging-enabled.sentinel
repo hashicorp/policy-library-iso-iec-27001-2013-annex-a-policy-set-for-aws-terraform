@@ -3,7 +3,7 @@
 # Refer to https://docs.aws.amazon.com/config/latest/developerguide/dms-replication-task-targetdb-logging.html for more details.
 # Refer to https://docs.aws.amazon.com/config/latest/developerguide/dms-replication-task-sourcedb-logging.html for more details.
 
-# Copyright IBM Corp. 2024, 2025
+# Copyright IBM Corp. 2026
 # SPDX-License-Identifier: BUSL-1.1
 
 import "tfplan/v2" as tfplan
