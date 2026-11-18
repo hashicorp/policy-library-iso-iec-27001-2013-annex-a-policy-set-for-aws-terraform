@@ -3,16 +3,14 @@
 
 mock "tfplan/v2" {
 	module {
-		source = "./mocks/policy-failure-msk-with-no-in-cluster-node-attribute/mock-tfplan-v2.sentinel"
+		source = "./mocks/policy-success-rabbitmq-broker-without-audit-log/mock-tfplan-v2.sentinel"
 	}
 }
 
-
-
 mock "tfresources" {
-  module {
-    source = "../../../../modules/tfresources/tfresources.sentinel"
-  }
+	module {
+		source = "../../../../modules/tfresources/tfresources.sentinel"
+	}
 }
 
 mock "report" {
@@ -23,6 +21,6 @@ mock "report" {
 
 test {
 	rules = {
-		main = false
+		main = true
 	}
 }
