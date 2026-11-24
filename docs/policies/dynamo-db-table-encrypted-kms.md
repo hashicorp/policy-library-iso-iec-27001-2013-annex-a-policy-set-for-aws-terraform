@@ -12,6 +12,14 @@ Encrypting DynamoDB tables with KMS provides enhanced security for sensitive dat
 
 This rule is covered by the [dynamo-db-table-encrypted-kms](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/dynamo-db/dynamo-db-table-encrypted-kms.sentinel) policy.
 
+## Parameters
+
+Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-table-encrypted-kms.html).
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `kmsKeyArns` | Comma separated list of AWS KMS key ARNs allowed for encrypting Amazon DynamoDB Tables | `string` | `""` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 ```bash
 trace:

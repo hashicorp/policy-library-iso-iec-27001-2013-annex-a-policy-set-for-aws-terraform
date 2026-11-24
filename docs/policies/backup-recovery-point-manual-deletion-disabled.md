@@ -14,6 +14,14 @@ Disabling manual deletion of recovery points prevents accidental or malicious de
 
 This rule is covered by the [backup-recovery-point-manual-deletion-disabled](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/backup/backup-recovery-point-manual-deletion-disabled.sentinel) policy.
 
+## Parameters
+
+Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/backup-recovery-point-manual-deletion-disabled.html).
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `principalArnList` | Comma-separated list of AWS Identity and Access Management (IAM) Amazon Resource Names (ARNs) for the rule to NOT check. | `string` | `""` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 ```bash
 trace:

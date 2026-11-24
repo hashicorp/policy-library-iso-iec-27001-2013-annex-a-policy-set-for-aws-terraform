@@ -10,6 +10,18 @@ This control checks whether the account password policy for IAM users uses stron
 
 This rule is covered by the [iam-password-policy-strong-configuration](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/iam/iam-password-policy-strong-configuration.sentinel) policy.
 
+## Parameters
+
+Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/iam-password-policy.html).
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `minimum_password_length_param` | Password minimum length. | `number` | `8` | `{ min: 8, max: 128, integer: true }` |
+| `min_password_reuse_prevention_param` | Number of passwords before allowing reuse. | `number` | `12` | `{ min: 12, max: 24, integer: true }` |
+| `max_password_age_param` | Number of days before password expiration. | `number` | `90` | `{ min: 1, max: 90, integer: true }` |
+
+The ranges follow the [AWS Security Hub control IAM.7](https://docs.aws.amazon.com/securityhub/latest/userguide/iam-controls.html#iam-7). The defaults are the values this policy applies, which differ from the AWS Config defaults (14, 24 and 90).
+
 ## Policy Results (Pass)
 ```bash
 trace:
