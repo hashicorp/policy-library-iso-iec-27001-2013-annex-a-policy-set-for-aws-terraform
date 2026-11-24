@@ -18,6 +18,15 @@ This means the policy depends on managed `aws_efs_file_system` resources plus AW
 
 This rule is covered by the [efs-recovery-point-compliance](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/efs/efs-recovery-point-compliance.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `resourceTags` | Tags of Amazon EFS File Systems for the rule to check, in JSON format `{"tagkey" : "tagValue"}`. | `string` | `""` | `{ format: json }` |
+| `resourceId` | ID of EFS File System for the rule to check. | `string` | `""` | - |
+| `recoveryPointAgeValue` | Numerical value for maximum allowed age. No more than 744 for hours, 31 for days. | `number` | `1` | `{ min: 1, max: 744, integer: true }` |
+| `recoveryPointAgeUnit` | Unit of time for maximum allowed age. Accepted values: 'hours', 'days'. | `string` | `"days"` | `{ allowed_values: ["hours", "days"] }` |
+
 ## Policy Results (Pass)
 ```bash
 trace:

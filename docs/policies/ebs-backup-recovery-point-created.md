@@ -14,6 +14,15 @@ Terraform plan data does not expose actual last recovery-point timestamps for EB
 
 This rule is covered by the [ebs-backup-recovery-point-created](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/ec2/ebs-backup-recovery-point-created.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `resourceTags` | Tags of Amazon EBS volumes for the rule to check, in JSON format `{"tagkey" : "tagValue"}`. | `string` | `""` | `{ format: json }` |
+| `resourceId` | ID of Amazon EBS volume for the rule to check. | `string` | `""` | - |
+| `recoveryPointAgeValue` | Numerical value for maximum allowed age. No more than 744 for hours, 31 for days. | `number` | `1` | `{ min: 1, max: 744, integer: true }` |
+| `recoveryPointAgeUnit` | Unit of time for maximum allowed age. Accepted values: 'hours', 'days'. | `string` | `"days"` | `{ allowed_values: ["hours", "days"] }` |
+
 ## Policy Results (Pass)
 ```bash
 trace:

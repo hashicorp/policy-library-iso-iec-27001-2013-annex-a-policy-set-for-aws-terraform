@@ -14,6 +14,12 @@ Limiting inter-account S3 bucket access helps prevent unauthorized data access f
 
 This rule is covered by the [s3-bucket-inter-account-permissions-check](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/s3/s3-bucket-inter-account-permissions-check.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `controlPolicy` | Amazon S3 bucket policy that defines an upper bound on the permissions of your S3 buckets. The policy can be a maximum of 1024 characters long. | `string` | `""` | `{ format: json, max_length: 1024 }` |
+
 ## Policy Results (Pass)
 
 ```bash

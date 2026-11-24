@@ -1,0 +1,30 @@
+# Copyright IBM Corp. 2026
+# SPDX-License-Identifier: BUSL-1.1
+
+mock "tfplan/v2" {
+  module {
+    source = "./mocks/pass/pass-all-public-access-blocks-enabled.sentinel"
+  }
+}
+
+mock "tfresources" {
+  module {
+    source = "../../../../modules/tfresources/tfresources.sentinel"
+  }
+}
+
+mock "report" {
+  module {
+    source = "../../../../modules/mocks/report/report.sentinel"
+  }
+}
+
+param "block_public_acls" {
+  value = false
+}
+
+test {
+  rules = {
+    main = true
+  }
+}

@@ -14,6 +14,12 @@ VPCs provide network isolation and enhanced security controls for your EC2 insta
 
 This rule is covered by the [ec2-belong-to-vpc](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/ec2/ec2-belong-to-vpc.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `vpcId` | VPC ID that contains these EC2 instances. | `string` | `""` | - |
+
 ## Policy Results (Pass)
 
 ```bash

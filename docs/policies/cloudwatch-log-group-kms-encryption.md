@@ -12,6 +12,12 @@ Encrypting CloudWatch log groups with KMS provides an additional layer of securi
 
 This rule is covered by the [cloudwatch-log-group-kms-encryption](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/cloudwatch/cloudwatch-log-group-kms-encryption.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `KmsKeyId` | Amazon Resource Name (ARN) of the ID for the KMS key that is used to encrypt the log group. | `string` | `""` | - |
+
 ## Policy Results (Pass)
 ```bash
 trace:

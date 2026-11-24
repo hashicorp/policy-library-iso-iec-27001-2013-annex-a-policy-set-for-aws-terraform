@@ -12,6 +12,15 @@ Account-level S3 public access blocks provide a centralized way to prevent publi
 
 This rule is covered by the [s3-account-level-public-access-configured](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/s3/s3-account-level-public-access-configured.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `ignore_public_acls` | IgnorePublicAcls is enforced or not, default True | `bool` | `true` | - |
+| `block_public_policy` | BlockPublicPolicy is enforced or not, default True | `bool` | `true` | - |
+| `block_public_acls` | BlockPublicAcls is enforced or not, default True | `bool` | `true` | - |
+| `restrict_public_buckets` | RestrictPublicBuckets is enforced or not, default True | `bool` | `true` | - |
+
 ## Policy Results (Pass)
 
 ```bash

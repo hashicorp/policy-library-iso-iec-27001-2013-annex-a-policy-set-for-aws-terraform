@@ -14,6 +14,12 @@ Restricting specific S3 actions helps prevent unauthorized data access, modifica
 
 This rule is covered by the [s3-bucket-blacklisted-actions-prohibited](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/s3/s3-bucket-blacklisted-actions-prohibited.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `blacklistedActionPattern` | Comma-separated list of blacklisted action patterns, for example, s3:GetBucket* and s3:DeleteObject. | `string` | `"s3:DeleteBucket,s3:DeleteBucketPolicy,s3:DeleteBucketWebsite,s3:DeleteObject,s3:DeleteObjectVersion,s3:PutBucketAcl,s3:PutBucketPolicy,s3:PutEncryptionConfiguration,s3:PutLifecycleConfiguration,s3:PutReplicationConfiguration,s3:ReplicateDelete,s3:RestoreObject,s3:PutObjectAcl,s3:GetBucketAcl,s3:GetBucketPolicy,s3:GetBucketTagging"` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 
 ```bash

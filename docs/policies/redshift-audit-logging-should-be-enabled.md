@@ -14,6 +14,12 @@ Audit logging for Redshift captures information about connections, queries, and 
 
 This rule is covered by the [redshift-audit-logging-should-be-enabled](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/redshift/redshift-audit-logging-should-be-enabled.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `bucketNames` | Comma-separated list of Amazon S3 bucket names for storing audit logs. | `string` | `""` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 
 ```bash

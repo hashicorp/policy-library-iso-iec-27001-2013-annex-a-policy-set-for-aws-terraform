@@ -14,6 +14,14 @@ Encryption protects data at rest from unauthorized access, while audit logging c
 
 This rule is covered by the [redshift-cluster-encryption-audit-logging-enabled](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/redshift/redshift-cluster-encryption-audit-logging-enabled.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `clusterDbEncrypted` | Database encryption is enabled | `bool` | `true` | - |
+| `loggingEnabled` | Audit logging is enabled | `bool` | `true` | - |
+| `nodeTypes` | Specify node type | `string` | `"dc1.large"` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 
 ```bash

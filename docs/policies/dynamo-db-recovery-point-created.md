@@ -14,6 +14,15 @@ Recovery points are backups of your DynamoDB tables that can be used to restore 
 
 This rule is covered by the [dynamo-db-recovery-point-created](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/dynamo-db/dynamo-db-recovery-point-created.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `resourceTags` | Tags of the DynamoDB Tables for the rule to check, in JSON format `{"tagkey" : "tagValue"}`. | `string` | `""` | `{ format: json }` |
+| `resourceId` | Name of DynamoDB Table for the rule to check. | `string` | `""` | - |
+| `recoveryPointAgeValue` | Numerical value for maximum allowed age. No more than 744 for hours, 31 for days. | `number` | `1` | `{ min: 1, max: 744, integer: true }` |
+| `recoveryPointAgeUnit` | Unit of time for maximum allowed age. Accepted values: 'hours', 'days'. | `string` | `"days"` | `{ allowed_values: ["hours", "days"] }` |
+
 ## Policy Results (Pass)
 ```bash
 trace:

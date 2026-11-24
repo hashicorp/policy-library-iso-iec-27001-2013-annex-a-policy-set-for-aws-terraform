@@ -12,6 +12,12 @@ Privileged mode grants elevated permissions to the Docker daemon running in the 
 
 This rule is covered by the [codebuild-project-privileged-mode-disabled](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/codebuild/codebuild-project-privileged-mode-disabled.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `exemptedProjects` | Comma-separated list of CodeBuild project names that are allowed to have 'privilegedMode' with value 'true'. | `string` | `""` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 ```bash
 trace:

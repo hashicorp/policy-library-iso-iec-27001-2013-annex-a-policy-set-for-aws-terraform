@@ -12,6 +12,13 @@ Backups help you to recover more quickly from a security incident. They strength
 
 This rule is covered by the [redshift-cluster-automated-snapshot-retention-enabled](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/redshift/redshift-cluster-automated-snapshot-retention-enabled.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `automated_snapshot_retention_period_lower_limit` | Minimum value for the retention period. | `number` | `7` | `{ min: 1, max: 35, integer: true }` |
+| `automated_snapshot_retention_period_upper_limit` | Maximum value for the retention period. | `number` | `35` | `{ min: 1, max: 35, integer: true }` |
+
 ## Policy Results (Pass)
 
 ```bash

@@ -14,6 +14,12 @@ Ensuring that IAM roles have the appropriate managed policies attached helps mai
 
 This rule is covered by the [iam-managed-policy-should-be-attached-to-role](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/iam/iam-managed-policy-should-be-attached-to-role.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `managedPolicyArns` | Comma-separated list of AWS managed policy Amazon Resource Names (ARNs). | `string` | `""` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 
 ```bash

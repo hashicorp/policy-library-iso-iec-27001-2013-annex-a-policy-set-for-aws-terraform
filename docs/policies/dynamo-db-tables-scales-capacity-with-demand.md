@@ -11,6 +11,15 @@ This control checks whether an Amazon DynamoDB table can scale its read and writ
 
 This rule is covered by the [dynamo-db-tables-scales-capacity-with-demand](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/dynamo-db/dynamo-db-tables-scales-capacity-with-demand.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `min_read_capacity` | The minimum number of units that should be provisioned with read capacity in the Auto Scaling group. | `number` | `1` | `{ min: 1, max: 40000, integer: true }` |
+| `max_read_capacity` | The maximum number of units that should be provisioned with read capacity in the Auto Scaling group. | `number` | `40000` | `{ min: 1, max: 40000, integer: true }` |
+| `min_write_capacity` | The minimum number of units that should be provisioned with write capacity in the Auto Scaling group. | `number` | `1` | `{ min: 1, max: 40000, integer: true }` |
+| `max_write_capacity` | The maximum number of units that should be provisioned with write capacity in the Auto Scaling group. | `number` | `40000` | `{ min: 1, max: 40000, integer: true }` |
+
 ## Policy Results (Pass)
 ```bash
 trace:

@@ -14,6 +14,12 @@ In Terraform, the `aws_instance.iam_instance_profile` argument is configured as 
 
 This rule is covered by the [ec2-instance-profile-required](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/ec2/ec2-instance-profile-required.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `IamInstanceProfileArnList` | Comma-separated list of IAM profile Amazon Resource Names (ARNs) that can be attached to Amazon EC2 instances. | `string` | `""` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 ```bash
 trace:

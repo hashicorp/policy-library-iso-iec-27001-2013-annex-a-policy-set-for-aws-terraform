@@ -14,6 +14,12 @@ Public routes to internet gateways with unrestricted CIDR blocks (0.0.0.0/0 or :
 
 This rule is covered by the [ec2-no-public-route-to-igw](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/ec2/ec2-no-public-route-to-igw.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `routeTableIds` | Comma-separated list of route table IDs that can have routes to an Internet Gateway with a destination CIDR block of '0.0.0.0/0' or '::/0'. | `string` | `""` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 
 ```bash

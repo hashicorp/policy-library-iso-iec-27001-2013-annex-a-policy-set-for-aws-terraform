@@ -14,6 +14,12 @@ Restricting internet gateway attachments to authorized VPCs helps prevent unauth
 
 This rule is covered by the [ec2-internet-gateway-allow-authorized-vpc-only](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/ec2/ec2-internet-gateway-allow-authorized-vpc-only.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `authorized_vpc_ids` | Comma-separated list of the authorized VPC IDs with attached IGWs. If parameter is not provided all attached IGWs will be NON_COMPLIANT. | `string` | `""` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 
 ```bash

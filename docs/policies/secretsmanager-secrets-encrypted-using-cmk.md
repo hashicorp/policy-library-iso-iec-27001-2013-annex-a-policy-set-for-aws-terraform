@@ -12,6 +12,12 @@ Using customer managed KMS keys provides you with more granular control over you
 
 This rule is covered by the [secretsmanager-secrets-encrypted-using-cmk](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/policies/secretsmanager/secretsmanager-secrets-encrypted-using-cmk.sentinel) policy.
 
+## Parameters
+
+| Parameter | Description | Type | Default | Constraints |
+| --- | --- | --- | --- | --- |
+| `kmsKeyArns` | Comma-separated list of KMS key Amazon Resource Names (ARNs) to check if the keys are used in the encryption. | `string` | `""` | `{ format: csv }` |
+
 ## Policy Results (Pass)
 
 ```bash
