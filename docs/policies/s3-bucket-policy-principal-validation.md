@@ -16,8 +16,6 @@ This rule is covered by the [s3-bucket-policy-principal-validation](https://gith
 
 ## Parameters
 
-Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-policy-grantee-check.html).
-
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
 | `awsPrincipals` | Comma-separated list of principals such as IAM User ARNs, IAM Role ARNs, and AWS accounts. You must provide the full ARN or use partial matching. For example, "arn:aws:iam::AccountID:role/role_name" or "arn:aws:iam::AccountID:role/*". If the provided value is not an exact match with the principal ARN specified in the bucket policy, the rule is NON_COMPLIANT. | `string` | `""` | `{ format: csv }` |

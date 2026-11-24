@@ -16,8 +16,6 @@ This rule is covered by the [s3-bucket-replication-enabled](https://github.com/h
 
 ## Parameters
 
-Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/s3-bucket-replication-enabled.html).
-
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
 | `ReplicationType` | Accepted values: 'CROSS-REGION' and 'SAME-REGION'. Enter 'CROSS-REGION' for the rule to check that all buckets have only Cross-Region Replication enabled. Enter 'SAME-REGION' for the rule to check that all buckets have only Same-Region Replication enabled. An empty value checks for any replication. | `string` | `""` | `{ allowed_values: ["", "CROSS-REGION", "SAME-REGION"] }` |

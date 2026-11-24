@@ -14,8 +14,6 @@ This rule is covered by the [codebuild-project-privileged-mode-disabled](https:/
 
 ## Parameters
 
-Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/codebuild-project-environment-privileged-check.html).
-
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
 | `exemptedProjects` | Comma-separated list of CodeBuild project names that are allowed to have 'privilegedMode' with value 'true'. | `string` | `""` | `{ format: csv }` |

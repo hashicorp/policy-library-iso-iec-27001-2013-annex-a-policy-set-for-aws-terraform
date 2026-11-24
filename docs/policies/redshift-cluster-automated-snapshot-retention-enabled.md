@@ -14,14 +14,10 @@ This rule is covered by the [redshift-cluster-automated-snapshot-retention-enabl
 
 ## Parameters
 
-Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/redshift-backup-enabled.html), where these parameters are called `MinRetentionPeriod` and `MaxRetentionPeriod`.
-
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
 | `automated_snapshot_retention_period_lower_limit` | Minimum value for the retention period. | `number` | `7` | `{ min: 1, max: 35, integer: true }` |
 | `automated_snapshot_retention_period_upper_limit` | Maximum value for the retention period. | `number` | `35` | `{ min: 1, max: 35, integer: true }` |
-
-The lower limit must not exceed the upper limit.
 
 ## Policy Results (Pass)
 

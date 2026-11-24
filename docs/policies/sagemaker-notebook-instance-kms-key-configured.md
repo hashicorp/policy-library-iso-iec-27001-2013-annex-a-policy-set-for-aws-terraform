@@ -16,8 +16,6 @@ This rule is covered by the [sagemaker-notebook-instance-kms-key-configured](htt
 
 ## Parameters
 
-Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/sagemaker-notebook-instance-kms-key-configured.html).
-
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
 | `kmsKeyArns` | Comma-separated list of AWS KMS key ARNs allowed for an Amazon SageMaker notebook instance. | `string` | `""` | `{ format: csv }` |

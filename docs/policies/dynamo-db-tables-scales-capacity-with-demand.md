@@ -13,16 +13,12 @@ This rule is covered by the [dynamo-db-tables-scales-capacity-with-demand](https
 
 ## Parameters
 
-Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/dynamodb-autoscaling-enabled.html). The AWS Config reference gives no range, so the limits follow the [AWS Security Hub control DynamoDB.1](https://docs.aws.amazon.com/securityhub/latest/userguide/dynamodb-controls.html#dynamodb-1).
-
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
 | `min_read_capacity` | The minimum number of units that should be provisioned with read capacity in the Auto Scaling group. | `number` | `1` | `{ min: 1, max: 40000, integer: true }` |
 | `max_read_capacity` | The maximum number of units that should be provisioned with read capacity in the Auto Scaling group. | `number` | `40000` | `{ min: 1, max: 40000, integer: true }` |
 | `min_write_capacity` | The minimum number of units that should be provisioned with write capacity in the Auto Scaling group. | `number` | `1` | `{ min: 1, max: 40000, integer: true }` |
 | `max_write_capacity` | The maximum number of units that should be provisioned with write capacity in the Auto Scaling group. | `number` | `40000` | `{ min: 1, max: 40000, integer: true }` |
-
-The minimum of each pair must not exceed its maximum.
 
 ## Policy Results (Pass)
 ```bash

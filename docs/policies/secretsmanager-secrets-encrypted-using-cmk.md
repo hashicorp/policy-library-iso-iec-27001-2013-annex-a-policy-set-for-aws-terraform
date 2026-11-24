@@ -14,8 +14,6 @@ This rule is covered by the [secretsmanager-secrets-encrypted-using-cmk](https:/
 
 ## Parameters
 
-Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/secretsmanager-using-cmk.html).
-
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
 | `kmsKeyArns` | Comma-separated list of KMS key Amazon Resource Names (ARNs) to check if the keys are used in the encryption. | `string` | `""` | `{ format: csv }` |

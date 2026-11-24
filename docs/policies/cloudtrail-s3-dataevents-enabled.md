@@ -14,8 +14,6 @@ This rule is covered by the [cloudtrail-s3-dataevents-enabled](https://github.co
 
 ## Parameters
 
-Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/cloudtrail-s3-dataevents-enabled.html).
-
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
 | `S3BucketNames` | Comma-separated list of S3 bucket names for which data events logging should be enabled. Default behavior checks for all S3 buckets. | `string` | `""` | `{ format: csv }` |

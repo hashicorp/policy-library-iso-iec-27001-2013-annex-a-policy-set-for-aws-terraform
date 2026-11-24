@@ -16,8 +16,6 @@ This rule is covered by the [ec2-instance-profile-required](https://github.com/h
 
 ## Parameters
 
-Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/ec2-instance-profile-attached.html).
-
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
 | `IamInstanceProfileArnList` | Comma-separated list of IAM profile Amazon Resource Names (ARNs) that can be attached to Amazon EC2 instances. | `string` | `""` | `{ format: csv }` |

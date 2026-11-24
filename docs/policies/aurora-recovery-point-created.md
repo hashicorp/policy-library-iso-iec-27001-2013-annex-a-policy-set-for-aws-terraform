@@ -16,16 +16,12 @@ This rule is covered by the [aurora-recovery-point-created](https://github.com/h
 
 ## Parameters
 
-Custom values are set with `params` in the policy block in [sentinel.hcl](https://github.com/hashicorp/policy-library-iso-iec-27001-2013-annex-a-policy-set-for-aws-terraform/blob/main/sentinel.hcl). Descriptions follow the [AWS Config managed rule reference](https://docs.aws.amazon.com/config/latest/developerguide/aurora-last-backup-recovery-point-created.html).
-
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
 | `resourceTags` | Tags of Aurora DB clusters for the rule to check, in JSON format `{"tagkey" : "tagValue"}`. | `string` | `""` | `{ format: json }` |
 | `resourceId` | ID of Aurora DB cluster for the rule to check. | `string` | `""` | - |
 | `recoveryPointAgeValue` | Numerical value for maximum allowed age. No more than 744 for hours, 31 for days. | `number` | `1` | `{ min: 1, max: 744, integer: true }` |
 | `recoveryPointAgeUnit` | Unit of time for maximum allowed age. Accepted values: 'hours', 'days'. | `string` | `"days"` | `{ allowed_values: ["hours", "days"] }` |
-
-The maximum of `recoveryPointAgeValue` is 744 when the unit is `hours` and 31 when it is `days`.
 
 ## Policy Results (Pass)
 ```bash
