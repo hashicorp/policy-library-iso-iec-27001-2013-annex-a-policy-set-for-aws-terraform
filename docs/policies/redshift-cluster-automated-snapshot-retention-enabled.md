@@ -18,10 +18,10 @@ Custom values are set with `params` in the policy block in [sentinel.hcl](https:
 
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
-| `automated_snapshot_retention_period_lower_limit` | Minimum value for the retention period. | `number` | `7` | `{ min: 1, max: 34, integer: true }` |
-| `automated_snapshot_retention_period_upper_limit` | Maximum value for the retention period. | `number` | `35` | `{ min: 2, max: 35, integer: true }` |
+| `automated_snapshot_retention_period_lower_limit` | Minimum value for the retention period. | `number` | `7` | `{ min: 1, max: 35, integer: true }` |
+| `automated_snapshot_retention_period_upper_limit` | Maximum value for the retention period. | `number` | `35` | `{ min: 1, max: 35, integer: true }` |
 
-The policy requires the lower limit to be below the upper limit.
+The lower limit must not exceed the upper limit.
 
 ## Policy Results (Pass)
 

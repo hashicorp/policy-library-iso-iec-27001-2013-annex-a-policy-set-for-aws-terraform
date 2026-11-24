@@ -18,9 +18,9 @@ Custom values are set with `params` in the policy block in [sentinel.hcl](https:
 
 | Parameter | Description | Type | Default | Constraints |
 | --- | --- | --- | --- | --- |
-| `backup_retention_period_lower_limit` | Minimum days backups should be kept. | `number` | `7` | `{ min: 1, max: 34, integer: true }` |
+| `backup_retention_period_lower_limit` | Minimum days backups should be kept. | `number` | `7` | `{ min: 1, max: 35, integer: true }` |
 
-The policy also has a fixed upper limit of 35 days (`backup_retention_period_upper_limit`) that is not customizable. The policy requires the lower limit to be below it, so the lower limit is limited to 34 here, while AWS Config allows 1 to 35.
+The policy also has a fixed upper limit of 35 days (`backup_retention_period_upper_limit`) that is not customizable.
 
 ## Policy Results (Pass)
 
